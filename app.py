@@ -770,13 +770,12 @@ st.markdown("""
     }
 
     /* =======================================================
-       6. ESTILOS GLOBALES DE INPUTS, LABELS Y TEXTOS (#111111)
-       Fondo visible y blanco en cajas de texto, bordes nítidos y
-       color de texto forzado a negro/gris oscuro (#111111) para
-       evitar que desaparezcan o se vuelvan ilegibles en modo claro u oscuro.
+       6. ESTILOS GLOBALES DE INPUTS, LABELS Y TEXTOS (TONOS MORADOS Y LILAS)
+       Fondo lila suave (#FAF5FF), bordes en morado tenue (#C77DFF / #D8B4FE)
+       y color de texto del usuario en #212121 para una lectura perfecta y armoniosa.
        ======================================================= */
 
-    /* 6.1 Color de texto forzado en etiquetas (labels), párrafos y spans de inputs */
+    /* 6.1 Etiquetas (labels), párrafos y títulos de widgets en tonos morados armónicos */
     label,
     label p,
     label span,
@@ -802,13 +801,14 @@ st.markdown("""
     [data-testid="stForm"] label,
     [data-testid="stForm"] label p,
     [data-testid="stForm"] label span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+        color: #5A189A !important;
+        -webkit-text-fill-color: #5A189A !important;
         font-weight: 600 !important;
+        letter-spacing: 0.2px !important;
         opacity: 1 !important;
     }
 
-    /* 6.2 Cajas de texto, inputs y textareas (fondo blanco y texto oscuro #111111) */
+    /* 6.2 Cajas de entrada (input, textarea, select) con fondo lila suave y texto #212121 */
     input,
     textarea,
     select,
@@ -821,23 +821,24 @@ st.markdown("""
     [data-testid="stForm"] input,
     [data-testid="stSidebar"] input,
     [data-testid="stSidebar"] textarea {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-        background-color: #FFFFFF !important;
+        color: #212121 !important;
+        -webkit-text-fill-color: #212121 !important;
+        background-color: #FAF5FF !important;
         font-size: 0.95rem !important;
+        font-weight: 500 !important;
         opacity: 1 !important;
     }
 
-    /* Contenedores base de inputs y textareas */
+    /* Contenedores BaseWeb de inputs y textareas con bordes morados sutiles */
     div[data-baseweb="input"],
     div[data-baseweb="input"] > div,
     div[data-baseweb="textarea"],
     div[data-baseweb="textarea"] > div,
     div[data-baseweb="base-input"] {
         border-radius: 12px !important;
-        border: 1.5px solid #CBD5E1 !important;
-        background-color: #FFFFFF !important;
-        color: #111111 !important;
+        border: 1.5px solid #D8B4FE !important;
+        background-color: #FAF5FF !important;
+        color: #212121 !important;
         transition: all 0.25s ease !important;
     }
 
@@ -848,71 +849,94 @@ st.markdown("""
     input:focus,
     textarea:focus {
         border-color: #7209B7 !important;
-        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.22) !important;
         background-color: #FFFFFF !important;
     }
 
-    /* Texto de marcadores de posición (placeholders) legibles */
+    /* Placeholders en tono lila-grisáceo suave y legible */
     ::placeholder,
     input::placeholder,
     textarea::placeholder {
-        color: #64748B !important;
-        -webkit-text-fill-color: #64748B !important;
-        opacity: 0.9 !important;
+        color: #7B6888 !important;
+        -webkit-text-fill-color: #7B6888 !important;
+        opacity: 0.85 !important;
     }
 
-    /* 6.3 Campos de entrada y tarjetas en pantalla de Login */
+    /* 6.3 Sección de Inicio de Sesión (Login) armonizada en tonos morados/lilas */
     [data-testid="stForm"] {
-        background-color: #FFFFFF !important;
-        border: 1.5px solid #CBD5E1 !important;
-        border-radius: 16px !important;
-        padding: 2rem !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%) !important;
+        border: 1.5px solid #D8B4FE !important;
+        border-radius: 20px !important;
+        padding: 2.2rem !important;
+        box-shadow: 0 10px 30px rgba(114, 9, 183, 0.08) !important;
     }
 
     [data-testid="stForm"] h1,
     [data-testid="stForm"] h2,
     [data-testid="stForm"] h3,
-    [data-testid="stForm"] h4,
+    [data-testid="stForm"] h4 {
+        color: #5A189A !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+    }
+
     [data-testid="stForm"] p,
-    [data-testid="stForm"] span,
-    [data-testid="stForm"] label {
-        color: #111111 !important;
+    [data-testid="stForm"] span {
+        color: #4A154B !important;
     }
 
     [data-testid="stForm"] div[data-baseweb="input"] > div {
-        background-color: #FFFFFF !important;
-        border: 1.5px solid #CBD5E1 !important;
-        border-radius: 10px !important;
+        background-color: #FAF5FF !important;
+        border: 1.5px solid #C77DFF !important;
+        border-radius: 12px !important;
+    }
+
+    [data-testid="stForm"] div.stButton > button {
+        background: linear-gradient(135deg, #7209B7 0%, #B5179E 100%) !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 14px rgba(114, 9, 183, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="stForm"] div.stButton > button:hover {
+        background: linear-gradient(135deg, #8318C7 0%, #C72CAE 100%) !important;
+        box-shadow: 0 6px 20px rgba(114, 9, 183, 0.45) !important;
+        transform: translateY(-1px) !important;
     }
 
     /* 6.4 Inputs de la barra lateral (Datos de la Escuela y configuración) */
     [data-testid="stSidebar"] {
-        background-color: #F8FAFC !important;
+        background-color: #FAF5FF !important;
+        border-right: 1px solid #E0AAFF !important;
     }
 
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h4 {
+        color: #5A189A !important;
+        font-family: 'Outfit', sans-serif !important;
+    }
+
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] .stMarkdown p,
     [data-testid="stSidebar"] .stMarkdown span {
-        color: #111111 !important;
+        color: #4A154B !important;
     }
 
     [data-testid="stSidebar"] div[data-baseweb="input"] > div,
     [data-testid="stSidebar"] div[data-baseweb="select"] > div {
         background-color: #FFFFFF !important;
-        border: 1.5px solid #CBD5E1 !important;
+        border: 1.5px solid #D8B4FE !important;
         border-radius: 10px !important;
     }
 
     /* =======================================================
        35. ESTILOS PARA SELECTORES (SELECTBOX Y MULTISELECT)
-       Fondo visible blanco y texto oscuro (#111111) para evitar
-       desaparición en modo claro/oscuro.
+       Fondo lila suave (#FAF5FF), bordes morados y texto #212121.
        ======================================================= */
     /* Borde y fondo principal de las cajas de selección */
     .stMultiSelect [data-baseweb="select"] > div, 
@@ -920,18 +944,20 @@ st.markdown("""
     div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
     div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
     div[data-baseweb="select"] > div {
-        border: 1.5px solid #CBD5E1 !important;
+        border: 1.5px solid #D8B4FE !important;
         border-radius: 12px !important;
-        background-color: #FFFFFF !important;
-        color: #111111 !important;
+        background-color: #FAF5FF !important;
+        color: #212121 !important;
+        transition: all 0.25s ease !important;
     }
 
     /* Texto seleccionado y buscador dentro del select */
     div[data-baseweb="select"] div,
     div[data-baseweb="select"] input,
     .stSelectbox div[data-baseweb="select"] span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+        color: #212121 !important;
+        -webkit-text-fill-color: #212121 !important;
+        font-weight: 500 !important;
     }
     
     /* Color de fondo degradado para las etiquetas (opciones seleccionadas) en multiselect */
@@ -959,28 +985,30 @@ st.markdown("""
     div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within,
     div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
         border-color: #7209B7 !important;
-        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.22) !important;
+        background-color: #FFFFFF !important;
     }
 
-    /* Menú desplegable emergente (dropdown options) con fondo blanco y texto oscuro */
+    /* Menú desplegable emergente (dropdown options) con fondo lila/blanco y texto oscuro */
     ul[data-baseweb="menu"],
     div[data-baseweb="popover"] ul {
-        background-color: #FFFFFF !important;
+        background-color: #FAF5FF !important;
         border-radius: 12px !important;
-        border: 1px solid #CBD5E1 !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+        border: 1.5px solid #D8B4FE !important;
+        box-shadow: 0 8px 24px rgba(114, 9, 183, 0.12) !important;
     }
 
     li[data-baseweb="menu-item"],
     ul[data-baseweb="menu"] li {
-        color: #111111 !important;
-        background-color: #FFFFFF !important;
+        color: #212121 !important;
+        background-color: #FAF5FF !important;
+        font-weight: 500 !important;
     }
 
     li[data-baseweb="menu-item"]:hover,
     li[data-baseweb="menu-item"][aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(255, 117, 143, 0.15) 0%, rgba(114, 9, 183, 0.15) 100%) !important;
-        color: #7209B7 !important;
+        background: linear-gradient(135deg, rgba(224, 170, 255, 0.35) 0%, rgba(199, 125, 255, 0.35) 100%) !important;
+        color: #5A189A !important;
     }
 
     /* Área de arrastre de archivos (file_uploader) */
@@ -1288,13 +1316,13 @@ if not st.session_state.get("authentication_status"):
     with col_l2:
         st.markdown("""
         <div style="text-align: center; margin-top: 2rem; margin-bottom: 1.5rem;">
-            <div style="display: inline-block; background: linear-gradient(135deg, #691C32, #9E2A2B); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2rem; color: #FFFFFF; box-shadow: 0 4px 14px rgba(105, 28, 50, 0.25);">
+            <div style="display: inline-block; background: linear-gradient(135deg, #7209B7, #B5179E); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2rem; color: #FFFFFF; box-shadow: 0 6px 18px rgba(114, 9, 183, 0.28);">
                 🇲🇽
             </div>
-            <h2 style="font-family: 'Outfit', sans-serif; color: #691C32; margin-top: 0.75rem; margin-bottom: 0.25rem; font-size: 1.8rem; font-weight: 700;">
+            <h2 style="font-family: 'Outfit', sans-serif; color: #5A189A; margin-top: 0.75rem; margin-bottom: 0.25rem; font-size: 1.8rem; font-weight: 700;">
                 Planeaciones Escolares NEM
             </h2>
-            <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 1.5rem;">
+            <p style="color: #7B2CBF; font-size: 0.95rem; margin-bottom: 1.5rem;">
                 Sistema Integral de Intervención Docente • Educación Primaria
             </p>
         </div>
