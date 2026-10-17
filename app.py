@@ -770,42 +770,171 @@ st.markdown("""
     }
 
     /* =======================================================
-       6. CAJAS DE TEXTO, ÁREAS DE CARGA (FILE UPLOADER) Y SELECTORES
-       Bordes sutiles en lila o rosa pastel cuando estén enfocados/activos.
+       6. ESTILOS GLOBALES DE INPUTS, LABELS Y TEXTOS (#111111)
+       Fondo visible y blanco en cajas de texto, bordes nítidos y
+       color de texto forzado a negro/gris oscuro (#111111) para
+       evitar que desaparezcan o se vuelvan ilegibles en modo claro u oscuro.
        ======================================================= */
-    /* Cajas de texto e inputs */
+
+    /* 6.1 Color de texto forzado en etiquetas (labels), párrafos y spans de inputs */
+    label,
+    label p,
+    label span,
+    [data-testid="stWidgetLabel"],
+    [data-testid="stWidgetLabel"] p,
+    [data-testid="stWidgetLabel"] span,
+    [data-testid="stWidgetLabel"] label,
+    div.stTextInput label,
+    div.stTextInput label p,
+    div.stTextInput label span,
+    div.stTextArea label,
+    div.stTextArea label p,
+    div.stTextArea label span,
+    div.stSelectbox label,
+    div.stSelectbox label p,
+    div.stSelectbox label span,
+    div.stMultiSelect label,
+    div.stMultiSelect label p,
+    div.stMultiSelect label span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] label p,
+    [data-testid="stSidebar"] label span,
+    [data-testid="stForm"] label,
+    [data-testid="stForm"] label p,
+    [data-testid="stForm"] label span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+    }
+
+    /* 6.2 Cajas de texto, inputs y textareas (fondo blanco y texto oscuro #111111) */
+    input,
+    textarea,
+    select,
+    input[type="text"],
+    input[type="password"],
+    div.stTextInput input,
+    div.stTextArea textarea,
+    div[data-baseweb="input"] input,
+    div[data-baseweb="textarea"] textarea,
+    [data-testid="stForm"] input,
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] textarea {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        background-color: #FFFFFF !important;
+        font-size: 0.95rem !important;
+        opacity: 1 !important;
+    }
+
+    /* Contenedores base de inputs y textareas */
+    div[data-baseweb="input"],
     div[data-baseweb="input"] > div,
+    div[data-baseweb="textarea"],
     div[data-baseweb="textarea"] > div,
-    div.stTextInput > div > div > input,
-    div.stTextArea > div > div > textarea {
+    div[data-baseweb="base-input"] {
         border-radius: 12px !important;
-        border: 1.5px solid #E2E8F0 !important;
-        transition: all 0.3s ease !important;
+        border: 1.5px solid #CBD5E1 !important;
+        background-color: #FFFFFF !important;
+        color: #111111 !important;
+        transition: all 0.25s ease !important;
+    }
+
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="input"]:focus-within > div,
+    div[data-baseweb="textarea"]:focus-within,
+    div[data-baseweb="textarea"]:focus-within > div,
+    input:focus,
+    textarea:focus {
+        border-color: #7209B7 !important;
+        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2) !important;
         background-color: #FFFFFF !important;
     }
 
-    div[data-baseweb="input"]:focus-within > div,
-    div[data-baseweb="textarea"]:focus-within > div,
-    div.stTextInput > div > div > input:focus,
-    div.stTextArea > div > div > textarea:focus {
-        border-color: #C77DFF !important;
-        box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.25) !important;
+    /* Texto de marcadores de posición (placeholders) legibles */
+    ::placeholder,
+    input::placeholder,
+    textarea::placeholder {
+        color: #64748B !important;
+        -webkit-text-fill-color: #64748B !important;
+        opacity: 0.9 !important;
+    }
+
+    /* 6.3 Campos de entrada y tarjetas en pantalla de Login */
+    [data-testid="stForm"] {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #CBD5E1 !important;
+        border-radius: 16px !important;
+        padding: 2rem !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    [data-testid="stForm"] h1,
+    [data-testid="stForm"] h2,
+    [data-testid="stForm"] h3,
+    [data-testid="stForm"] h4,
+    [data-testid="stForm"] p,
+    [data-testid="stForm"] span,
+    [data-testid="stForm"] label {
+        color: #111111 !important;
+    }
+
+    [data-testid="stForm"] div[data-baseweb="input"] > div {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #CBD5E1 !important;
+        border-radius: 10px !important;
+    }
+
+    /* 6.4 Inputs de la barra lateral (Datos de la Escuela y configuración) */
+    [data-testid="stSidebar"] {
+        background-color: #F8FAFC !important;
+    }
+
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown span {
+        color: #111111 !important;
+    }
+
+    [data-testid="stSidebar"] div[data-baseweb="input"] > div,
+    [data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #CBD5E1 !important;
+        border-radius: 10px !important;
     }
 
     /* =======================================================
-       35. SOBREESCRITURA GLOBAL DE ESTILOS PARA SELECTORES MULTIPLES
+       35. ESTILOS PARA SELECTORES (SELECTBOX Y MULTISELECT)
+       Fondo visible blanco y texto oscuro (#111111) para evitar
+       desaparición en modo claro/oscuro.
        ======================================================= */
     /* Borde y fondo principal de las cajas de selección */
     .stMultiSelect [data-baseweb="select"] > div, 
     .stSelectbox [data-baseweb="select"] > div,
     div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-        border: 2px solid #B5179E !important;
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div {
+        border: 1.5px solid #CBD5E1 !important;
         border-radius: 12px !important;
-        background-color: transparent !important;
+        background-color: #FFFFFF !important;
+        color: #111111 !important;
+    }
+
+    /* Texto seleccionado y buscador dentro del select */
+    div[data-baseweb="select"] div,
+    div[data-baseweb="select"] input,
+    .stSelectbox div[data-baseweb="select"] span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
     }
     
-    /* Color de fondo degradado para las etiquetas (opciones seleccionadas) */
+    /* Color de fondo degradado para las etiquetas (opciones seleccionadas) en multiselect */
     .stMultiSelect [data-baseweb="tag"],
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"],
     div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
@@ -814,13 +943,14 @@ st.markdown("""
         border-radius: 8px !important;
     }
     
-    /* Color del texto y la 'X' dentro de las etiquetas */
+    /* Color del texto y la 'X' dentro de las etiquetas multiselect */
     .stMultiSelect [data-baseweb="tag"] span, 
     .stMultiSelect [data-baseweb="tag"] svg,
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span,
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
-        color: white !important;
-        fill: white !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        fill: #FFFFFF !important;
     }
     
     /* Efecto de iluminación al hacer clic (focus) */
@@ -828,19 +958,28 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:focus-within,
     div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within,
     div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
-        border-color: #F72585 !important;
-        box-shadow: 0 0 10px rgba(247, 37, 133, 0.5) !important;
+        border-color: #7209B7 !important;
+        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2) !important;
     }
 
-    /* Menú desplegable emergente (dropdown options) */
-    ul[data-baseweb="menu"] {
+    /* Menú desplegable emergente (dropdown options) con fondo blanco y texto oscuro */
+    ul[data-baseweb="menu"],
+    div[data-baseweb="popover"] ul {
+        background-color: #FFFFFF !important;
         border-radius: 12px !important;
-        border: 1px solid rgba(181, 23, 158, 0.25) !important;
+        border: 1px solid #CBD5E1 !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    li[data-baseweb="menu-item"],
+    ul[data-baseweb="menu"] li {
+        color: #111111 !important;
+        background-color: #FFFFFF !important;
     }
 
     li[data-baseweb="menu-item"]:hover,
     li[data-baseweb="menu-item"][aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(255, 117, 143, 0.12) 0%, rgba(114, 9, 183, 0.12) 100%) !important;
+        background: linear-gradient(135deg, rgba(255, 117, 143, 0.15) 0%, rgba(114, 9, 183, 0.15) 100%) !important;
         color: #7209B7 !important;
     }
 
