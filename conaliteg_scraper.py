@@ -9,6 +9,14 @@ import urllib3
 import requests
 from bs4 import BeautifulSoup
 from typing import Dict, List, Tuple
+
+__all__ = [
+    "obtener_libros_conaliteg",
+    "buscar_programa_sintetico_sep",
+    "LIBROS_SEP_FALLBACK",
+    "clean_title",
+]
+
 # Diccionario base de respaldo de la Nueva Escuela Mexicana (NEM)
 LIBROS_SEP_FALLBACK = {
     "1° de Primaria": [
@@ -137,3 +145,89 @@ def obtener_libros_conaliteg() -> Tuple[Dict[str, List[str]], bool]:
 
     # Respaldo (Fallback) con el catálogo oficial de la Nueva Escuela Mexicana
     return dict(LIBROS_SEP_FALLBACK), False
+
+
+def buscar_programa_sintetico_sep(fase_seleccionada: str, max_resultados: int = 3) -> Tuple[str, bool]:
+    """
+    Función auxiliar de búsqueda y web scraping de respaldo para el Programa Sintético oficial de la SEP
+    cuando el usuario NO subió un documento a través del file_uploader.
+
+    1. Utiliza librerías como googlesearch-python y requests/BeautifulSoup.
+    2. Búsqueda restringida con el término:
+       site:sep.gob.mx OR site:conaliteg.sep.gob.mx "Programa Sintético" "Fase {fase_seleccionada}"
+    3. Extrae un resumen del contenido de los primeros resultados y lo retorna como contexto.
+    4. Si el scraping falla, retorna ("", False) para que el prompt incluya la instrucción de fallback.
+    """
+    fase_limpia = str(fase_seleccionada).replace("Fase", "").strip() or "5"
+    fase_termino = f"Fase {fase_limpia}"
+
+    query = f'site:sep.gob.mx OR site:conaliteg.sep.gob.mx "Programa Sintético" "{fase_termino}"'
+    urls = []
+
+    # 1. Utilizar googlesearch-python
+    try:
+        from googlesearch import search
+        for item in search(query, num_results=max_resultados, lang="es", timeout=5):
+            u = getattr(item, "url", item) if not isinstance(item, str) else item
+            if u and isinstance(u, str) and u.startswith("http"):
+                urls.append(u)
+            if len(urls) >= max_resultados:
+                break
+    except Exception:
+        pass
+
+    # 2. Respaldo secundario si Google bloquea la petición automatizada
+    if not urls:
+        try:
+            try:
+                from ddgs import DDGS
+            except ImportError:
+                from duckduckgo_search import DDGS
+            with DDGS() as ddgs:
+                ddg_res = list(ddgs.text(query, max_results=max_resultados))
+                for item in ddg_res:
+                    link = item.get("href") or item.get("link")
+                    if link and ("sep.gob.mx" in link or "conaliteg.sep.gob.mx" in link):
+                        urls.append(link)
+        except Exception:
+            pass
+
+    # 3. Extraer contenido de los primeros resultados con requests y BeautifulSoup
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "es-MX,es;q=0.9"
+    }
+
+    resumenes = []
+    for u in urls[:max_resultados]:
+        try:
+            resp = requests.get(u, headers=headers, timeout=6, verify=False)
+            if resp.status_code == 200 and resp.text:
+                soup = BeautifulSoup(resp.text, "html.parser")
+                for s in soup(["script", "style", "nav", "footer", "header", "noscript"]):
+                    s.decompose()
+                parrafos = [
+                    p.get_text(strip=True)
+                    for p in soup.find_all(["p", "h1", "h2", "h3", "li"])
+                    if len(p.get_text(strip=True)) > 30
+                ]
+                texto_pagina = " ".join(parrafos[:15])
+                if len(texto_pagina.strip()) > 80:
+                    resumenes.append(f"Fuente ({u}):\n{texto_pagina[:1200]}")
+        except Exception:
+            continue
+
+    if resumenes:
+        return "\n\n---\n\n".join(resumenes), True
+
+    return "", False
+
+
+# Alias de compatibilidad para integraciones externas
+get_conaliteg_books = obtener_libros_conaliteg
+get_libros_conaliteg = obtener_libros_conaliteg
+scrape_conaliteg = obtener_libros_conaliteg
+buscar_programa_sintetico = buscar_programa_sintetico_sep
+buscar_programa_sep = buscar_programa_sintetico_sep
+
