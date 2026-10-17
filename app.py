@@ -560,6 +560,51 @@ def get_cached_conaliteg_books():
     """Obtiene y cachea en memoria los libros de texto de CONALITEG."""
     return obtener_libros_conaliteg()
 
+import re
+
+def extraer_embed_youtube(url_o_id: str) -> str:
+    """Extrae y formatea la URL limpia para incrustar en un iframe de YouTube."""
+    if not url_o_id or not str(url_o_id).strip():
+        return "https://www.youtube.com/embed/jfKfPfyJRdk"
+    
+    url = str(url_o_id).strip()
+    
+    if "youtube.com/embed/" in url:
+        return url
+        
+    if "playlist?list=" in url:
+        match_list = re.search(r"list=([a-zA-Z0-9_-]+)", url)
+        if match_list:
+            return f"https://www.youtube.com/embed/videoseries?list={match_list.group(1)}"
+            
+    if "youtu.be/" in url:
+        match_short = re.search(r"youtu\.be/([a-zA-Z0-9_-]+)", url)
+        if match_short:
+            vid = match_short.group(1)
+            match_list = re.search(r"list=([a-zA-Z0-9_-]+)", url)
+            if match_list:
+                return f"https://www.youtube.com/embed/{vid}?list={match_list.group(1)}"
+            return f"https://www.youtube.com/embed/{vid}"
+            
+    if "watch?v=" in url:
+        match_v = re.search(r"v=([a-zA-Z0-9_-]+)", url)
+        if match_v:
+            vid = match_v.group(1)
+            match_list = re.search(r"list=([a-zA-Z0-9_-]+)", url)
+            if match_list:
+                return f"https://www.youtube.com/embed/{vid}?list={match_list.group(1)}"
+            return f"https://www.youtube.com/embed/{vid}"
+            
+    if "/live/" in url:
+        match_live = re.search(r"/live/([a-zA-Z0-9_-]+)", url)
+        if match_live:
+            return f"https://www.youtube.com/embed/{match_live.group(1)}"
+            
+    if re.match(r"^[a-zA-Z0-9_-]{11}$", url):
+        return f"https://www.youtube.com/embed/{url}"
+        
+    return "https://www.youtube.com/embed/jfKfPfyJRdk"
+
 # ==========================================
 # CONFIGURACIÓN DE PÁGINA STREAMLIT
 # ==========================================
@@ -1605,6 +1650,62 @@ if authentication_status:
         with st.expander("📌 Ver directrices de esta sesión CTE", expanded=False):
             st.markdown(f"**Enfoque:** {cte_info['enfoque']}")
             st.markdown(f"**Directrices:** {cte_info['directrices']}")
+
+        st.markdown("---")
+        st.markdown("### 🎵 Música para Concentración")
+        st.caption("Música ambiental relajante para acompañar tu planeación docente.")
+
+        CANALES_MUSICA_DEFAULT = {
+            "🎧 Lo-Fi Hip Hop (Relax / Estudio)": "https://www.youtube.com/embed/jfKfPfyJRdk",
+            "🎹 Piano Clásico Relajante": "https://www.youtube.com/embed/4xDzrJKXOOY",
+            "☕ Café Jazz Instrumental": "https://www.youtube.com/embed/DXUAyRRkI6k",
+            "🌿 Sonidos de la Naturaleza y Lluvia": "https://www.youtube.com/embed/mPZkdNFkNps",
+            "✨ Ondas Alfa (Enfoque Profundo)": "https://www.youtube.com/embed/WPni755-Krg",
+            "🔗 Enlace Personalizado de YouTube": ""
+        }
+
+        estilo_musica_sel = st.selectbox(
+            "Ambiente Musical:",
+            options=list(CANALES_MUSICA_DEFAULT.keys()),
+            index=0,
+            help="Selecciona una atmósfera musical relajante para concentrarte al diseñar tus planeaciones.",
+            key=f"musica_preset_{st.session_state.widget_key}"
+        )
+
+        url_custom_youtube = st.text_input(
+            "Enlace personalizado de YouTube (opcional):",
+            value="",
+            placeholder="https://www.youtube.com/watch?v=...",
+            help="Pega aquí el enlace de cualquier video o playlist de YouTube para reproducirlo.",
+            key=f"musica_url_{st.session_state.widget_key}"
+        )
+
+        # Resolver la URL del reproductor
+        if url_custom_youtube.strip():
+            url_embed_activa = extraer_embed_youtube(url_custom_youtube.strip())
+        elif CANALES_MUSICA_DEFAULT.get(estilo_musica_sel):
+            url_embed_activa = CANALES_MUSICA_DEFAULT[estilo_musica_sel]
+        else:
+            url_embed_activa = "https://www.youtube.com/embed/jfKfPfyJRdk"
+
+        # Reproductor compacto estilizado en morado
+        st.markdown(
+            f"""
+            <div style="border-radius: 12px; overflow: hidden; border: 1.5px solid #8B5CF6; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.18); margin-top: 0.35rem; margin-bottom: 0.6rem; background-color: #000000;">
+                <iframe 
+                    width="100%" 
+                    height="150" 
+                    src="{url_embed_activa}" 
+                    title="Música Ambiental para Concentración" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen
+                    style="display: block; width: 100%; border: none;">
+                </iframe>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     
     # Empaquetar datos de escuela
     datos_escuela_actual = {
