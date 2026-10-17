@@ -24,29 +24,29 @@ LIBROS_SEP_FALLBACK = {
         "Proyectos Escolares (1° grado)",
         "Proyectos Comunitarios (1° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (1° grado)",
-        "Múltiples Lenguajes (1° grado)",
-        "Múltiples Lenguajes: Trazos y palabras (1° grado)"
+        "Múltiples lenguajes (1° grado)",
+        "Múltiples lenguajes: Trazos y palabras (1° grado)"
     ],
     "2° de Primaria": [
         "Proyectos de Aula (2° grado)",
         "Proyectos Escolares (2° grado)",
         "Proyectos Comunitarios (2° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (2° grado)",
-        "Múltiples Lenguajes (2° grado)"
+        "Múltiples lenguajes (2° grado)"
     ],
     "3° de Primaria": [
         "Proyectos de Aula (3° grado)",
         "Proyectos Escolares (3° grado)",
         "Proyectos Comunitarios (3° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (3° grado)",
-        "Múltiples Lenguajes (3° grado)"
+        "Múltiples lenguajes (3° grado)"
     ],
     "4° de Primaria": [
         "Proyectos de Aula (4° grado)",
         "Proyectos Escolares (4° grado)",
         "Proyectos Comunitarios (4° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (4° grado)",
-        "Múltiples Lenguajes (4° grado)",
+        "Múltiples lenguajes (4° grado)",
         "Cartografía de México y el mundo (Fases 4 y 5)"
     ],
     "5° de Primaria": [
@@ -54,7 +54,7 @@ LIBROS_SEP_FALLBACK = {
         "Proyectos Escolares (5° grado)",
         "Proyectos Comunitarios (5° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (5° grado)",
-        "Múltiples Lenguajes (5° grado)",
+        "Múltiples lenguajes (5° grado)",
         "Cartografía de México y el mundo (5° grado)"
     ],
     "6° de Primaria": [
@@ -62,7 +62,7 @@ LIBROS_SEP_FALLBACK = {
         "Proyectos Escolares (6° grado)",
         "Proyectos Comunitarios (6° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (6° grado)",
-        "Múltiples Lenguajes (6° grado)",
+        "Múltiples lenguajes (6° grado)",
         "Cartografía de México y el mundo (6° grado)"
     ]
 }
@@ -85,9 +85,18 @@ def clean_title(title: str) -> str:
     """Corrige inconsistencias tipográficas presentes en el HTML de CONALITEG."""
     if not title:
         return ""
-    # Arreglar caracteres mal codificados en la fuente oficial
-    t = title.replace("Cartografa", "Cartografía")
+    t = title
+    # Arreglar errores de codificación y acentuación en Múltiples lenguajes
+    t = t.replace("MÃºltiples lenguajes", "Múltiples lenguajes")
+    t = t.replace("mÃºltiples lenguajes", "múltiples lenguajes")
+    t = t.replace("MÃºltiples Lenguajes", "Múltiples lenguajes")
+    t = t.replace("MÃºltiples", "Múltiples")
+    t = t.replace("mÃºltiples", "múltiples")
+    t = t.replace("Mltiples lenguajes", "Múltiples lenguajes")
+    t = t.replace("Mltiples", "Múltiples")
+    t = t.replace("Múltiples Lenguajes", "Múltiples lenguajes")
     t = t.replace("Cartograf\xada", "Cartografía")
+    t = t.replace("Cartografa", "Cartografía")
     t = t.replace("Mxico", "México")
     t = t.replace("Galera", "Galería")
     t = t.rstrip(".").strip()
@@ -112,6 +121,7 @@ def obtener_libros_conaliteg() -> Tuple[Dict[str, List[str]], bool]:
 
     try:
         response = requests.get(CONALITEG_URL, headers=headers, timeout=6, verify=False)
+        response.encoding = 'utf-8'
         if response.status_code == 200 and response.text:
             soup = BeautifulSoup(response.text, "html.parser")
             libros_extraidos = {grado_std: [] for grado_std in GRADE_MAPPING.values()}

@@ -8,7 +8,7 @@ import time
 import socket
 import requests
 import streamlit as st
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Union, List, Optional
 from google import genai
 from google.genai import types
 try:
@@ -108,6 +108,9 @@ def generate_planeacion(
     guia_cte: str = None,
     programa_sintetico: str = None,
     dias_seleccionados: list = None,
+    semana_seleccionada: Union[int, str] = None,
+    fase_seleccionada: str = None,
+    fallback_programa_sintetico: bool = False,
     num_sesiones: int = 5,
     api_key: str = None,
     modelo: str = DEFAULT_MODEL,
@@ -123,6 +126,10 @@ def generate_planeacion(
         libros_seleccionados: Lista o texto de libros de texto SEP seleccionados.
         guia_cte: Guía u orientaciones de Consejo Técnico Escolar seleccionadas.
         programa_sintetico: Texto extraído o directrices del Programa Sintético de la NEM.
+        dias_seleccionados: Lista de días de la semana a planear seleccionados por el usuario.
+        semana_seleccionada: Número de semana (1 a 56) del calendario oficial SEP.
+        fase_seleccionada: Fase oficial de la Nueva Escuela Mexicana (ej. 'Fase 5' o '5').
+        fallback_programa_sintetico: Booleano que indica si se debe usar la directriz de fallback si no hay archivo oficial.
         contexto_url: Texto extraído de una URL de referencia pedagógica mediante web scraping.
     """
     # Verificación preventiva de conectividad a internet
@@ -140,18 +147,83 @@ def generate_planeacion(
 
     guia_cte_detalle = kwargs.get("guia_cte_detalle", None)
 
-    if programa_sintetico is None:
-        programa_sintetico = kwargs.get("programa_sintetico_destacado", "")
-
     if not contexto_url:
         contexto_url = kwargs.get("contexto_url", "")
 
+    # 1. REGLA DE DÍAS SELECCIONADOS
     if dias_seleccionados is None:
         dias_seleccionados = kwargs.get("dias_seleccionados") or kwargs.get("dias_planeados") or datos_escuela.get("dias_seleccionados") or datos_escuela.get("dias_planeados") or ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
     if not dias_seleccionados:
         dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 
     num_sesiones = len(dias_seleccionados)
+
+    # 2. REGLA DE TEMPORALIDAD (56 SEMANAS)
+    if semana_seleccionada is None:
+        semana_seleccionada = (
+            kwargs.get("semana_seleccionada") or
+            kwargs.get("semana") or
+            datos_escuela.get("semana_seleccionada") or
+            datos_escuela.get("semana")
+        )
+        if not semana_seleccionada and datos_escuela.get("periodo"):
+            import re
+            m = re.search(r'\d+', str(datos_escuela.get("periodo")))
+            if m:
+                semana_seleccionada = int(m.group())
+        if not semana_seleccionada:
+            semana_seleccionada = 20
+
+    # 3. FASE CURRICULAR (NEM)
+    fase_correspondiente = datos_escuela.get('fase', 'Fase 5')
+    if fase_seleccionada is None:
+        fase_seleccionada = kwargs.get("fase_seleccionada") or fase_correspondiente
+    fase_limpia = str(fase_seleccionada).replace("Fase", "").strip() or "5"
+
+    grado_seleccionado = datos_escuela.get('grado', '5° de Primaria')
+
+    # 4. PROGRAMA SINTÉTICO Y FUNCIÓN DE RESPALDO (WEB SCRAPING SEP)
+    if programa_sintetico is None:
+        programa_sintetico = kwargs.get("programa_sintetico_destacado", "")
+
+    fallback_programa_sintetico = fallback_programa_sintetico or kwargs.get("fallback_programa_sintetico", False)
+    if not programa_sintetico and not fallback_programa_sintetico:
+        try:
+            from conaliteg_scraper import buscar_programa_sintetico_sep
+            resumen_sep, exito_scraping = buscar_programa_sintetico_sep(fase_seleccionada)
+            if exito_scraping and resumen_sep:
+                programa_sintetico = resumen_sep
+            else:
+                fallback_programa_sintetico = True
+        except Exception:
+            fallback_programa_sintetico = True
+
+    if fallback_programa_sintetico or not programa_sintetico or not str(programa_sintetico).strip():
+        directriz_programa_sintetico_txt = f"""=== PROGRAMA SINTÉTICO Y LINEAMIENTOS CURRICULARES (SEP - NEM) ===
+Como no se proporcionó un documento oficial, utiliza tu conocimiento interno y capacidad de búsqueda para acceder a los lineamientos de la Nueva Escuela Mexicana (SEP) para la Fase {fase_limpia} y Semana {semana_seleccionada}.
+* REGLA DE FIDELIDAD CURRICULAR: Fundamenta los Contenidos sintéticos y Procesos de Desarrollo de Aprendizaje (PDA) oficiales en el currículo nacional vigente de la Nueva Escuela Mexicana para la Fase {fase_limpia}."""
+    else:
+        directriz_programa_sintetico_txt = f"""=== BASE DE DATOS PRINCIPAL Y OFICIAL: PROGRAMA SINTÉTICO FASE 5 (5° DE PRIMARIA - SEP) ===
+DOCUMENTO OFICIAL CARGADO: "Programa_Sintetico_Fase_5.pdf"
+* DIRECTRIZ MANDATORIA DE MÁXIMA PRIORIDAD Y FIDELIDAD CURRICULAR:
+Utiliza este documento oficial cargado como la BASE DE DATOS PRINCIPAL Y OFICIAL para tu análisis pedagógico y la planeación didáctica de 5° de Primaria.
+Debes extraer rigurosamente y sin excepción de este documento:
+1. CONTENIDOS SINTÉTICOS: Los contenidos oficiales de la Fase 5 correspondientes específicamente a 5° de Primaria.
+2. PROCESOS DE DESARROLLO DE APRENDIZAJE (PDA): Los PDA oficiales específicos de 5° de Primaria exactamente con la redacción y alcance del documento.
+3. CAMPOS FORMATIVOS: Articulación en los 4 Campos Formativos (Lenguajes, Saberes y Pensamiento Científico, Ética, Naturaleza y Sociedades, De lo Humano y lo Comunitario).
+4. EJES ARTICULADORES: Vinculación con los 7 Ejes Articuladores de la Nueva Escuela Mexicana.
+PROHIBICIÓN ESTRICTA: Queda terminantemente prohibido inventar, distorsionar o sustituir los Contenidos y PDA por versiones genéricas. Cada momento de la secuencia didáctica (Inicio, Desarrollo y Cierre) y las actividades de inicio del día deben derivarse de forma estricta de esta base curricular oficial.
+
+--- TEXTO EXTRAÍDO DEL DOCUMENTO OFICIAL ---
+{str(programa_sintetico).strip()}"""
+
+    # Mapeo de fechas del calendario 2026 si están disponibles
+    dias_fechas = datos_escuela.get("dias_fechas", {}) if isinstance(datos_escuela, dict) else {}
+    fechas_txt = ""
+    if dias_fechas:
+        lineas_f = [f"  * {d}: {dias_fechas.get(d, d)}" for d in dias_seleccionados if d in dias_fechas]
+        if lineas_f:
+            fechas_txt = "\n- Fechas exactas del Calendario 2026 asignadas a cada día:\n" + "\n".join(lineas_f)
 
     # Detalle de la metodología seleccionada
     metodologia_info = METODOLOGIAS_SOCIOCRITICAS.get(metodologia, {})
@@ -170,8 +242,6 @@ def generate_planeacion(
     cte_nombre = str(guia_cte or "Orientaciones CTE - 5ª Sesión Ordinaria (Febrero 2026)")
     cte_enfoque = guia_cte_detalle.get("enfoque", "Evaluación formativa y proyectos comunitarios") if isinstance(guia_cte_detalle, dict) else "Evaluación formativa y proyectos comunitarios"
     cte_directrices = guia_cte_detalle.get("directrices", "Priorizar la evaluación dialógica y atención a BAP.") if isinstance(guia_cte_detalle, dict) else "Priorizar la evaluación dialógica y atención a BAP."
-    prog_sintetico_txt = str(programa_sintetico).strip() if programa_sintetico else "Contenidos sintéticos y Procesos de Desarrollo de Aprendizaje (PDA) oficiales de la Fase correspondiente (NEM)."
-    programa_sintetico = prog_sintetico_txt
 
     busqueda_web = busqueda_web or kwargs.get("busqueda_web", False)
     directriz_busqueda_web_txt = ""
@@ -188,9 +258,6 @@ Antes de estructurar la secuencia didáctica, utiliza tu herramienta de búsqued
 El usuario ha proporcionado el siguiente material de referencia extraído de una página web educativa: {contexto_url}. Analiza este contenido y adapta las secuencias didácticas semanales o por proyectos basándote en los ejemplos y la estructura de este material.
 """
 
-    fase_correspondiente = datos_escuela.get('fase', 'Fase 5')
-    grado_seleccionado = datos_escuela.get('grado', '5° de Primaria')
-
     prompt = f"""{build_system_instruction()}
 
 Elabora la planeación didáctica completa, oficial y lista para aplicar, bajo las siguientes especificaciones:
@@ -200,14 +267,22 @@ Elabora la planeación didáctica completa, oficial y lista para aplicar, bajo l
 - CCT: {datos_escuela.get('cct', '10EPR0361N')}
 - Docente Titular: {datos_escuela.get('docente', 'Aday Domínguez Domínguez')}
 - Director de la Escuela: {datos_escuela.get('director', 'José Guillermo Borjas Díaz')}
-- Grado y Fase: {datos_escuela.get('grado', '5° de Primaria')} ({datos_escuela.get('fase', 'Fase 5')}) Grupo '{datos_escuela.get('grupo', 'A')}'
-- Temporalidad: {datos_escuela.get('periodo', 'Semana 20')} ({num_sesiones} sesiones didácticas programadas: {', '.join(dias_seleccionados)})
+- Grado y Fase: {datos_escuela.get('grado', '5° de Primaria')} ({fase_correspondiente}) Grupo '{datos_escuela.get('grupo', 'A')}'
+- Temporalidad: {datos_escuela.get('periodo', f'Semana {semana_seleccionada}')} ({num_sesiones} sesiones didácticas programadas: {', '.join(dias_seleccionados)})
 - Ciclo Escolar: {datos_escuela.get('ciclo_escolar', '2025-2026')}
 - Turno: {datos_escuela.get('turno', 'Matutino')}
 
-=== DÍAS DE LA SEMANA A PLANEAR (OBLIGATORIO) ===
+=== TEMPORALIDAD Y CALENDARIO OFICIAL SEP (56 SEMANAS) ===
+- Semana seleccionada: Semana {semana_seleccionada} de las 56 semanas del calendario escolar oficial de la SEP
+REGLA DE TEMPORALIDAD (56 SEMANAS):
+Ajusta la profundidad de los Contenidos y los PDA para que correspondan exactamente a la Semana {semana_seleccionada} de las 56 semanas del calendario escolar oficial de la SEP. El nivel de exigencia debe reflejar el avance esperado para esta etapa del ciclo escolar.
+
+=== DÍAS DE LA SEMANA A PLANEAR Y CALENDARIO INTERACTIVO 2026 (OBLIGATORIO) ===
 - Días de la semana a planear: {dias_seleccionados}
-REGLA ESTRICTA: SOLO debes generar la secuencia didáctica para los siguientes días: {dias_seleccionados}. TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o incluir tablas para cualquier otro día de la semana.
+{fechas_txt}
+REGLA DE DÍAS SELECCIONADOS:
+Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. En los encabezados de cada sesión didáctica, indica el día y su fecha oficial del año 2026 (ejemplo: 'Sesión 1: Lunes 19 de Octubre de 2026'). No inventes días adicionales.
+REGLA ESTRICTA ADICIONAL: TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o incluir tablas para cualquier otro día de la semana que no figure en {dias_seleccionados}.
 
 === CONFIGURACIÓN CURRICULAR (SEP - NEM) ===
 - Campos Formativos seleccionados: {', '.join(campos_formativos)}
@@ -227,9 +302,7 @@ REGLA ESTRICTA: SOLO debes generar la secuencia didáctica para los siguientes d
   * Directrices CTE aplicadas: {cte_directrices}
   * REQUISITO CTE: Articula estas directrices en el plano didáctico, la evaluación formativa y los ajustes razonables.
 
-=== PROGRAMA SINTÉTICO Y ANÁLISIS CURRICULAR ===
-Basa los contenidos y la progresión de aprendizajes estrictamente en el siguiente Programa Sintético proporcionado: {programa_sintetico}
-* REGLA DE FIDELIDAD CURRICULAR: Extrae y articula los Contenidos sintéticos, los Procesos de Desarrollo de Aprendizaje (PDA), los Campos Formativos y los Ejes Articuladores exactos correspondientes.
+{directriz_programa_sintetico_txt}
 
 === ARTICULACIÓN CURRICULAR (CONTENIDOS Y PDA PRIORIZADOS) ===
 {articulacion_txt}
@@ -248,13 +321,14 @@ ESTRUCTURA DE RESPUESTA EXIGIDA (Usa Markdown profesional, encabezados claros y 
 - Escenario (Aula, Escolar o Comunitario).
 - Metodología y justificación pedagógica.
 - Ejes articuladores en acción.
+- Temporalidad: Semana {semana_seleccionada} de 56 del calendario SEP ({num_sesiones} sesiones).
 
 # II. ARTICULACIÓN CURRICULAR (TABLA NEM)
 Genera una tabla con:
 | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) |
 
 # III. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA)
-REGLA ESTRICTA: SOLO debes generar la secuencia didáctica para los siguientes días: {dias_seleccionados}. TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o incluir tablas para cualquier otro día de la semana.
+Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. No inventes días adicionales.
 Desarrolla la rutina matutina ÚNICAMENTE para los siguientes días: {dias_seleccionados}. No inventes actividades para los días que no estén en esta lista. Genera exactamente {num_sesiones} rutinas, una por cada día:
 Para cada día en {dias_seleccionados}:
 - Sesión N ([Día de la semana]):
@@ -263,8 +337,8 @@ Para cada día en {dias_seleccionados}:
   * Problema Matemático Razonado: Enunciado, datos, operaciones y resultado interpretado.
 
 # IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES)
-REGLA ESTRICTA: SOLO debes generar la secuencia didáctica para los siguientes días: {dias_seleccionados}. TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o incluir tablas para cualquier otro día de la semana.
-Estructura la Secuencia Didáctica separando claramente cada día. Para cada día incluido en {dias_seleccionados}, debes proporcionar sus respectivas actividades de Inicio, Desarrollo y Cierre. No agrupes todos los días en un solo bloque. Estructura la secuencia didáctica ÚNICAMENTE para los siguientes días: {dias_seleccionados}. No inventes actividades para los días que no estén en esta lista. Desarrolla detalladamente exactamente una sesión por cada día en {dias_seleccionados} (total: {num_sesiones} sesiones):
+Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. No inventes días adicionales.
+Estructura la Secuencia Didáctica separando claramente cada día. Para cada día incluido en {dias_seleccionados}, debes proporcionar sus respectivas actividades de Inicio, Desarrollo y Cierre. No agrupes todos los días en un solo bloque. Desarrolla detalladamente exactamente una sesión por cada día en {dias_seleccionados} (total: {num_sesiones} sesiones):
 ### Sesión N: [Día de la semana] - [Nombre de la Sesión y Fase/Momento Metodológico correspondiente]
 - **Tiempo estimado:** (ej. 90 minutos)
 - **Inicio (15-20 min):** Descripción paso a paso de actividades, preguntas detonadoras y recuperación de conocimientos previos.
@@ -472,13 +546,15 @@ def generate_sample_fallback(
 - **Evidencia:** Registro fotográfico de la socialización, diana de autoevaluación y notas en el diario de campo."""
     }
 
+    dias_fechas_map = datos_escuela.get("dias_fechas", {}) if isinstance(datos_escuela, dict) else {}
     rutinas_str = ""
     sesiones_str = ""
     for idx, dia in enumerate(dias_seleccionados, 1):
         r_txt = sample_rutinas.get(dia, sample_rutinas["Lunes"])
-        rutinas_str += f"### Sesión {idx} ({dia}):\n{r_txt}\n\n"
+        dia_header = dias_fechas_map.get(dia, dia)
+        rutinas_str += f"### Sesión {idx} ({dia_header}):\n{r_txt}\n\n"
         s_txt = sample_sesiones.get(dia, sample_sesiones["Lunes"])
-        sesiones_str += f"### Sesión {idx}: {dia} - {s_txt}\n\n"
+        sesiones_str += f"### Sesión {idx}: {dia_header} - {s_txt}\n\n"
 
     dias_str = ", ".join(dias_seleccionados)
 

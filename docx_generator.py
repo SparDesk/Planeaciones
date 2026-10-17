@@ -606,7 +606,8 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
         # Regla 1: Encabezado principal -> Fondo Morado Intenso (#7209B7), texto Blanco, negrita y centrado
         title_cell = table.rows[0].cells[0].merge(table.rows[0].cells[3])
         title_cell.width = Inches(7.5)
-        title_text = DIAS_FECHAS_OFICIALES.get(dia, f"{dia.upper()} DE LA SEMANA ESCOLAR")
+        dias_fechas_map = (datos_escuela.get("dias_fechas") or {}) if isinstance(datos_escuela, dict) else {}
+        title_text = dias_fechas_map.get(dia) or DIAS_FECHAS_OFICIALES.get(dia, f"{dia.upper()} DE LA SEMANA ESCOLAR")
         title_cell.text = title_text
         set_cell_background(title_cell, HEX_MORADO_INTENSO)
         set_cell_margins(title_cell, top=60, bottom=60, left=80, right=80)

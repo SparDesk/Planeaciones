@@ -13,7 +13,7 @@ except ImportError:
     import pypdf as pdf_lib
 import requests
 
-def extract_text_from_pdf(file_bytes: bytes, max_pages: int = 25) -> str:
+def extract_text_from_pdf(file_bytes: bytes, max_pages: int = 200) -> str:
     """Extrae texto de un archivo PDF subido en Streamlit usando PyPDF2 / pypdf."""
     try:
         reader = pdf_lib.PdfReader(io.BytesIO(file_bytes))
@@ -33,6 +33,37 @@ def extract_text_from_pdf(file_bytes: bytes, max_pages: int = 25) -> str:
         return "\n\n".join(extracted_texts)
     except Exception as e:
         return f"[Error al extraer contenido del PDF: {str(e)}]"
+
+def extraer_contenidos_pda_fase5(texto: str) -> List[Dict[str, str]]:
+    """
+    Analiza el texto extraído del Programa Sintético de la Fase 5 (5° y 6° de primaria)
+    para identificar los bloques de Campo Formativo, Contenido y PDA de 5° grado.
+    """
+    import re
+    resultados = []
+    if not texto:
+        return resultados
+
+    # Expresión regular para bloques estructurados comunes en el Programa Sintético
+    patron = re.compile(
+        r'(?:Campo\s+Formativo[:\s]+(?P<campo>[^\n]+)\n)?'
+        r'Contenido[:\s]+(?P<contenido>[^\n]+)\n'
+        r'(?:PDA(?:\s+5[°o]?\s+Grado)?[:\s]+(?P<pda>[^\n]+))',
+        re.IGNORECASE
+    )
+    for m in patron.finditer(texto):
+        c_dict = m.groupdict()
+        campo_val = (c_dict.get("campo") or "Lenguajes").strip()
+        cont_val = (c_dict.get("contenido") or "").strip()
+        pda_val = (c_dict.get("pda") or "").strip()
+        if cont_val and pda_val:
+            resultados.append({
+                "campo": campo_val,
+                "contenido": cont_val,
+                "pda": pda_val,
+                "grado": "5° de Primaria"
+            })
+    return resultados
 
 def extract_text_from_docx(file_bytes: bytes, max_paragraphs: int = 150) -> str:
     """Extrae texto de un archivo Word (.docx) subido."""

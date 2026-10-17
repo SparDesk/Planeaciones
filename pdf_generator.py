@@ -280,8 +280,9 @@ def build_pdf_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.By
                 if pdf.get_y() > 235:
                     pdf.add_page()
                 pdf.set_font('Helvetica', 'B', 9)
-                pdf.set_text_color(*RGB_SEP_GUINDA)
-                pdf.cell(186, 6, sanitize_latin1(f"**Día: {dia}**"), border=0, new_x='LMARGIN', new_y='NEXT')
+                dias_fechas_map = (datos_escuela.get("dias_fechas") or {}) if isinstance(datos_escuela, dict) else {}
+                dia_label = dias_fechas_map.get(dia, dia)
+                pdf.cell(186, 6, sanitize_latin1(f"**Día: {dia_label}**"), border=0, new_x='LMARGIN', new_y='NEXT')
                 pdf.ln(1)
 
                 # Tabla correspondiente con las celdas de Inicio, Desarrollo y Cierre exclusivas para ese día
