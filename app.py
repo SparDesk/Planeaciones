@@ -520,13 +520,16 @@ CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["5° de Primaria"]
 
 EJEMPLO_PROBLEMICA_ANALITICO = """Problemática comunitaria identificada en el Consejo Técnico Escolar (CTE):
 En el diagnóstico integral de la Escuela Primaria Revolución Social 1910, se detectó una necesidad apremiante de fortalecer la comprensión lectora, la redacción propia y la resolución de problemas multiplicativos y fraccionarios contextualizados. Además, se observa en la convivencia escolar la necesidad de reforzar la empatía, el cuidado del entorno escolar y la resolución pacífica de conflictos mediante el diálogo."""
+import calendar
+import datetime
 from file_processor import (
     process_uploaded_files,
     format_context_for_prompt,
     extract_text_from_pdf,
     extract_text_from_docx,
     extract_text_from_txt,
-    extraer_texto_url
+    extraer_texto_url,
+    extraer_contenidos_pda_fase5
 )
 import socket
 import requests
@@ -1077,12 +1080,18 @@ st.markdown("""
        TARJETAS DE INFORMACIÓN, ALERTAS Y NOTAS DE RESPALDO SEP
        (Contenedores oscuros / de color: Texto en Blanco #FFFFFF y Lila muy claro #F3E8FF)
        Aplica a: Modo de Respaldo SEP, Plantilla de Word, Consejos de Respaldo y Advertencias
+    /* =======================================================
+       TARJETAS DE INFORMACIÓN, ALERTAS Y NOTAS DE RESPALDO SEP
+       (Contenedores oscuros: Texto en Blanco Nítido #FFFFFF con Máximo Contraste)
+       Aplica a: Modo de Respaldo SEP, Plantilla de Word, Consejos de Respaldo y Advertencias
        ======================================================= */
     div[data-testid="stAlert"],
     div[data-testid="stNotification"],
     div.stAlert,
     [data-testid="stSidebar"] div[data-testid="stAlert"],
+    [data-testid="stSidebar"] div.stAlert,
     .nem-card div[data-testid="stAlert"],
+    .nem-card div.stAlert,
     div[data-testid="stAppViewContainer"] div[data-testid="stAlert"] {
         background: linear-gradient(135deg, #2E1065 0%, #1E1B4B 100%) !important;
         background-color: #2E1065 !important;
@@ -1093,12 +1102,14 @@ st.markdown("""
         margin: 0.75rem 0 !important;
     }
 
-    /* Texto principal de notas y alertas en blanco nítido (#FFFFFF) */
+    /* Texto principal de notas y alertas en blanco nítido (#FFFFFF) garantizado */
     div[data-testid="stAlert"] *,
     div[data-testid="stNotification"] *,
     div.stAlert *,
     [data-testid="stSidebar"] div[data-testid="stAlert"] *,
+    [data-testid="stSidebar"] div.stAlert *,
     .nem-card div[data-testid="stAlert"] *,
+    .nem-card div.stAlert *,
     div[data-testid="stAppViewContainer"] div[data-testid="stAlert"] * {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
@@ -1112,14 +1123,16 @@ st.markdown("""
     div[data-testid="stNotification"] p,
     div[data-testid="stNotification"] span,
     div.stAlert p,
-    div.stAlert span {
+    div.stAlert span,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] p,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] span {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
         font-size: 0.94rem !important;
         line-height: 1.55 !important;
     }
 
-    /* Títulos destacados y textos en negrita dentro de alertas en lila muy claro (#F3E8FF) */
+    /* Títulos destacados y textos en negrita dentro de alertas en blanco nítido (#FFFFFF) */
     div[data-testid="stAlert"] strong,
     div[data-testid="stAlert"] b,
     div[data-testid="stAlert"] em,
@@ -1127,10 +1140,13 @@ st.markdown("""
     div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] b,
     div[data-testid="stNotification"] strong,
     div[data-testid="stNotification"] b,
+    div.stAlert strong,
+    div.stAlert b,
     [data-testid="stSidebar"] div[data-testid="stAlert"] strong,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] b,
     .nem-card div[data-testid="stAlert"] strong {
-        color: #F3E8FF !important;
-        -webkit-text-fill-color: #F3E8FF !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
     }
 
@@ -1138,12 +1154,13 @@ st.markdown("""
     div[data-testid="stAlert"] code,
     div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] code,
     div[data-testid="stNotification"] code,
+    div.stAlert code,
     [data-testid="stSidebar"] div[data-testid="stAlert"] code,
     .nem-card div[data-testid="stAlert"] code {
         background: #4C1D95 !important;
         background-color: #4C1D95 !important;
-        color: #F3E8FF !important;
-        -webkit-text-fill-color: #F3E8FF !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         border: 1.5px solid #A78BFA !important;
         border-radius: 6px !important;
         padding: 2px 7px !important;
@@ -1154,9 +1171,10 @@ st.markdown("""
 
     /* Enlaces dentro de notas y alertas */
     div[data-testid="stAlert"] a,
-    div[data-testid="stNotification"] a {
-        color: #DDD6FE !important;
-        -webkit-text-fill-color: #DDD6FE !important;
+    div[data-testid="stNotification"] a,
+    div.stAlert a {
+        color: #E9D5FF !important;
+        -webkit-text-fill-color: #E9D5FF !important;
         text-decoration: underline !important;
         font-weight: 600 !important;
     }
@@ -1167,8 +1185,8 @@ st.markdown("""
     div.stAlert svg,
     [data-testid="stSidebar"] div[data-testid="stAlert"] svg,
     .nem-card div[data-testid="stAlert"] svg {
-        fill: #F3E8FF !important;
-        color: #F3E8FF !important;
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
     }
 
     /* =======================================================
@@ -1192,26 +1210,41 @@ st.markdown("""
     }
 
     /* Botón de cabecera del expander (Summary): claro (#EDE9FE) con texto legible #1F2937 */
-    details[data-testid="stExpander"] summary {
+    details[data-testid="stExpander"] summary,
+    div[data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary {
         background: #EDE9FE !important;
         background-color: #EDE9FE !important;
         border-radius: 12px !important;
         padding: 0.85rem 1.25rem !important;
         cursor: pointer !important;
-        border-bottom: 1px solid #DDD6FE !important;
+        border-bottom: 1.5px solid #C4B5FD !important;
         transition: all 0.25s ease !important;
     }
 
-    details[data-testid="stExpander"] summary:hover {
+    details[data-testid="stExpander"] summary:hover,
+    div[data-testid="stExpander"] summary:hover,
+    [data-testid="stExpander"] summary:hover {
         background: #DDD6FE !important;
         background-color: #DDD6FE !important;
     }
 
-    /* Texto del botón de personalizar contenidos: perfectamente legible (#1F2937 sobre contenedor claro) */
+    /* Texto del botón de personalizar contenidos: perfectamente legible (#1F2937 oscuro profundo) */
     details[data-testid="stExpander"] summary,
+    details[data-testid="stExpander"] summary *,
     details[data-testid="stExpander"] summary span,
     details[data-testid="stExpander"] summary p,
-    details[data-testid="stExpander"] summary div {
+    details[data-testid="stExpander"] summary div,
+    div[data-testid="stExpander"] summary,
+    div[data-testid="stExpander"] summary *,
+    div[data-testid="stExpander"] summary span,
+    div[data-testid="stExpander"] summary p,
+    div[data-testid="stExpander"] summary div,
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary *,
+    [data-testid="stExpander"] summary span,
+    [data-testid="stExpander"] summary p,
+    [data-testid="stExpander"] summary div {
         color: #1F2937 !important;
         -webkit-text-fill-color: #1F2937 !important;
         font-weight: 700 !important;
@@ -1220,15 +1253,17 @@ st.markdown("""
     }
 
     /* Icono del chevron en expander */
-    details[data-testid="stExpander"] summary svg {
+    details[data-testid="stExpander"] summary svg,
+    div[data-testid="stExpander"] summary svg,
+    [data-testid="stExpander"] summary svg {
         fill: #7C3AED !important;
         color: #7C3AED !important;
     }
 
     /* Contenedor desplegado (Details): Fondo claro con textos en #1F2937 */
-    div[data-testid="stExpanderDetails"] {
+    div[data-testid="stExpanderDetails"],
+    div[data-testid="stExpanderDetails"] * {
         background-color: #FFFFFF !important;
-        padding: 1.25rem !important;
         color: #1F2937 !important;
         -webkit-text-fill-color: #1F2937 !important;
     }
@@ -1242,6 +1277,14 @@ st.markdown("""
         -webkit-text-fill-color: #1F2937 !important;
     }
 
+    div[data-testid="stExpanderDetails"] textarea,
+    div[data-testid="stExpanderDetails"] input {
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #C4B5FD !important;
+    }
+
     /* Adaptación en modo oscuro para el botón de personalizar contenidos */
     @media (prefers-color-scheme: dark) {
         div[data-testid="stExpander"],
@@ -1250,34 +1293,52 @@ st.markdown("""
             background-color: #1E1B4B !important;
         }
 
-        details[data-testid="stExpander"] summary {
+        details[data-testid="stExpander"] summary,
+        div[data-testid="stExpander"] summary,
+        [data-testid="stExpander"] summary {
             background: #2E1065 !important;
             background-color: #2E1065 !important;
-            border-bottom: 1px solid #4C1D95 !important;
+            border-bottom: 1.5px solid #4C1D95 !important;
         }
 
-        details[data-testid="stExpander"] summary:hover {
+        details[data-testid="stExpander"] summary:hover,
+        div[data-testid="stExpander"] summary:hover,
+        [data-testid="stExpander"] summary:hover {
             background: #3B0764 !important;
             background-color: #3B0764 !important;
         }
 
         details[data-testid="stExpander"] summary,
+        details[data-testid="stExpander"] summary *,
         details[data-testid="stExpander"] summary span,
         details[data-testid="stExpander"] summary p,
-        details[data-testid="stExpander"] summary div {
+        details[data-testid="stExpander"] summary div,
+        div[data-testid="stExpander"] summary,
+        div[data-testid="stExpander"] summary *,
+        div[data-testid="stExpander"] summary span,
+        div[data-testid="stExpander"] summary p,
+        div[data-testid="stExpander"] summary div,
+        [data-testid="stExpander"] summary,
+        [data-testid="stExpander"] summary *,
+        [data-testid="stExpander"] summary span,
+        [data-testid="stExpander"] summary p,
+        [data-testid="stExpander"] summary div {
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
         }
 
-        details[data-testid="stExpander"] summary svg {
-            fill: #F3E8FF !important;
-            color: #F3E8FF !important;
+        details[data-testid="stExpander"] summary svg,
+        div[data-testid="stExpander"] summary svg,
+        [data-testid="stExpander"] summary svg {
+            fill: #FFFFFF !important;
+            color: #FFFFFF !important;
         }
 
-        div[data-testid="stExpanderDetails"] {
+        div[data-testid="stExpanderDetails"],
+        div[data-testid="stExpanderDetails"] * {
             background-color: #1E1B4B !important;
-            color: #F3E8FF !important;
-            -webkit-text-fill-color: #F3E8FF !important;
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }
 
         div[data-testid="stExpanderDetails"] label,
@@ -1285,9 +1346,141 @@ st.markdown("""
         div[data-testid="stExpanderDetails"] label span,
         div[data-testid="stExpanderDetails"] p,
         div[data-testid="stExpanderDetails"] span {
-            color: #F3E8FF !important;
-            -webkit-text-fill-color: #F3E8FF !important;
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }
+
+        div[data-testid="stExpanderDetails"] textarea,
+        div[data-testid="stExpanderDetails"] input {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            background-color: #2E1065 !important;
+            border: 1.5px solid #7C3AED !important;
+        }
+    }
+
+    [data-theme="dark"] details[data-testid="stExpander"] summary,
+    [data-theme="dark"] div[data-testid="stExpander"] summary,
+    [data-theme="dark"] [data-testid="stExpander"] summary {
+        background: #2E1065 !important;
+        background-color: #2E1065 !important;
+        border-bottom: 1.5px solid #4C1D95 !important;
+    }
+
+    [data-theme="dark"] details[data-testid="stExpander"] summary *,
+    [data-theme="dark"] div[data-testid="stExpander"] summary *,
+    [data-theme="dark"] [data-testid="stExpander"] summary * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    [data-theme="dark"] div[data-testid="stExpanderDetails"],
+    [data-theme="dark"] div[data-testid="stExpanderDetails"] * {
+        background-color: #1E1B4B !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    [data-theme="dark"] div[data-testid="stExpanderDetails"] textarea,
+    [data-theme="dark"] div[data-testid="stExpanderDetails"] input {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        background-color: #2E1065 !important;
+        border: 1.5px solid #7C3AED !important;
+    }
+
+    /* =======================================================
+       CALENDARIO INTERACTIVO DEL AÑO ACTUAL (2026)
+       ======================================================= */
+    .cal-wrapper {
+        background: #FFFFFF;
+        border: 1.5px solid #8B5CF6;
+        border-radius: 14px;
+        padding: 1.25rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.10);
+    }
+    .cal-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 4px;
+        margin: 0.75rem 0;
+        text-align: center;
+    }
+    .cal-table th {
+        background: #EDE9FE;
+        color: #4C1D95 !important;
+        -webkit-text-fill-color: #4C1D95 !important;
+        font-weight: 700;
+        padding: 8px 4px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+    }
+    .cal-table td {
+        padding: 9px 4px;
+        font-size: 0.92rem;
+        border-radius: 8px;
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
+        background: #FAF5FF;
+        transition: all 0.2s ease;
+    }
+    .cal-cell-active {
+        background: #7C3AED !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4) !important;
+    }
+    .cal-cell-weekend {
+        color: #6B7280 !important;
+        -webkit-text-fill-color: #6B7280 !important;
+        background: #F3F4F6 !important;
+    }
+    .cal-cell-empty {
+        background: transparent !important;
+        color: transparent !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .cal-wrapper {
+            background: #1E1B4B;
+            border-color: #7C3AED;
+        }
+        .cal-table th {
+            background: #2E1065;
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+        .cal-table td {
+            background: #2E1065;
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+        .cal-cell-weekend {
+            background: #1E1B4B !important;
+            color: #9CA3AF !important;
+            -webkit-text-fill-color: #9CA3AF !important;
+        }
+    }
+    [data-theme="dark"] .cal-wrapper {
+        background: #1E1B4B;
+        border-color: #7C3AED;
+    }
+    [data-theme="dark"] .cal-table th {
+        background: #2E1065;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .cal-table td {
+        background: #2E1065;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .cal-cell-weekend {
+        background: #1E1B4B !important;
+        color: #9CA3AF !important;
+        -webkit-text-fill-color: #9CA3AF !important;
     }
 
     /* CÍRCULO / PUNTO MORADO DECORATIVO */
@@ -1814,6 +2007,27 @@ if "resultados_busqueda_gratis" not in st.session_state:
 if "contexto_url" not in st.session_state:
     st.session_state.contexto_url = ""
 
+if "cal_mes_nombre" not in st.session_state:
+    st.session_state.cal_mes_nombre = "Octubre"
+
+if "cal_semana_escolar" not in st.session_state:
+    st.session_state.cal_semana_escolar = 20
+
+if "cal_sem_idx" not in st.session_state:
+    st.session_state.cal_sem_idx = 3
+
+if "dias_seleccionados" not in st.session_state or not st.session_state.dias_seleccionados:
+    st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+
+if "dias_fechas" not in st.session_state or not st.session_state.dias_fechas:
+    st.session_state.dias_fechas = {
+        "Lunes": "LUNES 19 DE OCTUBRE DE 2026",
+        "Martes": "MARTES 20 DE OCTUBRE DE 2026",
+        "Miércoles": "MIÉRCOLES 21 DE OCTUBRE DE 2026",
+        "Jueves": "JUEVES 22 DE OCTUBRE DE 2026",
+        "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
+    }
+
 def limpiar_todo_callback():
     """Reinicia todas las variables de estado y rota las llaves dinámicas para empezar desde cero."""
     st.session_state.widget_key += 1
@@ -1824,11 +2038,23 @@ def limpiar_todo_callback():
     st.session_state.archivos_procesados = {}
     st.session_state.programa_sintetico_texto = ""
     st.session_state["programa_sintetico_subido"] = False
+    st.session_state["es_programa_oficial_fase5"] = False
     st.session_state.query_busqueda = ""
     st.session_state.resultados_busqueda_gratis = []
     st.session_state.query_busqueda_gratis = ""
     st.session_state.query_busqueda_enriquecida = ""
     st.session_state.contexto_url = ""
+    st.session_state.cal_mes_nombre = "Octubre"
+    st.session_state.cal_semana_escolar = 20
+    st.session_state.cal_sem_idx = 3
+    st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+    st.session_state.dias_fechas = {
+        "Lunes": "LUNES 19 DE OCTUBRE DE 2026",
+        "Martes": "MARTES 20 DE OCTUBRE DE 2026",
+        "Miércoles": "MIÉRCOLES 21 DE OCTUBRE DE 2026",
+        "Jueves": "JUEVES 22 DE OCTUBRE DE 2026",
+        "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
+    }
 
     # Limpieza explícita de variables de selectores curriculares (listas vacías [])
     st.session_state["dias"] = []
@@ -2045,28 +2271,32 @@ if authentication_status:
                 "Semana Escolar SEP (1 a 56):",
                 min_value=1,
                 max_value=56,
-                value=20,
+                value=int(st.session_state.get("cal_semana_escolar", 20)),
                 step=1,
                 help="Número de semana del ciclo escolar según el calendario oficial de 56 semanas de la SEP.",
                 key=f"semana_{st.session_state.widget_key}"
             )
+            st.session_state.cal_semana_escolar = semana_seleccionada
             periodo_sel = f"Semana {semana_seleccionada}"
         with col_ciclo:
             ciclo_sel = st.text_input("Ciclo Escolar:", value=DATOS_PREDETERMINADOS["ciclo_escolar"], key=f"ciclo_{st.session_state.widget_key}")
     
+        dias_disponibles_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+        dias_def_sb = [d for d in st.session_state.get("dias_seleccionados", dias_disponibles_semana) if d in dias_disponibles_semana]
+        if not dias_def_sb:
+            dias_def_sb = dias_disponibles_semana
+
         dias_seleccionados = st.multiselect(
             "Días de la semana a planear",
-            options=["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"],
-            default=["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"] if st.session_state.widget_key == 0 else [],
+            options=dias_disponibles_semana,
+            default=dias_def_sb,
             help="Selecciona los días específicos de la semana para estructurar la planeación pedagógica.",
             key=f"dias_{st.session_state.widget_key}"
         )
         if not dias_seleccionados:
-            if st.session_state.widget_key == 0:
-                st.warning("⚠️ Debes seleccionar al menos un día de la semana. Se considerará 'Lunes' por defecto.")
-                dias_seleccionados = ["Lunes"]
-            else:
-                st.info("ℹ️ Selecciona los días de la semana a planear.")
+            st.warning("⚠️ Debes seleccionar al menos un día de la semana. Se considerará 'Lunes' por defecto.")
+            dias_seleccionados = ["Lunes"]
+        st.session_state.dias_seleccionados = dias_seleccionados
     
         st.info("Importante: Asegúrate de que la plantilla de Word que usas como base NO tenga las tablas de los días pre-dibujadas. La aplicación las creará automáticamente según los días que elijas.")
     
@@ -2215,7 +2445,8 @@ if authentication_status:
         "ciclo_escolar": ciclo_sel,
         "turno": turno,
         "dias_seleccionados": dias_seleccionados,
-        "dias_planeados": dias_seleccionados
+        "dias_planeados": dias_seleccionados,
+        "dias_fechas": st.session_state.get("dias_fechas", {})
     }
     
     # ==========================================
@@ -2270,11 +2501,22 @@ if authentication_status:
                 texto_extraido = extract_text_from_txt(bytes_p)
             st.session_state.programa_sintetico_texto = texto_extraido
             st.session_state["programa_sintetico_subido"] = True
+            st.session_state["nombre_archivo_programa"] = uploaded_prog.name
+            st.session_state["es_programa_oficial_fase5"] = True
             programa_sintetico = texto_extraido
-            st.success(f"✓ Programa Sintético ({fase_correspondiente}) procesado exitosamente: {len(st.session_state.programa_sintetico_texto):,} caracteres extraídos.")
+            pda_extraidos = extraer_contenidos_pda_fase5(texto_extraido)
+            st.session_state["pda_extraidos_programa"] = pda_extraidos
+            st.success(
+                f"🟢 Base de Datos Principal y Oficial Reconocida: '{uploaded_prog.name}'. "
+                f"Configurado como la fuente oficial para extraer Contenidos, PDA (5° Grado), "
+                f"Campos Formativos y Ejes Articuladores ({len(texto_extraido):,} caracteres extraídos)."
+            )
         else:
             st.session_state.programa_sintetico_texto = ""
             st.session_state["programa_sintetico_subido"] = False
+            st.session_state["nombre_archivo_programa"] = ""
+            st.session_state["es_programa_oficial_fase5"] = False
+            st.session_state["pda_extraidos_programa"] = []
             programa_sintetico = ""
             st.info(f"ℹ️ **Modo de Respaldo SEP:** Al no subir un archivo, el sistema ejecutará automáticamente una búsqueda de respaldo en portales oficiales de la SEP (`site:sep.gob.mx OR site:conaliteg.sep.gob.mx`) para la {fase_correspondiente}. Si el scraping no está disponible, se activará la directriz curricular oficial de la Nueva Escuela Mexicana para la Fase {fase_correspondiente.replace('Fase', '').strip()} y Semana {semana_seleccionada}.")
     
@@ -2339,9 +2581,14 @@ if authentication_status:
             if st.button(f"Recargar Programa ({fase_correspondiente})", help=f"Carga el extracto oficial de Programa Sintético {fase_correspondiente}"):
                 try:
                     with open("sample_data/programa_sintetico_fase5_ejemplo.txt", "r", encoding="utf-8") as f:
-                        st.session_state.programa_sintetico_texto = f.read()
-                        programa_sintetico = st.session_state.programa_sintetico_texto
-                    st.info(f"Extracto oficial de Programa Sintético {fase_correspondiente} recargado.")
+                        texto_ej = f.read()
+                        st.session_state.programa_sintetico_texto = texto_ej
+                        st.session_state["programa_sintetico_subido"] = True
+                        st.session_state["nombre_archivo_programa"] = "Programa_Sintetico_Fase_5.pdf"
+                        st.session_state["es_programa_oficial_fase5"] = True
+                        programa_sintetico = texto_ej
+                        st.session_state["pda_extraidos_programa"] = extraer_contenidos_pda_fase5(texto_ej)
+                    st.success(f"🟢 Base de Datos Principal y Oficial Reconocida: 'Programa_Sintetico_Fase_5.pdf'. Configurado como la fuente oficial para extraer Contenidos, PDA (5° Grado), Campos Formativos y Ejes Articuladores.")
                 except Exception as e:
                     st.error(f"Error al cargar ejemplo: {e}")
     
@@ -2366,6 +2613,179 @@ if authentication_status:
     
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
     
+    # ==========================================
+    # MÓDULO DE CALENDARIO INTERACTIVO DEL AÑO ACTUAL (2026) Y DOSIFICACIÓN SEMANAL
+    # ==========================================
+    st.markdown("""
+    <div class="nem-card-header">
+        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
+        <h3 class="nem-card-title">Módulo de Calendario Interactivo del Año Actual (2026) y Dosificación Semanal</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    st.caption("Visualiza los meses del año actual (2026), selecciona la semana escolar SEP (1 a 56) y marca los días específicos del mes a planear. Las secuencias didácticas (Inicio, Desarrollo y Cierre) y los dosificadores se sincronizarán automáticamente con las fechas exactas seleccionadas.")
+
+    MESES_2026 = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ]
+    DIAS_HABIL_NOMBRES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+
+    col_cal_ctrls, col_cal_visual = st.columns([1.1, 1.2])
+
+    with col_cal_ctrls:
+        idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
+        cal_mes_actual = st.selectbox(
+            "📅 Mes del Año Actual (2026):",
+            options=MESES_2026,
+            index=idx_mes_actual,
+            help="Selecciona el mes del año 2026 para visualizar y dosificar tus sesiones escolares.",
+            key=f"cal_mes_select_{st.session_state.widget_key}"
+        )
+        st.session_state.cal_mes_nombre = cal_mes_actual
+        m_idx = MESES_2026.index(cal_mes_actual) + 1
+
+        cal_obj = calendar.Calendar(firstweekday=0)
+        month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
+
+        def format_sem_label(idx_w: int) -> str:
+            w_d = month_weeks[idx_w]
+            m_fin = MESES_2026[w_d[4].month - 1]
+            return f"Semana {idx_w + 1} ({w_d[0].day} al {w_d[4].day} de {m_fin})"
+
+        cal_sem_idx = st.selectbox(
+            "📆 Semana del Mes (Bloque a Planear):",
+            options=range(len(month_weeks)),
+            format_func=format_sem_label,
+            index=min(st.session_state.get("cal_sem_idx", 3), len(month_weeks) - 1),
+            help="Selecciona el bloque semanal de trabajo dentro del mes elegido.",
+            key=f"cal_sem_idx_select_{st.session_state.widget_key}"
+        )
+        st.session_state.cal_sem_idx = cal_sem_idx
+        active_week = month_weeks[cal_sem_idx]
+
+        semana_escolar_cal = st.number_input(
+            "🏫 Semana Escolar SEP (1 a 56):",
+            min_value=1,
+            max_value=56,
+            value=int(st.session_state.get("cal_semana_escolar", 20)),
+            step=1,
+            help="Número correlativo de semana dentro del calendario oficial de 56 semanas de la SEP.",
+            key=f"cal_semana_escolar_input_{st.session_state.widget_key}"
+        )
+        st.session_state.cal_semana_escolar = semana_escolar_cal
+        semana_seleccionada = semana_escolar_cal
+        periodo_sel = f"Semana {semana_seleccionada}"
+
+    # Fechas del bloque hábil seleccionado (Lunes a Viernes)
+    fechas_bloque = {
+        nom: active_week[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
+    }
+
+    # Casillas interactivas para elegir días específicos del mes
+    st.markdown("**Selección de Días Específicos a Planear en la Semana:**")
+    st.caption("Marca las casillas de los días hábiles del mes en los que se impartirá clase para estructurar las secuencias didácticas:")
+
+    col_btn_q1, col_btn_q2, col_btn_q3, _ = st.columns([1, 1, 1, 1.5])
+    with col_btn_q1:
+        if st.button("Semana Completa (Lun-Vie)", key=f"btn_cal_all_{st.session_state.widget_key}", help="Seleccionar los 5 días hábiles"):
+            st.session_state.dias_seleccionados = DIAS_HABIL_NOMBRES.copy()
+            st.rerun()
+    with col_btn_q2:
+        if st.button("Lun, Mié y Vie", key=f"btn_cal_lmv_{st.session_state.widget_key}", help="Seleccionar Lunes, Miércoles y Viernes"):
+            st.session_state.dias_seleccionados = ["Lunes", "Miércoles", "Viernes"]
+            st.rerun()
+    with col_btn_q3:
+        if st.button("Mar y Jue", key=f"btn_cal_mj_{st.session_state.widget_key}", help="Seleccionar Martes y Jueves"):
+            st.session_state.dias_seleccionados = ["Martes", "Jueves"]
+            st.rerun()
+
+    col_dias_chk = st.columns(5)
+    dias_elegidos = []
+    dias_fechas_calculadas = {}
+    dias_previos = st.session_state.get("dias_seleccionados", DIAS_HABIL_NOMBRES)
+
+    for idx_d, nom_d in enumerate(DIAS_HABIL_NOMBRES):
+        dt_obj = fechas_bloque[nom_d]
+        mes_dt_nom = MESES_2026[dt_obj.month - 1]
+        chk_label = f"**{nom_d}**\n{dt_obj.day} de {mes_dt_nom[:3]}"
+        fecha_completa = f"{nom_d} {dt_obj.day} de {mes_dt_nom} de {dt_obj.year}"
+        with col_dias_chk[idx_d]:
+            is_checked = st.checkbox(
+                chk_label,
+                value=(nom_d in dias_previos),
+                key=f"chk_dia_{nom_d}_{st.session_state.widget_key}"
+            )
+            if is_checked:
+                dias_elegidos.append(nom_d)
+                dias_fechas_calculadas[nom_d] = fecha_completa
+
+    if not dias_elegidos:
+        st.warning("⚠️ Debes seleccionar al menos un día hábil. Se considerará 'Lunes' automáticamente.")
+        dias_elegidos = ["Lunes"]
+        dt_lun = fechas_bloque["Lunes"]
+        dias_fechas_calculadas["Lunes"] = f"Lunes {dt_lun.day} de {MESES_2026[dt_lun.month - 1]} de {dt_lun.year}"
+
+    # Sincronización en session_state y variables de ejecución
+    dias_seleccionados = dias_elegidos
+    st.session_state.dias_seleccionados = dias_seleccionados
+    st.session_state.dias_fechas = dias_fechas_calculadas
+
+    # Actualizar inmediatamente datos_escuela_actual con las fechas y días sincronizados
+    datos_escuela_actual["dias_seleccionados"] = dias_seleccionados
+    datos_escuela_actual["dias_planeados"] = dias_seleccionados
+    datos_escuela_actual["dias_fechas"] = dias_fechas_calculadas
+    datos_escuela_actual["semana"] = semana_seleccionada
+    datos_escuela_actual["semana_seleccionada"] = semana_seleccionada
+    datos_escuela_actual["periodo"] = periodo_sel
+
+    # Visualización gráfica del mes actual (2026) en col_cal_visual
+    with col_cal_visual:
+        st.markdown(f"**Vista Gráfica del Mes: {cal_mes_actual} 2026**")
+        fechas_activas_set = set(fechas_bloque[d] for d in dias_seleccionados)
+        cal_html_rows = []
+        for w in month_weeks:
+            cells = []
+            for d in w:
+                if d.month != m_idx:
+                    cells.append(f'<td class="cal-cell-empty" style="opacity: 0.35;">{d.day}</td>')
+                elif d in fechas_activas_set:
+                    cells.append(f'<td class="cal-cell-active" title="Día seleccionado para planeación: {d.day} de {cal_mes_actual}"><strong>{d.day}</strong></td>')
+                elif d.weekday() >= 5:
+                    cells.append(f'<td class="cal-cell-weekend">{d.day}</td>')
+                else:
+                    cells.append(f'<td>{d.day}</td>')
+            cal_html_rows.append('<tr>' + ''.join(cells) + '</tr>')
+
+        cal_tabla_html = f"""
+        <div class="cal-wrapper">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">{cal_mes_actual.upper()} 2026</span>
+                <span style="font-size: 0.8rem; color: #6D28D9; font-weight: 600;">Semana Escolar {semana_seleccionada}</span>
+            </div>
+            <table class="cal-table">
+                <thead><tr><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th></tr></thead>
+                <tbody>{''.join(cal_html_rows)}</tbody>
+            </table>
+            <div style="display: flex; gap: 12px; font-size: 0.78rem; color: #4B5563; margin-top: 4px; justify-content: center;">
+                <span><span style="display: inline-block; width: 10px; height: 10px; background: #7C3AED; border-radius: 3px; margin-right: 4px;"></span>Activo</span>
+                <span><span style="display: inline-block; width: 10px; height: 10px; background: #FAF5FF; border: 1px solid #C4B5FD; border-radius: 3px; margin-right: 4px;"></span>Hábiles</span>
+                <span><span style="display: inline-block; width: 10px; height: 10px; background: #F3F4F6; border-radius: 3px; margin-right: 4px;"></span>Fin de semana</span>
+            </div>
+        </div>
+        """
+        st.markdown(cal_tabla_html, unsafe_allow_html=True)
+
+    fechas_resumen_txt = ", ".join(dias_fechas_calculadas.values())
+    st.markdown(
+        f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.6rem 1rem; color: #4C1D95; font-size: 0.92rem; font-weight: 600; margin-top: 0.5rem;'>"
+        f"🗓️ <b>Días y Fechas Sincronizadas para la Planeación:</b> {fechas_resumen_txt} "
+        f"<span style='background: #7C3AED; color: #FFFFFF; padding: 2px 8px; border-radius: 12px; font-size: 0.82rem; margin-left: 8px;'>{len(dias_seleccionados)} Sesión(es) Didáctica(s)</span>"
+        f"</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
+
     # ==========================================
     # SECCIÓN 2: CAMPOS EDITABLES DE CONFIGURACIÓN CURRICULAR (SEP - NEM)
     # ==========================================
@@ -2431,25 +2851,57 @@ if authentication_status:
     
     # Pre-poblar según los campos formativos elegidos para el grado activo
     sugerencias_pda = []
+
+    # 1. Integración de Contenidos y PDA del Programa Sintético Subido (Base de Datos Oficial Fase 5 - 5° Grado)
+    pda_doc_subido = st.session_state.get("pda_extraidos_programa", [])
+    if pda_doc_subido:
+        for item in pda_doc_subido:
+            c_item = item.get("campo", "Lenguajes")
+            if not campos_sel or c_item in campos_sel:
+                sugerencias_pda.append({
+                    "campo": c_item,
+                    "contenido": item.get("contenido", ""),
+                    "pda": item.get("pda", ""),
+                    "grado": "5° de Primaria",
+                    "origen": "Programa Sintético Fase 5 (Oficial Subido)"
+                })
+
     for campo in campos_sel:
         if campo in banco_grado_activo:
             for item in banco_grado_activo[campo]:
-                sugerencias_pda.append({
-                    "campo": campo,
-                    "contenido": item["contenido"],
-                    "pda": item["pda"],
-                    "grado": grado_seleccionado
-                })
-    
+                if not any(s["contenido"] == item["contenido"] and s["pda"] == item["pda"] for s in sugerencias_pda):
+                    sugerencias_pda.append({
+                        "campo": campo,
+                        "contenido": item["contenido"],
+                        "pda": item["pda"],
+                        "grado": grado_seleccionado,
+                        "origen": "Banco Curricular SEP"
+                    })
+
+    if st.session_state.get("programa_sintetico_subido"):
+        nom_db = st.session_state.get("nombre_archivo_programa") or "Programa_Sintetico_Fase_5.pdf"
+        st.markdown(
+            f"<div style='background-color: #ECFDF5; border: 1.5px solid #10B981; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.8rem; color: #065F46; font-weight: 600; font-size: 0.95rem;'>"
+            f"🟢 <b>Base de Datos Principal y Oficial Activa:</b> <code>{nom_db}</code>. Contenidos y PDA de 5° de Primaria vinculados prioritariamente."
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
     if sugerencias_pda:
-        opciones_display = [f"[{item['campo']}] {item['contenido'][:60]}... — PDA: {item['pda'][:70]}..." for item in sugerencias_pda]
+        opciones_display = []
+        for item in sugerencias_pda:
+            if item.get("origen") == "Programa Sintético Fase 5 (Oficial Subido)":
+                opciones_display.append(f"⭐ [Oficial 5° - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
+            else:
+                opciones_display.append(f"[{item['campo']}] {item['contenido'][:60]}... — PDA: {item['pda'][:70]}...")
+
         pda_seleccionados_indices = st.multiselect(
             f"Contenidos y PDA oficiales disponibles para {grado_seleccionado}:",
             options=range(len(sugerencias_pda)),
             format_func=lambda x: opciones_display[x],
             default=[0, 1] if (st.session_state.widget_key == 0 and len(sugerencias_pda) >= 2) else ([0] if (st.session_state.widget_key == 0 and len(sugerencias_pda) == 1) else []),
             key=f"pda_{st.session_state.widget_key}",
-            help=f"Mostrando únicamente los Contenidos y PDA oficiales del programa sintético para {grado_seleccionado} ({fase_correspondiente})."
+            help=f"Mostrando los Contenidos y PDA oficiales del programa sintético para {grado_seleccionado} ({fase_correspondiente})."
         )
         items_pda_final = [sugerencias_pda[i] for i in pda_seleccionados_indices]
     else:
@@ -2558,17 +3010,19 @@ if authentication_status:
         tabla_curricular_md = "\n".join(filas_curricular)
     
         # Rutinas matutinas y secuencias didácticas generadas estrictamente para los días seleccionados
+        dias_fechas = datos_escuela.get("dias_fechas", {}) if isinstance(datos_escuela, dict) else {}
         rutinas_md = ""
         secuencias_md = ""
         for s, nombre_dia in enumerate(dias_seleccionados, 1):
+            fecha_dia = dias_fechas.get(nombre_dia, nombre_dia)
             rutinas_md += f"""
-    ### Sesión {s} ({nombre_dia}):
+    ### Sesión {s} ({fecha_dia}):
     - **Dictado:** [Redactar 5 palabras clave para dictado reflexivo aquí]
     - **Cálculo Mental:** [Redactar 5 operaciones de cálculo mental aquí]
     - **Problema Razonado:** [Redactar situación problemática contextualizada aquí]
     """
             secuencias_md += f"""
-    ### Sesión {s} (**Día: {nombre_dia}**) - [Nombre de la Sesión y Momento Metodológico]
+    ### Sesión {s} (**Día: {fecha_dia}**) - [Nombre de la Sesión y Momento Metodológico]
     - **Tiempo estimado:** 90 minutos
     - **Inicio (15-20 min):** [Redactar actividades de inicio aquí]
     - **Desarrollo (50-60 min):** [Redactar actividades de desarrollo aquí]
@@ -2577,7 +3031,7 @@ if authentication_status:
     - **Evidencia / Producto de la sesión:** [Redactar producto o evidencia de aprendizaje aquí]
     """
     
-        dias_str = ", ".join(dias_seleccionados)
+        dias_str = ", ".join(dias_fechas.get(d, d) for d in dias_seleccionados)
     
         return f"""# I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
     
