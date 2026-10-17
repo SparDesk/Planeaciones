@@ -96,29 +96,29 @@ LIBROS_SEP_POR_GRADO = {
         "Proyectos Escolares (1° grado)",
         "Proyectos Comunitarios (1° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (1° grado)",
-        "Múltiples Lenguajes (1° grado)",
-        "Múltiples Lenguajes: Trazos y palabras (1° grado)"
+        "Múltiples lenguajes (1° grado)",
+        "Múltiples lenguajes: Trazos y palabras (1° grado)"
     ],
     "2° de Primaria": [
         "Proyectos de Aula (2° grado)",
         "Proyectos Escolares (2° grado)",
         "Proyectos Comunitarios (2° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (2° grado)",
-        "Múltiples Lenguajes (2° grado)"
+        "Múltiples lenguajes (2° grado)"
     ],
     "3° de Primaria": [
         "Proyectos de Aula (3° grado)",
         "Proyectos Escolares (3° grado)",
         "Proyectos Comunitarios (3° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (3° grado)",
-        "Múltiples Lenguajes (3° grado)"
+        "Múltiples lenguajes (3° grado)"
     ],
     "4° de Primaria": [
         "Proyectos de Aula (4° grado)",
         "Proyectos Escolares (4° grado)",
         "Proyectos Comunitarios (4° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (4° grado)",
-        "Múltiples Lenguajes (4° grado)",
+        "Múltiples lenguajes (4° grado)",
         "Cartografía de México y el mundo (Fases 4 y 5)"
     ],
     "5° de Primaria": [
@@ -126,7 +126,7 @@ LIBROS_SEP_POR_GRADO = {
         "Proyectos Escolares (5° grado)",
         "Proyectos Comunitarios (5° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (5° grado)",
-        "Múltiples Lenguajes (5° grado)",
+        "Múltiples lenguajes (5° grado)",
         "Cartografía de México y el mundo (5° grado)"
     ],
     "6° de Primaria": [
@@ -134,7 +134,7 @@ LIBROS_SEP_POR_GRADO = {
         "Proyectos Escolares (6° grado)",
         "Proyectos Comunitarios (6° grado)",
         "Nuestros Saberes: Libro para alumnos, maestros y familia (6° grado)",
-        "Múltiples Lenguajes (6° grado)",
+        "Múltiples lenguajes (6° grado)",
         "Cartografía de México y el mundo (6° grado)"
     ]
 }
@@ -610,7 +610,7 @@ def extraer_embed_youtube(url_o_id: str) -> str:
 # ==========================================
 st.set_page_config(
     page_title="Planeaciones Escolares Educación Primaria",
-    page_icon="📚",
+    page_icon="•",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -889,100 +889,18 @@ st.markdown("""
 
     /* =======================================================
        3. TEXTOS Y ETIQUETAS: CONTRASTE ESTRICTO
-          - Fondo claro -> Negro o gris muy oscuro (#111111)
+          - Fondo claro -> Negro profundo (#111111)
           - Fondo oscuro / lienzo oscuro -> Blanco (#FFFFFF) o gris claro (#F3E8FF)
           - Contenedores morados -> Blanco puro (#FFFFFF)
+          - Círculos / Puntos decorativos -> Morado vibrante (#7C3AED)
        ======================================================= */
 
-    /* CONTENEDORES CON FONDO CLARO (Sidebar, NEM Cards, Alerts, Popovers) */
-    [data-testid="stSidebar"],
-    section[data-testid="stSidebar"],
-    [data-testid="stSidebar"] > div:first-child,
-    [data-testid="stSidebarContent"],
-    [data-testid="stSidebarUserContent"],
-    div[data-testid="stSidebarUserContent"] {
-        background-color: #FAF5FF !important;
-        border-right: 1.5px solid #EDE9FE !important;
-    }
-
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] label p,
-    [data-testid="stSidebar"] label span,
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
-    [data-testid="stSidebar"] div.stMarkdown p,
-    [data-testid="stSidebar"] div.stMarkdown span,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-        font-weight: 600 !important;
-        font-size: 0.92rem !important;
-    }
-
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4 {
-        color: #4C1D95 !important;
-        -webkit-text-fill-color: #4C1D95 !important;
-        font-weight: 700 !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
-    [data-testid="stSidebar"] .stCaption {
-        color: #5B21B6 !important;
-        -webkit-text-fill-color: #5B21B6 !important;
-        font-weight: 500 !important;
-    }
-
-    .nem-card,
-    .nem-card p,
-    .nem-card span,
-    .nem-card div,
-    .nem-card li,
-    .nem-card label,
-    .nem-card [data-testid="stWidgetLabel"] *,
-    div[data-testid="stAlert"] *,
-    ul[data-baseweb="menu"] li,
-    div[data-baseweb="popover"] li {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-    }
-
-    .nem-card h1, .nem-card h2, .nem-card h3, .nem-card h4 {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-        font-family: 'Outfit', sans-serif !important;
-        font-weight: 700 !important;
-    }
-
-    .nem-card-title {
-        color: #5B21B6 !important;
-        -webkit-text-fill-color: #5B21B6 !important;
-        font-size: 1.25rem !important;
-        font-weight: 700 !important;
-    }
-
-    /* MODO OSCURO (LIENZO GENERAL OSCURO) */
+    /* Reglas generales para Lienzo Oscuro */
     @media (prefers-color-scheme: dark) {
         .stApp,
         [data-testid="stAppViewContainer"],
         .block-container {
             color: #F3E8FF !important;
-        }
-        [data-testid="stAppViewContainer"] p,
-        [data-testid="stAppViewContainer"] span,
-        [data-testid="stAppViewContainer"] label,
-        [data-testid="stAppViewContainer"] div.stMarkdown p,
-        [data-testid="stAppViewContainer"] div.stMarkdown span,
-        [data-testid="stAppViewContainer"] div.stMarkdown li,
-        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
-        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
-        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
-        [data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"] p {
-            color: #F3E8FF !important;
-            -webkit-text-fill-color: #F3E8FF !important;
         }
         [data-testid="stAppViewContainer"] h1,
         [data-testid="stAppViewContainer"] h2,
@@ -993,17 +911,6 @@ st.markdown("""
         }
     }
 
-    [data-theme="dark"] [data-testid="stAppViewContainer"] p,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] span,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] label,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown p,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown span,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span {
-        color: #F3E8FF !important;
-        -webkit-text-fill-color: #F3E8FF !important;
-    }
     [data-theme="dark"] [data-testid="stAppViewContainer"] h1,
     [data-theme="dark"] [data-testid="stAppViewContainer"] h2,
     [data-theme="dark"] [data-testid="stAppViewContainer"] h3,
@@ -1012,7 +919,7 @@ st.markdown("""
         -webkit-text-fill-color: #FFFFFF !important;
     }
 
-    /* MODO CLARO (LIENZO GENERAL CLARO) */
+    /* Reglas generales para Lienzo Claro */
     @media (prefers-color-scheme: light) {
         .stApp,
         [data-testid="stAppViewContainer"],
@@ -1039,6 +946,96 @@ st.markdown("""
     [data-theme="light"] div.stMarkdown span {
         color: #111111 !important;
         -webkit-text-fill-color: #111111 !important;
+    }
+
+    /* CONTENEDORES CON FONDO CLARO (Sidebar, Tarjetas NEM, Formulario, Alertas, Dropdowns)
+       Se fuerza color negro profundo (#111111) en todo momento para garantizar máxima legibilidad */
+    [data-testid="stSidebar"],
+    section[data-testid="stSidebar"],
+    [data-testid="stSidebar"] > div:first-child,
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"],
+    div[data-testid="stSidebarUserContent"] {
+        background-color: #FAF5FF !important;
+        border-right: 1.5px solid #EDE9FE !important;
+    }
+
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] label p,
+    [data-testid="stSidebar"] label span,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
+    [data-testid="stSidebar"] div.stMarkdown p,
+    [data-testid="stSidebar"] div.stMarkdown span,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span:not(.badge-sep):not([data-baseweb="tag"] *):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    [data-testid="stForm"] label,
+    [data-testid="stForm"] label *,
+    [data-testid="stForm"] p,
+    [data-testid="stForm"] span:not([data-baseweb="tag"] *):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    .nem-card,
+    .nem-card p,
+    .nem-card span:not(.badge-sep):not([data-baseweb="tag"] *):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    .nem-card div,
+    .nem-card li,
+    .nem-card label,
+    .nem-card label *,
+    .nem-card [data-testid="stWidgetLabel"] *,
+    .nem-card table,
+    .nem-card th,
+    .nem-card td,
+    div[data-testid="stAlert"] *,
+    div[data-testid="stExpander"] summary span,
+    ul[data-baseweb="menu"] li,
+    div[data-baseweb="popover"] li {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }
+
+    /* Subtítulos y descripciones en contenedores claros */
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+    [data-testid="stSidebar"] .stCaption,
+    .nem-card [data-testid="stCaptionContainer"] p,
+    .nem-card .stCaption,
+    [data-testid="stForm"] [data-testid="stCaptionContainer"] p {
+        color: #374151 !important;
+        -webkit-text-fill-color: #374151 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Títulos en barra lateral y tarjetas NEM */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4 {
+        color: #4C1D95 !important;
+        -webkit-text-fill-color: #4C1D95 !important;
+        font-weight: 700 !important;
+    }
+
+    .nem-card h1, .nem-card h2, .nem-card h3, .nem-card h4 {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+    }
+
+    .nem-card-title {
+        color: #4C1D95 !important;
+        -webkit-text-fill-color: #4C1D95 !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* CÍRCULO / PUNTO MORADO DECORATIVO */
+    .purple-dot,
+    span.purple-dot,
+    span[style*="#7C3AED"],
+    span[style*="rgb(124, 58, 237)"] {
+        color: #7C3AED !important;
+        -webkit-text-fill-color: #7C3AED !important;
+        display: inline-block;
+        font-weight: bold;
     }
 
     /* =======================================================
@@ -1451,8 +1448,8 @@ if not st.session_state.get("authentication_status"):
     with col_l2:
         st.markdown("""
         <div style="text-align: center; margin-top: 2rem; margin-bottom: 1.5rem;">
-            <div style="display: inline-block; background: linear-gradient(135deg, #7C3AED, #6D28D9); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2rem; color: #FFFFFF; box-shadow: 0 6px 18px rgba(124, 58, 237, 0.28);">
-                📚
+            <div style="display: inline-block; background: linear-gradient(135deg, #7C3AED, #6D28D9); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2.2rem; color: #FFFFFF; box-shadow: 0 6px 18px rgba(124, 58, 237, 0.28);">
+                •
             </div>
             <h2 class="login-header-title">
                 Planeaciones Escolares NEM
@@ -1485,12 +1482,12 @@ if authentication_status:
     # ==========================================
     with st.sidebar:
         # Información del docente y botón de cerrar sesión
-        st.markdown(f"### 👤 **{st.session_state.get('name', 'Docente')}**")
+        st.markdown(f'### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> **{st.session_state.get("name", "Docente")}**', unsafe_allow_html=True)
         st.caption(f"Usuario activo: @{st.session_state.get('username', '')}")
         authenticator.logout('Cerrar sesión', 'sidebar', use_container_width=True)
         st.markdown('---')
         st.button(
-            "🔄 Nueva Planeación (Limpiar Todo)",
+            "Nueva Planeación (Limpiar Todo)",
             on_click=limpiar_todo_callback,
             key="btn_nueva_planeacion",
             use_container_width=True,
@@ -1498,7 +1495,7 @@ if authentication_status:
             help="Reinicia todos los campos, documentos cargados, búsquedas y selecciones para comenzar una nueva planeación desde cero."
         )
         st.markdown("---")
-        st.markdown("### 🏛️ Datos de la Escuela")
+        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Datos de la Escuela', unsafe_allow_html=True)
         st.caption("Configuración oficial predeterminada de la Primaria Revolución Social 1910.")
     
         escuela_nombre = st.text_input(
@@ -1578,7 +1575,7 @@ if authentication_status:
         st.info("Importante: Asegúrate de que la plantilla de Word que usas como base NO tenga las tablas de los días pre-dibujadas. La aplicación las creará automáticamente según los días que elijas.")
     
         st.markdown("---")
-        st.markdown("### 🤖 Motor de IA Gemini")
+        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Motor de IA Gemini', unsafe_allow_html=True)
         st.caption("SDK oficial de Google GenAI con modelos de última generación.")
     
         # Resolver API Key
@@ -1615,15 +1612,25 @@ if authentication_status:
         )
     
         st.markdown("---")
-        st.markdown("### 📚 Recursos SEP (Nueva Escuela Mexicana)")
+        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Recursos SEP (Nueva Escuela Mexicana)', unsafe_allow_html=True)
     
         # A) Libros de Texto Dinámicos (Scraping en tiempo real CONALITEG + Fallback)
         catalogo_conaliteg, conaliteg_online = get_cached_conaliteg_books()
         # Usar catálogo dinámico de CONALITEG; si está vacío o no disponible, usar el diccionario interno de respaldo (fallback)
         if catalogo_conaliteg and isinstance(catalogo_conaliteg, dict) and catalogo_conaliteg.get(grado_sel):
-            libros_disponibles = catalogo_conaliteg[grado_sel]
+            libros_raw = catalogo_conaliteg[grado_sel]
         else:
-            libros_disponibles = LIBROS_SEP_POR_GRADO.get(grado_sel, LIBROS_SEP_POR_GRADO.get("5° de Primaria", []))
+            libros_raw = LIBROS_SEP_POR_GRADO.get(grado_sel, LIBROS_SEP_POR_GRADO.get("5° de Primaria", []))
+    
+        # Sanitizar y normalizar ortografía estrictamente a 'Múltiples lenguajes'
+        libros_disponibles = []
+        for l in libros_raw:
+            l_clean = str(l).strip()
+            l_clean = l_clean.replace("MÃºltiples", "Múltiples").replace("mÃºltiples", "múltiples")
+            l_clean = l_clean.replace("MÃº", "Mú").replace("mÃº", "mú")
+            l_clean = l_clean.replace("Mltiples", "Múltiples")
+            l_clean = re.sub(r'Múltiples\s+Lenguajes', 'Múltiples lenguajes', l_clean, flags=re.IGNORECASE)
+            libros_disponibles.append(l_clean)
     
         if conaliteg_online:
             st.markdown("<span style='color:#166534; font-size:0.8rem; font-weight:600;'>🟢 Catálogo CONALITEG 2025-2026 (En vivo)</span>", unsafe_allow_html=True)
@@ -1647,21 +1654,20 @@ if authentication_status:
             key=f"cte_{st.session_state.widget_key}"
         )
         cte_info = GUIAS_CTE_CATALOGO[guia_cte_sel]
-        with st.expander("📌 Ver directrices de esta sesión CTE", expanded=False):
+        with st.expander("Ver directrices de esta sesión CTE", expanded=False):
             st.markdown(f"**Enfoque:** {cte_info['enfoque']}")
             st.markdown(f"**Directrices:** {cte_info['directrices']}")
 
         st.markdown("---")
-        st.markdown("### 🎵 Música para Concentración")
-        st.caption("Música ambiental relajante para acompañar tu planeación docente.")
+        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Sound', unsafe_allow_html=True)
 
         CANALES_MUSICA_DEFAULT = {
-            "🎧 Lo-Fi Hip Hop (Relax / Estudio)": "https://www.youtube.com/embed/jfKfPfyJRdk",
-            "🎹 Piano Clásico Relajante": "https://www.youtube.com/embed/4xDzrJKXOOY",
-            "☕ Café Jazz Instrumental": "https://www.youtube.com/embed/DXUAyRRkI6k",
-            "🌿 Sonidos de la Naturaleza y Lluvia": "https://www.youtube.com/embed/mPZkdNFkNps",
-            "✨ Ondas Alfa (Enfoque Profundo)": "https://www.youtube.com/embed/WPni755-Krg",
-            "🔗 Enlace Personalizado de YouTube": ""
+            "Lo-Fi Hip Hop (Relax / Estudio)": "https://www.youtube.com/embed/jfKfPfyJRdk",
+            "Piano Clásico Relajante": "https://www.youtube.com/embed/4xDzrJKXOOY",
+            "Café Jazz Instrumental": "https://www.youtube.com/embed/DXUAyRRkI6k",
+            "Sonidos de la Naturaleza y Lluvia": "https://www.youtube.com/embed/mPZkdNFkNps",
+            "Ondas Alfa (Enfoque Profundo)": "https://www.youtube.com/embed/WPni755-Krg",
+            "Enlace Personalizado de YouTube": ""
         }
 
         estilo_musica_sel = st.selectbox(
@@ -1696,7 +1702,7 @@ if authentication_status:
                     width="100%" 
                     height="150" 
                     src="{url_embed_activa}" 
-                    title="Música Ambiental para Concentración" 
+                    title="Sound" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     allowfullscreen
@@ -1733,13 +1739,13 @@ if authentication_status:
     # Metadatos en píldoras rápidas
     cols_meta = st.columns(4)
     with cols_meta[0]:
-        st.markdown(f"<div class='badge-sep'>🏫 {escuela_nombre}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> {escuela_nombre}</div>", unsafe_allow_html=True)
     with cols_meta[1]:
-        st.markdown(f"<div class='badge-sep'>🆔 C.C.T. {cct}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> C.C.T. {cct}</div>", unsafe_allow_html=True)
     with cols_meta[2]:
-        st.markdown(f"<div class='badge-sep'>👩‍🏫 Docente: {docente}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> Docente: {docente}</div>", unsafe_allow_html=True)
     with cols_meta[3]:
-        st.markdown(f"<div class='badge-sep'>📅 {grado_sel} ({fase_auto}) • {periodo_sel}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> {grado_sel} ({fase_auto}) • {periodo_sel}</div>", unsafe_allow_html=True)
     
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
     
@@ -1748,7 +1754,7 @@ if authentication_status:
     # ==========================================
     st.markdown("""
     <div class="nem-card-header">
-        <span style="font-size: 1.5rem;">📂</span>
+        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
         <h3 class="nem-card-title">1. Carga de Archivos y Textos de Referencia</h3>
     </div>
     """, unsafe_allow_html=True)
@@ -1756,7 +1762,7 @@ if authentication_status:
     col_archivos, col_texto = st.columns([1.1, 1.2])
     
     with col_archivos:
-        st.markdown(f"#### 📘 Cargar Programa Sintético ({fase_correspondiente})")
+        st.markdown(f'#### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Cargar Programa Sintético ({fase_correspondiente})', unsafe_allow_html=True)
         st.caption(f"Sube el documento del Programa Sintético oficial ({fase_correspondiente} - {grado_seleccionado}) para que Gemini extraiga automáticamente los Contenidos, los PDA, los 4 Campos Formativos y los 7 Ejes Articuladores.")
     
         uploaded_prog = st.file_uploader(
@@ -1787,7 +1793,7 @@ if authentication_status:
     
     
         if st.session_state.programa_sintetico_texto:
-            with st.expander(f"📄 Ver extracto de Programa Sintético cargado ({fase_correspondiente})", expanded=False):
+            with st.expander(f"Ver extracto de Programa Sintético cargado ({fase_correspondiente})", expanded=False):
                 st.caption("Texto del Programa Sintético que se enviará en el prompt de Gemini:")
                 st.text_area(
                     f"Contenido del Programa Sintético ({fase_correspondiente}):",
@@ -1813,7 +1819,7 @@ if authentication_status:
             st.success(f"✓ Se procesaron {len(uploaded_files)} archivo(s) de referencia.")
             for fname, cont in st.session_state.archivos_procesados.items():
                 chars = len(cont)
-                st.caption(f"📄 **{fname}**: ~{chars:,} caracteres extraídos.")
+                st.caption(f"**{fname}**: ~{chars:,} caracteres extraídos.")
     
         url_referencia = st.text_input(
             "URL de Referencia para Planeaciones (Ej. materialeducativo.org):",
@@ -1828,7 +1834,7 @@ if authentication_status:
             st.session_state.contexto_url = contexto_url
             if contexto_url:
                 st.success(f"✓ Contenido web extraído con éxito ({len(contexto_url):,} caracteres).")
-                with st.expander("🌐 Ver extracto de contenido web extraído", expanded=False):
+                with st.expander("Ver extracto de contenido web extraído", expanded=False):
                     st.text_area(
                         "Texto extraído de la URL:",
                         value=contexto_url[:2000] + ("..." if len(contexto_url) > 2000 else ""),
@@ -1843,7 +1849,7 @@ if authentication_status:
     
         col_btn_ej1, col_btn_ej2 = st.columns(2)
         with col_btn_ej1:
-            if st.button(f"📄 Recargar Programa ({fase_correspondiente})", help=f"Carga el extracto oficial de Programa Sintético {fase_correspondiente}"):
+            if st.button(f"Recargar Programa ({fase_correspondiente})", help=f"Carga el extracto oficial de Programa Sintético {fase_correspondiente}"):
                 try:
                     with open("sample_data/programa_sintetico_fase5_ejemplo.txt", "r", encoding="utf-8") as f:
                         st.session_state.programa_sintetico_texto = f.read()
@@ -1853,7 +1859,7 @@ if authentication_status:
                     st.error(f"Error al cargar ejemplo: {e}")
     
         with col_btn_ej2:
-            if st.button("📘 Cargar Guía CTE 5° (.docx)", help="Carga la guía escolar de ejemplo en Word"):
+            if st.button("Cargar Guía CTE 5° (.docx)", help="Carga la guía escolar de ejemplo en Word"):
                 try:
                     with open("sample_data/guia_5to_grado_ejemplo.docx", "rb") as f:
                         st.session_state.archivos_procesados["Guia_Escolar_5to.docx"] = extract_text_from_docx(f.read())
@@ -1878,7 +1884,7 @@ if authentication_status:
     # ==========================================
     st.markdown("""
     <div class="nem-card-header">
-        <span style="font-size: 1.5rem;">⚙️</span>
+        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
         <h3 class="nem-card-title">2. Configuración Curricular Oficial (SEP - México)</h3>
     </div>
     """, unsafe_allow_html=True)
@@ -1916,7 +1922,7 @@ if authentication_status:
     
         # Mostrar información didáctica de la metodología elegida
         metodo_info = METODOLOGIAS_SOCIOCRITICAS.get(metodologia_sel, {})
-        with st.expander("🔍 Ver descripción y fases metodológicas de esta metodología", expanded=True):
+        with st.expander("Ver descripción y fases metodológicas de esta metodología", expanded=True):
             st.markdown(f"*{metodo_info.get('descripcion', '')}*")
             st.markdown("**Fases y Momentos oficiales:**")
             for f in metodo_info.get("fases_oficiales", []):
@@ -1924,7 +1930,7 @@ if authentication_status:
     
     # Articulación Curricular: Contenidos y PDA (100% Dinámico por Grado y Fase)
     st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
-    st.markdown("#### 🎯 Articulación Curricular: Contenidos y Procesos de Desarrollo de Aprendizaje (PDA)")
+    st.markdown('#### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Articulación Curricular: Contenidos y Procesos de Desarrollo de Aprendizaje (PDA)', unsafe_allow_html=True)
     
     # Subtítulo y encabezado dinámicos según el grado y fase seleccionados
     st.subheader(f"Selecciona los Contenidos y PDA de {grado_seleccionado} recomendados para tu planeación (puedes personalizarlos abajo):")
@@ -1964,7 +1970,7 @@ if authentication_status:
         st.info(f"No hay Contenidos y PDA precargados para los campos formativos seleccionados en {grado_seleccionado}. Puedes redactarlos abajo.")
     
     # Área para agregar o editar Contenido y PDA manuales
-    with st.expander(f"✏️ Personalizar o escribir Contenidos y PDA manualmente para {grado_seleccionado}", expanded=(len(items_pda_final) == 0)):
+    with st.expander(f"Personalizar o escribir Contenidos y PDA manualmente para {grado_seleccionado}", expanded=(len(items_pda_final) == 0)):
         val_cont_def = items_pda_final[0]["contenido"] if items_pda_final else (sugerencias_pda[0]["contenido"] if sugerencias_pda else f"Contenido sintético para {grado_seleccionado}.")
         val_pda_def = items_pda_final[0]["pda"] if items_pda_final else (sugerencias_pda[0]["pda"] if sugerencias_pda else f"Procesos de Desarrollo de Aprendizaje para {grado_seleccionado}.")
         contenido_custom = st.text_area(
@@ -2148,7 +2154,7 @@ if authentication_status:
     st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
     st.markdown("""
     <div class="nem-card-header">
-        <span style="font-size: 1.5rem;">🔍</span>
+        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
         <h3 class="nem-card-title">Buscador de Recursos</h3>
     </div>
     """, unsafe_allow_html=True)
@@ -2226,7 +2232,7 @@ if authentication_status:
     # ==========================================
     st.markdown("""
     <div class="nem-card-header">
-        <span style="font-size: 1.5rem;">✨</span>
+        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
         <h3 class="nem-card-title">3. Generación Automatizada del Plano Didáctico</h3>
     </div>
     """, unsafe_allow_html=True)
@@ -2236,7 +2242,7 @@ if authentication_status:
     with col_btn_gen:
         btn_generar = st.button("Generar Planeación con Gemini", type="primary", use_container_width=True)
         btn_busqueda_web = st.button(
-            "Generar Planeación con Búsqueda Web 🌐",
+            "Generar Planeación con Búsqueda Web",
             key="btn_generar_web",
             use_container_width=True,
             help="Consulta la web en tiempo real con Google Search Grounding para enriquecer la secuencia didáctica con dinámicas, noticias y ejemplos prácticos recientes."
@@ -2249,7 +2255,7 @@ if authentication_status:
     
     with col_btn_demo:
         btn_demo = st.button(
-            f"📋 Cargar Ejemplo Completo ({grado_sel}) [Vista Previa Rápida]",
+            f"Cargar Ejemplo Completo ({grado_sel}) [Vista Previa Rápida]",
             use_container_width=True,
             help=f"Muestra una planeación oficial completa para {grado_sel} sin consumir cuota de API."
         )
@@ -2496,7 +2502,7 @@ if authentication_status:
         st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
         st.markdown("""
         <div class="nem-card-header">
-            <span style="font-size: 1.5rem;">📄</span>
+            <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
             <h3 class="nem-card-title">4. Estructura Oficial de la Planeación (Plano Didáctico)</h3>
         </div>
         """, unsafe_allow_html=True)
@@ -2517,7 +2523,7 @@ if authentication_status:
         
         with col_d1:
             st.download_button(
-                label="📥 Descargar Word (.docx) [Plantilla Oficial]",
+                label="Descargar Word (.docx) [Plantilla Oficial]",
                 data=docx_buffer,
                 file_name=f"{nombre_base}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -2527,7 +2533,7 @@ if authentication_status:
     
         with col_d2:
             st.download_button(
-                label="📕 Descargar PDF (.pdf) [Listo para Imprimir]",
+                label="Descargar PDF (.pdf) [Listo para Imprimir]",
                 data=pdf_buffer,
                 file_name=f"{nombre_base}.pdf",
                 mime="application/pdf",
@@ -2537,7 +2543,7 @@ if authentication_status:
     
         with col_d3:
             st.download_button(
-                label="📄 Descargar Markdown (.md) [Texto]",
+                label="Descargar Markdown (.md) [Texto]",
                 data=st.session_state.planeacion_generada,
                 file_name=f"{nombre_base}.md",
                 mime="text/markdown",
@@ -2551,12 +2557,12 @@ if authentication_status:
     
         # Pestañas interactivas para revisar la planeación
         tab_completa, tab_dosificador, tab_rutina, tab_sesiones, tab_evaluacion, tab_ajustes = st.tabs([
-            "📄 Documento Completo",
-            "📊 Dosificador y Articulación",
-            "⏰ Rutina de Inicio del Día",
-            "🧩 Secuencia por Sesiones",
-            "📝 Instrumentos de Evaluación",
-            "🤝 Ajustes Razonables (BAP/DUA)"
+            "Documento Completo",
+            "Dosificador y Articulación",
+            "Rutina de Inicio del Día",
+            "Secuencia por Sesiones",
+            "Instrumentos de Evaluación",
+            "Ajustes Razonables (BAP/DUA)"
         ])
     
         with tab_completa:
