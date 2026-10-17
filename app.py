@@ -2007,6 +2007,59 @@ if "resultados_busqueda_gratis" not in st.session_state:
 if "contexto_url" not in st.session_state:
     st.session_state.contexto_url = ""
 
+MESES_2026 = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+]
+DIAS_HABIL_NOMBRES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+
+def construir_catalogo_sep_2026():
+    """
+    Construye las 56 semanas escolares oficiales SEP del ciclo 2026.
+    Semana 1 inicia el primer lunes hábil de 2026 (5 de enero de 2026).
+    Mapea bi-direccionalmente:
+      - número de semana (1 a 56) -> fechas y mes
+      - fecha (mes, día) -> número de semana (1 a 56)
+    """
+    catalogo_por_semana = {}
+    catalogo_por_fecha = {}
+
+    lunes_base = datetime.date(2026, 1, 5)
+    for s_num in range(1, 57):
+        lunes = lunes_base + datetime.timedelta(weeks=s_num - 1)
+        viernes = lunes + datetime.timedelta(days=4)
+        
+        dias_semana = []
+        for i, nom in enumerate(DIAS_HABIL_NOMBRES):
+            d_obj = lunes + datetime.timedelta(days=i)
+            m_nom = MESES_2026[d_obj.month - 1] if d_obj.year == 2026 else ("Diciembre" if d_obj.year > 2026 else "Enero")
+            dias_semana.append({
+                "nombre_dia": nom,
+                "date": d_obj,
+                "dia_num": d_obj.day,
+                "mes_num": d_obj.month,
+                "mes_nombre": m_nom,
+                "fecha_corta": f"{nom} {d_obj.day}/{m_nom[:3]}",
+                "fecha_completa": f"{nom} {d_obj.day} de {m_nom} de {d_obj.year}"
+            })
+            if d_obj.year == 2026:
+                catalogo_por_fecha[(d_obj.month, d_obj.day)] = s_num
+
+        m_rep = MESES_2026[lunes.month - 1] if lunes.year == 2026 else "Diciembre"
+        catalogo_por_semana[s_num] = {
+            "semana": s_num,
+            "lunes": lunes,
+            "viernes": viernes,
+            "mes_idx": lunes.month if lunes.year == 2026 else 12,
+            "mes_nombre": m_rep,
+            "rango_str": f"{lunes.day} {MESES_2026[lunes.month-1][:3]} al {viernes.day} {MESES_2026[viernes.month-1][:3]}",
+            "dias_habil": dias_semana
+        }
+
+    return catalogo_por_semana, catalogo_por_fecha
+
+CATALOGO_SEMANAS_SEP, CATALOGO_FECHAS_SEP = construir_catalogo_sep_2026()
+
 if "cal_mes_nombre" not in st.session_state:
     st.session_state.cal_mes_nombre = "Octubre"
 
@@ -2265,39 +2318,26 @@ if authentication_status:
     
         st.markdown(f"**Fase Curricular (NEM):** `{fase_correspondiente}`")
     
-        col_per, col_ciclo = st.columns(2)
-        with col_per:
-            semana_seleccionada = st.number_input(
-                "Semana Escolar SEP (1 a 56):",
-                min_value=1,
-                max_value=56,
-                value=int(st.session_state.get("cal_semana_escolar", 20)),
-                step=1,
-                help="Número de semana del ciclo escolar según el calendario oficial de 56 semanas de la SEP.",
-                key=f"semana_{st.session_state.widget_key}"
-            )
-            st.session_state.cal_semana_escolar = semana_seleccionada
-            periodo_sel = f"Semana {semana_seleccionada}"
+        col_fase, col_ciclo = st.columns(2)
+        with col_fase:
+            st.markdown(f"**Fase Curricular:** `{fase_correspondiente}`")
         with col_ciclo:
             ciclo_sel = st.text_input("Ciclo Escolar:", value=DATOS_PREDETERMINADOS["ciclo_escolar"], key=f"ciclo_{st.session_state.widget_key}")
-    
-        dias_disponibles_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
-        dias_def_sb = [d for d in st.session_state.get("dias_seleccionados", dias_disponibles_semana) if d in dias_disponibles_semana]
-        if not dias_def_sb:
-            dias_def_sb = dias_disponibles_semana
 
-        dias_seleccionados = st.multiselect(
-            "Días de la semana a planear",
-            options=dias_disponibles_semana,
-            default=dias_def_sb,
-            help="Selecciona los días específicos de la semana para estructurar la planeación pedagógica.",
-            key=f"dias_{st.session_state.widget_key}"
+        semana_seleccionada = int(st.session_state.get("cal_semana_escolar", 20))
+        periodo_sel = f"Semana {semana_seleccionada}"
+        dias_seleccionados = st.session_state.get("dias_seleccionados", ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"])
+
+        # Píldora de estado unificado del Calendario Oficial SEP 2026
+        st.markdown(
+            f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.65rem 0.85rem; margin: 0.6rem 0; font-size: 0.86rem; color: #4C1D95;'>"
+            f"📅 <b>Dosificación Calendario SEP 2026:</b><br>"
+            f"<b>{periodo_sel}</b> ({len(dias_seleccionados)} días activos)<br>"
+            f"<span style='font-size: 0.78rem; color: #6D28D9;'>La semana escolar (1 a 56) y los días hábiles se definen directamente en el Calendario Oficial interactivo unificado del panel central.</span>"
+            f"</div>",
+            unsafe_allow_html=True
         )
-        if not dias_seleccionados:
-            st.warning("⚠️ Debes seleccionar al menos un día de la semana. Se considerará 'Lunes' por defecto.")
-            dias_seleccionados = ["Lunes"]
-        st.session_state.dias_seleccionados = dias_seleccionados
-    
+
         st.info("Importante: Asegúrate de que la plantilla de Word que usas como base NO tenga las tablas de los días pre-dibujadas. La aplicación las creará automáticamente según los días que elijas.")
     
         st.markdown("---")
@@ -2614,78 +2654,134 @@ if authentication_status:
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
     
     # ==========================================
-    # MÓDULO DE CALENDARIO INTERACTIVO DEL AÑO ACTUAL (2026) Y DOSIFICACIÓN SEMANAL
+    # CALENDARIO INTERACTIVO OFICIAL SEP 2026 Y SELECCIÓN UNIFICADA (DÍAS Y SEMANAS 1 A 56)
     # ==========================================
     st.markdown("""
     <div class="nem-card-header">
         <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
-        <h3 class="nem-card-title">Módulo de Calendario Interactivo del Año Actual (2026) y Dosificación Semanal</h3>
+        <h3 class="nem-card-title">Calendario Oficial SEP 2026 y Dosificación Unificada (Semanas 1 a 56 y Días)</h3>
     </div>
     """, unsafe_allow_html=True)
-    st.caption("Visualiza los meses del año actual (2026), selecciona la semana escolar SEP (1 a 56) y marca los días específicos del mes a planear. Las secuencias didácticas (Inicio, Desarrollo y Cierre) y los dosificadores se sincronizarán automáticamente con las fechas exactas seleccionadas.")
+    st.caption(
+        "Módulo unificado de calendario oficial para el ciclo escolar 2026 en México. "
+        "Define la semana escolar oficial de la SEP (1 a 56) y selecciona de forma visual o por casillas "
+        "los días exactos que abarcará la planeación didáctica (lunes a viernes o jornadas particulares). "
+        "Ambos selectores están conectados de forma bidireccional y alimentan estrictamente las secuencias didácticas."
+    )
 
-    MESES_2026 = [
-        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-    ]
-    DIAS_HABIL_NOMBRES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
-
-    col_cal_ctrls, col_cal_visual = st.columns([1.1, 1.2])
-
-    with col_cal_ctrls:
-        idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
-        cal_mes_actual = st.selectbox(
-            "📅 Mes del Año Actual (2026):",
-            options=MESES_2026,
-            index=idx_mes_actual,
-            help="Selecciona el mes del año 2026 para visualizar y dosificar tus sesiones escolares.",
-            key=f"cal_mes_select_{st.session_state.widget_key}"
+    # Modo de selección y sincronización bidireccional
+    col_modo, col_info_sep = st.columns([1.2, 1.3])
+    with col_modo:
+        modo_navegacion = st.radio(
+            "Método de Selección Temporal:",
+            options=["Por Semana Escolar SEP (1 a 56)", "Por Mes del Calendario 2026"],
+            horizontal=True,
+            key=f"modo_cal_sel_{st.session_state.widget_key}",
+            help="Elige si prefieres dosificar buscando directamente el número de semana SEP (1 a 56) o navegando por los meses del año 2026."
         )
-        st.session_state.cal_mes_nombre = cal_mes_actual
-        m_idx = MESES_2026.index(cal_mes_actual) + 1
 
-        cal_obj = calendar.Calendar(firstweekday=0)
-        month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
+    # Variables de control
+    semana_actual_init = int(st.session_state.get("cal_semana_escolar", 20))
+    if semana_actual_init not in CATALOGO_SEMANAS_SEP:
+        semana_actual_init = 20
 
-        def format_sem_label(idx_w: int) -> str:
-            w_d = month_weeks[idx_w]
-            m_fin = MESES_2026[w_d[4].month - 1]
-            return f"Semana {idx_w + 1} ({w_d[0].day} al {w_d[4].day} de {m_fin})"
+    col_ctrls, col_visual = st.columns([1.1, 1.2])
 
-        cal_sem_idx = st.selectbox(
-            "📆 Semana del Mes (Bloque a Planear):",
-            options=range(len(month_weeks)),
-            format_func=format_sem_label,
-            index=min(st.session_state.get("cal_sem_idx", 3), len(month_weeks) - 1),
-            help="Selecciona el bloque semanal de trabajo dentro del mes elegido.",
-            key=f"cal_sem_idx_select_{st.session_state.widget_key}"
-        )
-        st.session_state.cal_sem_idx = cal_sem_idx
-        active_week = month_weeks[cal_sem_idx]
+    with col_ctrls:
+        if modo_navegacion == "Por Semana Escolar SEP (1 a 56)":
+            semana_sep_sel = st.selectbox(
+                "🏫 Semana Escolar Oficial SEP (1 a 56):",
+                options=list(range(1, 57)),
+                index=semana_actual_init - 1,
+                format_func=lambda s: f"Semana {s} SEP — {CATALOGO_SEMANAS_SEP[s]['rango_str']} ({CATALOGO_SEMANAS_SEP[s]['mes_nombre']} 2026)",
+                key=f"sel_semana_sep_{st.session_state.widget_key}",
+                help="Selecciona la semana del calendario oficial de la SEP. Los días y meses se sincronizan automáticamente."
+            )
+            info_semana = CATALOGO_SEMANAS_SEP[semana_sep_sel]
+            cal_mes_actual = info_semana["mes_nombre"]
+            m_idx = info_semana["mes_idx"]
+            rango_fechas_str = info_semana["rango_str"]
+            active_week_dates = [d["date"] for d in info_semana["dias_habil"]]
+            st.session_state.cal_semana_escolar = semana_sep_sel
+            st.session_state.cal_mes_nombre = cal_mes_actual
+            semana_seleccionada = semana_sep_sel
+            periodo_sel = f"Semana {semana_seleccionada}"
 
-        semana_escolar_cal = st.number_input(
-            "🏫 Semana Escolar SEP (1 a 56):",
-            min_value=1,
-            max_value=56,
-            value=int(st.session_state.get("cal_semana_escolar", 20)),
-            step=1,
-            help="Número correlativo de semana dentro del calendario oficial de 56 semanas de la SEP.",
-            key=f"cal_semana_escolar_input_{st.session_state.widget_key}"
-        )
-        st.session_state.cal_semana_escolar = semana_escolar_cal
-        semana_seleccionada = semana_escolar_cal
-        periodo_sel = f"Semana {semana_seleccionada}"
+            st.markdown(
+                f"<div style='background-color: #F5F3FF; border: 1px solid #C4B5FD; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.88rem; color: #4C1D95; margin-top: 0.3rem;'>"
+                f"📅 <b>Rango Calendario 2026 Sincronizado:</b> {rango_fechas_str} de {cal_mes_actual} de 2026"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
+        else: # "Por Mes del Calendario 2026"
+            idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
+            cal_mes_actual = st.selectbox(
+                "📅 Mes del Año Actual (2026):",
+                options=MESES_2026,
+                index=idx_mes_actual,
+                help="Selecciona el mes del año 2026 para visualizar y dosificar tus sesiones escolares.",
+                key=f"sel_mes_cal_{st.session_state.widget_key}"
+            )
+            st.session_state.cal_mes_nombre = cal_mes_actual
+            m_idx = MESES_2026.index(cal_mes_actual) + 1
+
+            cal_obj = calendar.Calendar(firstweekday=0)
+            month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
+
+            def format_sem_label(idx_w: int) -> str:
+                w_d = month_weeks[idx_w]
+                m_fin = MESES_2026[w_d[4].month - 1]
+                return f"Semana {idx_w + 1} ({w_d[0].day} al {w_d[4].day} de {m_fin})"
+
+            cal_sem_idx = st.selectbox(
+                "📆 Bloque Semanal en el Mes:",
+                options=range(len(month_weeks)),
+                format_func=format_sem_label,
+                index=min(st.session_state.get("cal_sem_idx", 3), len(month_weeks) - 1),
+                help="Selecciona el bloque semanal de trabajo dentro del mes elegido.",
+                key=f"sel_sem_mes_{st.session_state.widget_key}"
+            )
+            st.session_state.cal_sem_idx = cal_sem_idx
+            active_week_full = month_weeks[cal_sem_idx]
+            active_week_dates = active_week_full[:5]
+
+            # Detección automática dinámica de Semana SEP a partir de la fecha seleccionada
+            lun_d = active_week_dates[0]
+            vie_d = active_week_dates[4]
+            sem_detectada = CATALOGO_FECHAS_SEP.get((lun_d.month, lun_d.day)) or CATALOGO_FECHAS_SEP.get((vie_d.month, vie_d.day)) or 20
+            
+            semana_sep_sel = st.number_input(
+                "🏫 Semana Escolar SEP detectada automáticamente (1 a 56):",
+                min_value=1,
+                max_value=56,
+                value=int(sem_detectada),
+                step=1,
+                help="Semana oficial detectada a partir de las fechas del calendario 2026 (puedes ajustarla si tu escuela maneja una numeración particular).",
+                key=f"num_sem_detectada_{st.session_state.widget_key}"
+            )
+            st.session_state.cal_semana_escolar = semana_sep_sel
+            semana_seleccionada = semana_sep_sel
+            periodo_sel = f"Semana {semana_seleccionada}"
+            rango_fechas_str = f"{lun_d.day} {MESES_2026[lun_d.month-1][:3]} al {vie_d.day} {MESES_2026[vie_d.month-1][:3]}"
+
+            st.markdown(
+                f"<div style='background-color: #ECFDF5; border: 1px solid #10B981; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.88rem; color: #065F46; margin-top: 0.3rem;'>"
+                f"🟢 <b>Semana SEP Detectada:</b> Semana {semana_sep_sel} ({rango_fechas_str} 2026)"
+                f"</div>",
+                unsafe_allow_html=True
+            )
 
     # Fechas del bloque hábil seleccionado (Lunes a Viernes)
     fechas_bloque = {
-        nom: active_week[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
+        nom: active_week_dates[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
     }
 
     # Casillas interactivas para elegir días específicos del mes
     st.markdown("**Selección de Días Específicos a Planear en la Semana:**")
     st.caption("Marca las casillas de los días hábiles del mes en los que se impartirá clase para estructurar las secuencias didácticas:")
 
-    col_btn_q1, col_btn_q2, col_btn_q3, _ = st.columns([1, 1, 1, 1.5])
+    col_btn_q1, col_btn_q2, col_btn_q3, col_btn_q4 = st.columns([1, 1, 1, 1])
     with col_btn_q1:
         if st.button("Semana Completa (Lun-Vie)", key=f"btn_cal_all_{st.session_state.widget_key}", help="Seleccionar los 5 días hábiles"):
             st.session_state.dias_seleccionados = DIAS_HABIL_NOMBRES.copy()
@@ -2697,6 +2793,10 @@ if authentication_status:
     with col_btn_q3:
         if st.button("Mar y Jue", key=f"btn_cal_mj_{st.session_state.widget_key}", help="Seleccionar Martes y Jueves"):
             st.session_state.dias_seleccionados = ["Martes", "Jueves"]
+            st.rerun()
+    with col_btn_q4:
+        if st.button("Solo Lunes", key=f"btn_cal_lun_{st.session_state.widget_key}", help="Seleccionar únicamente el Lunes"):
+            st.session_state.dias_seleccionados = ["Lunes"]
             st.rerun()
 
     col_dias_chk = st.columns(5)
@@ -2738,12 +2838,14 @@ if authentication_status:
     datos_escuela_actual["semana_seleccionada"] = semana_seleccionada
     datos_escuela_actual["periodo"] = periodo_sel
 
-    # Visualización gráfica del mes actual (2026) en col_cal_visual
-    with col_cal_visual:
+    # Visualización gráfica del mes actual (2026) en col_visual
+    with col_visual:
         st.markdown(f"**Vista Gráfica del Mes: {cal_mes_actual} 2026**")
+        cal_obj_vis = calendar.Calendar(firstweekday=0)
+        month_weeks_vis = cal_obj_vis.monthdatescalendar(2026, m_idx)
         fechas_activas_set = set(fechas_bloque[d] for d in dias_seleccionados)
         cal_html_rows = []
-        for w in month_weeks:
+        for w in month_weeks_vis:
             cells = []
             for d in w:
                 if d.month != m_idx:
@@ -2760,7 +2862,7 @@ if authentication_status:
         <div class="cal-wrapper">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">{cal_mes_actual.upper()} 2026</span>
-                <span style="font-size: 0.8rem; color: #6D28D9; font-weight: 600;">Semana Escolar {semana_seleccionada}</span>
+                <span style="font-size: 0.8rem; color: #6D28D9; font-weight: 600;">Semana Escolar {semana_seleccionada} SEP</span>
             </div>
             <table class="cal-table">
                 <thead><tr><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th></tr></thead>
@@ -2777,8 +2879,9 @@ if authentication_status:
 
     fechas_resumen_txt = ", ".join(dias_fechas_calculadas.values())
     st.markdown(
-        f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.6rem 1rem; color: #4C1D95; font-size: 0.92rem; font-weight: 600; margin-top: 0.5rem;'>"
-        f"🗓️ <b>Días y Fechas Sincronizadas para la Planeación:</b> {fechas_resumen_txt} "
+        f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.65rem 1rem; color: #4C1D95; font-size: 0.92rem; font-weight: 600; margin-top: 0.5rem;'>"
+        f"🗓️ <b>Dosificación Oficial SEP 2026 Unificada:</b> Semana {semana_seleccionada} de 56 ({rango_fechas_str} 2026) | "
+        f"<b>Días Activos:</b> {fechas_resumen_txt} "
         f"<span style='background: #7C3AED; color: #FFFFFF; padding: 2px 8px; border-radius: 12px; font-size: 0.82rem; margin-left: 8px;'>{len(dias_seleccionados)} Sesión(es) Didáctica(s)</span>"
         f"</div>",
         unsafe_allow_html=True
