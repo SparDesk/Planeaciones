@@ -1260,7 +1260,7 @@ st.markdown("""
         color: #7C3AED !important;
     }
 
-    /* Contenedor desplegado (Details): Fondo claro con textos en #1F2937 */
+    /* Contenedor desplegado general (Details): Fondo claro con textos en #1F2937 */
     div[data-testid="stExpanderDetails"],
     div[data-testid="stExpanderDetails"] * {
         background-color: #FFFFFF !important;
@@ -1283,6 +1283,63 @@ st.markdown("""
         -webkit-text-fill-color: #1F2937 !important;
         background-color: #FFFFFF !important;
         border: 1.5px solid #C4B5FD !important;
+    }
+
+    /* =======================================================
+       CORRECCIÓN DE CONTRASTE DEFINITIVA: DIRECTRICES CTE EN SIDEBAR
+       Texto claro, nítido y legible (#F3E8FF / #FFFFFF) sobre fondo oscuro/morado
+       ======================================================= */
+    [data-testid="stSidebar"] div[data-testid="stExpander"],
+    [data-testid="stSidebar"] details[data-testid="stExpander"] {
+        background-color: #1E1B4B !important;
+        border: 1px solid #7C3AED !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    [data-testid="stSidebar"] details[data-testid="stExpander"] summary,
+    [data-testid="stSidebar"] div[data-testid="stExpander"] summary,
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary {
+        background: #2E1065 !important;
+        background-color: #2E1065 !important;
+        border-bottom: 1px solid #4C1D95 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    [data-testid="stSidebar"] details[data-testid="stExpander"] summary *,
+    [data-testid="stSidebar"] details[data-testid="stExpander"] summary span,
+    [data-testid="stSidebar"] details[data-testid="stExpander"] summary p,
+    [data-testid="stSidebar"] div[data-testid="stExpander"] summary *,
+    [data-testid="stSidebar"] div[data-testid="stExpander"] summary span,
+    [data-testid="stSidebar"] div[data-testid="stExpander"] summary p {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    [data-testid="stSidebar"] details[data-testid="stExpander"] summary svg,
+    [data-testid="stSidebar"] div[data-testid="stExpander"] summary svg {
+        fill: #C084FC !important;
+        color: #C084FC !important;
+    }
+
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"],
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] * {
+        background-color: #1E1B4B !important;
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+    }
+
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] strong,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] b,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] h1,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] h2,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] h3,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] h4 {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
     }
 
     /* Adaptación en modo oscuro para el botón de personalizar contenidos */
@@ -1390,52 +1447,164 @@ st.markdown("""
     }
 
     /* =======================================================
-       CALENDARIO INTERACTIVO DEL AÑO ACTUAL (2026)
+       BADGE DE SESIONES DIDÁCTICAS: COLOR OSCURO Y PROFUNDO (#111111)
        ======================================================= */
+    .badge-sesiones-count,
+    span.badge-sesiones-count {
+        background-color: #DDD6FE !important;
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-weight: 800 !important;
+        font-size: 0.82rem !important;
+        padding: 3px 12px !important;
+        border-radius: 9999px !important;
+        border: 1px solid #7C3AED !important;
+        display: inline-block !important;
+        white-space: nowrap !important;
+        letter-spacing: -0.1px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* =======================================================
+       CALENDARIO SEP 2026: REDISEÑO MINIMALISTA Y COMPACTO
+       ======================================================= */
+    .cal-minimal-box {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        margin: 0.4rem 0 0.8rem 0;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.03);
+    }
+    .cal-mini-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .cal-mini-wrap {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 0.55rem 0.7rem;
+    }
+    .cal-mini-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #374151;
+        letter-spacing: 0.4px;
+        margin-bottom: 5px;
+    }
+    .cal-mini-badge {
+        background: #EDE9FE;
+        color: #6D28D9;
+        font-size: 0.70rem;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        border: 1px solid #DDD6FE;
+    }
+    .cal-mini-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 2.5px;
+        text-align: center;
+        margin: 0;
+    }
+    .cal-mini-table th {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #64748B;
+        padding: 1px 0;
+    }
+    .cal-mini-table td {
+        font-size: 0.72rem;
+        padding: 3.5px 0;
+        border-radius: 4px;
+        color: #1E293B;
+        background: #FFFFFF;
+        border: 1px solid #F1F5F9;
+        min-width: 20px;
+        line-height: 1.1;
+    }
+    .cal-mini-active {
+        background: #7C3AED !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
+        border-color: #6D28D9 !important;
+        box-shadow: 0 1px 4px rgba(124, 58, 237, 0.35) !important;
+    }
+    .cal-mini-wend {
+        color: #94A3B8 !important;
+        -webkit-text-fill-color: #94A3B8 !important;
+        background: #F8FAFC !important;
+        border-color: transparent !important;
+    }
+    .cal-mini-empty {
+        background: transparent !important;
+        border: none !important;
+        color: #CBD5E1 !important;
+        -webkit-text-fill-color: #CBD5E1 !important;
+        opacity: 0.3;
+    }
+    .cal-mini-legend {
+        display: flex;
+        gap: 8px;
+        font-size: 0.67rem;
+        color: #64748B;
+        margin-top: 5px;
+        justify-content: center;
+    }
+    .cal-mini-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .cal-mini-legend-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 2px;
+    }
+
+    /* Clases retrocompatibles */
     .cal-wrapper {
         background: #FFFFFF;
-        border: 1.5px solid #8B5CF6;
-        border-radius: 14px;
-        padding: 1.25rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.10);
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 0.75rem;
     }
     .cal-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 4px;
-        margin: 0.75rem 0;
+        border-spacing: 3px;
         text-align: center;
     }
     .cal-table th {
         background: #EDE9FE;
         color: #4C1D95 !important;
-        -webkit-text-fill-color: #4C1D95 !important;
-        font-weight: 700;
-        padding: 8px 4px;
-        border-radius: 8px;
-        font-size: 0.88rem;
+        font-size: 0.75rem;
+        padding: 4px;
     }
     .cal-table td {
-        padding: 9px 4px;
-        font-size: 0.92rem;
-        border-radius: 8px;
-        color: #1F2937 !important;
-        -webkit-text-fill-color: #1F2937 !important;
         background: #FAF5FF;
-        transition: all 0.2s ease;
+        color: #1F2937 !important;
+        font-size: 0.78rem;
+        padding: 4px;
     }
     .cal-cell-active {
         background: #7C3AED !important;
         color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 700 !important;
-        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4) !important;
+        font-weight: bold;
     }
     .cal-cell-weekend {
-        color: #6B7280 !important;
-        -webkit-text-fill-color: #6B7280 !important;
-        background: #F3F4F6 !important;
+        color: #94A3B8 !important;
+        background: #F8FAFC !important;
     }
     .cal-cell-empty {
         background: transparent !important;
@@ -1443,44 +1612,66 @@ st.markdown("""
     }
 
     @media (prefers-color-scheme: dark) {
-        .cal-wrapper {
-            background: #1E1B4B;
-            border-color: #7C3AED;
+        .cal-minimal-box {
+            background: #111827;
+            border-color: #374151;
+            box-shadow: none;
         }
-        .cal-table th {
-            background: #2E1065;
+        .cal-mini-header {
+            border-bottom-color: #1F2937;
+        }
+        .cal-mini-wrap {
+            background: #1F2937;
+            border-color: #374151;
+        }
+        .cal-mini-title {
+            color: #E5E7EB;
+        }
+        .cal-mini-table td {
+            background: #111827;
+            border-color: #374151;
+            color: #E5E7EB;
+        }
+        .cal-mini-active {
+            background: #7C3AED !important;
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
         }
-        .cal-table td {
-            background: #2E1065;
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-        }
-        .cal-cell-weekend {
-            background: #1E1B4B !important;
-            color: #9CA3AF !important;
-            -webkit-text-fill-color: #9CA3AF !important;
+        .cal-mini-wend {
+            background: #1F2937 !important;
+            color: #64748B !important;
+            -webkit-text-fill-color: #64748B !important;
         }
     }
-    [data-theme="dark"] .cal-wrapper {
-        background: #1E1B4B;
-        border-color: #7C3AED;
+    [data-theme="dark"] .cal-minimal-box {
+        background: #111827;
+        border-color: #374151;
+        box-shadow: none;
     }
-    [data-theme="dark"] .cal-table th {
-        background: #2E1065;
+    [data-theme="dark"] .cal-mini-header {
+        border-bottom-color: #1F2937;
+    }
+    [data-theme="dark"] .cal-mini-wrap {
+        background: #1F2937;
+        border-color: #374151;
+    }
+    [data-theme="dark"] .cal-mini-title {
+        color: #E5E7EB;
+    }
+    [data-theme="dark"] .cal-mini-table td {
+        background: #111827;
+        border-color: #374151;
+        color: #E5E7EB;
+    }
+    [data-theme="dark"] .cal-mini-active {
+        background: #7C3AED !important;
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
     }
-    [data-theme="dark"] .cal-table td {
-        background: #2E1065;
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-    }
-    [data-theme="dark"] .cal-cell-weekend {
-        background: #1E1B4B !important;
-        color: #9CA3AF !important;
-        -webkit-text-fill-color: #9CA3AF !important;
+    [data-theme="dark"] .cal-mini-wend {
+        background: #1F2937 !important;
+        color: #64748B !important;
+        -webkit-text-fill-color: #64748B !important;
     }
 
     /* CÍRCULO / PUNTO MORADO DECORATIVO */
@@ -2420,9 +2611,22 @@ if authentication_status:
             key=f"cte_{st.session_state.widget_key}"
         )
         cte_info = GUIAS_CTE_CATALOGO[guia_cte_sel]
-        with st.expander("Ver directrices de esta sesión CTE", expanded=False):
-            st.markdown(f"**Enfoque:** {cte_info['enfoque']}")
-            st.markdown(f"**Directrices:** {cte_info['directrices']}")
+        with st.expander("📋 Ver directrices de esta sesión CTE...", expanded=False):
+            st.markdown(
+                f"""
+                <div style="background-color: #1E1B4B; border: 1px solid #7C3AED; border-radius: 8px; padding: 12px; margin-top: 4px;">
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #FFFFFF; font-weight: 700; font-size: 0.88rem;">🎯 Enfoque Pedagógico:</span>
+                        <div style="color: #F3E8FF; font-size: 0.85rem; line-height: 1.45; margin-top: 2px;">{cte_info['enfoque']}</div>
+                    </div>
+                    <div>
+                        <span style="color: #FFFFFF; font-weight: 700; font-size: 0.88rem;">📌 Directrices (Evaluación formativa, retroalimentación y BAP):</span>
+                        <div style="color: #F3E8FF; font-size: 0.85rem; line-height: 1.45; margin-top: 2px;">{cte_info['directrices']}</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
         st.markdown("---")
         st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Sound', unsafe_allow_html=True)
@@ -2654,193 +2858,157 @@ if authentication_status:
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
     
     # ==========================================
-    # CALENDARIO INTERACTIVO OFICIAL SEP 2026 Y SELECCIÓN UNIFICADA (DÍAS Y SEMANAS 1 A 56)
+    # CALENDARIO INTERACTIVO OFICIAL SEP 2026 Y SELECCIÓN UNIFICADA (REDISEÑO MINIMALISTA)
     # ==========================================
     st.markdown("""
-    <div class="nem-card-header">
-        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
-        <h3 class="nem-card-title">Calendario Oficial SEP 2026 y Dosificación Unificada (Semanas 1 a 56 y Días)</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #E2E8F0;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #7C3AED;"></span>
+            <span style="font-weight: 700; font-size: 1.02rem; color: #1E1B4B; letter-spacing: -0.2px;">Calendario Oficial SEP 2026 y Dosificación Temporal</span>
+            <span style="font-size: 0.72rem; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 9999px; font-weight: 700; border: 1px solid #C4B5FD;">Semanas 1 a 56 SEP</span>
+        </div>
+        <span style="font-size: 0.78rem; color: #6B7280;">Sincronizado con secuencias didácticas</span>
     </div>
     """, unsafe_allow_html=True)
-    st.caption(
-        "Módulo unificado de calendario oficial para el ciclo escolar 2026 en México. "
-        "Define la semana escolar oficial de la SEP (1 a 56) y selecciona de forma visual o por casillas "
-        "los días exactos que abarcará la planeación didáctica (lunes a viernes o jornadas particulares). "
-        "Ambos selectores están conectados de forma bidireccional y alimentan estrictamente las secuencias didácticas."
-    )
 
-    # Modo de selección y sincronización bidireccional
-    col_modo, col_info_sep = st.columns([1.2, 1.3])
-    with col_modo:
-        modo_navegacion = st.radio(
-            "Método de Selección Temporal:",
-            options=["Por Semana Escolar SEP (1 a 56)", "Por Mes del Calendario 2026"],
-            horizontal=True,
-            key=f"modo_cal_sel_{st.session_state.widget_key}",
-            help="Elige si prefieres dosificar buscando directamente el número de semana SEP (1 a 56) o navegando por los meses del año 2026."
-        )
-
-    # Variables de control
+    # Variables de control inicial
     semana_actual_init = int(st.session_state.get("cal_semana_escolar", 20))
     if semana_actual_init not in CATALOGO_SEMANAS_SEP:
         semana_actual_init = 20
 
-    col_ctrls, col_visual = st.columns([1.1, 1.2])
+    # Layout de proporción minimalista: Selectores de dosificación (izq) y Calendario compacto (der)
+    col_ctrls, col_visual = st.columns([1.18, 0.82])
 
     with col_ctrls:
-        if modo_navegacion == "Por Semana Escolar SEP (1 a 56)":
-            semana_sep_sel = st.selectbox(
-                "🏫 Semana Escolar Oficial SEP (1 a 56):",
-                options=list(range(1, 57)),
-                index=semana_actual_init - 1,
-                format_func=lambda s: f"Semana {s} SEP — {CATALOGO_SEMANAS_SEP[s]['rango_str']} ({CATALOGO_SEMANAS_SEP[s]['mes_nombre']} 2026)",
-                key=f"sel_semana_sep_{st.session_state.widget_key}",
-                help="Selecciona la semana del calendario oficial de la SEP. Los días y meses se sincronizan automáticamente."
-            )
-            info_semana = CATALOGO_SEMANAS_SEP[semana_sep_sel]
-            cal_mes_actual = info_semana["mes_nombre"]
-            m_idx = info_semana["mes_idx"]
-            rango_fechas_str = info_semana["rango_str"]
-            active_week_dates = [d["date"] for d in info_semana["dias_habil"]]
-            st.session_state.cal_semana_escolar = semana_sep_sel
-            st.session_state.cal_mes_nombre = cal_mes_actual
-            semana_seleccionada = semana_sep_sel
-            periodo_sel = f"Semana {semana_seleccionada}"
-
-            st.markdown(
-                f"<div style='background-color: #F5F3FF; border: 1px solid #C4B5FD; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.88rem; color: #4C1D95; margin-top: 0.3rem;'>"
-                f"📅 <b>Rango Calendario 2026 Sincronizado:</b> {rango_fechas_str} de {cal_mes_actual} de 2026"
-                f"</div>",
-                unsafe_allow_html=True
+        c_modo, c_sel = st.columns([0.85, 1.15])
+        with c_modo:
+            modo_navegacion = st.selectbox(
+                "Dosificar por:",
+                options=["Semana SEP (1 a 56)", "Mes del Año 2026"],
+                key=f"modo_cal_sel_{st.session_state.widget_key}",
+                help="Elige si prefieres dosificar buscando directamente el número de semana SEP (1 a 56) o navegando por los meses del año 2026."
             )
 
-        else: # "Por Mes del Calendario 2026"
-            idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
-            cal_mes_actual = st.selectbox(
-                "📅 Mes del Año Actual (2026):",
-                options=MESES_2026,
-                index=idx_mes_actual,
-                help="Selecciona el mes del año 2026 para visualizar y dosificar tus sesiones escolares.",
-                key=f"sel_mes_cal_{st.session_state.widget_key}"
-            )
-            st.session_state.cal_mes_nombre = cal_mes_actual
-            m_idx = MESES_2026.index(cal_mes_actual) + 1
+        with c_sel:
+            if modo_navegacion == "Semana SEP (1 a 56)":
+                semana_sep_sel = st.selectbox(
+                    "🏫 Semana Escolar SEP:",
+                    options=list(range(1, 57)),
+                    index=semana_actual_init - 1,
+                    format_func=lambda s: f"Sem. {s} — {CATALOGO_SEMANAS_SEP[s]['rango_str']} ({CATALOGO_SEMANAS_SEP[s]['mes_nombre'][:3]})",
+                    key=f"sel_semana_sep_{st.session_state.widget_key}",
+                    help="Semana del ciclo escolar 2026 oficial de la SEP."
+                )
+                info_semana = CATALOGO_SEMANAS_SEP[semana_sep_sel]
+                cal_mes_actual = info_semana["mes_nombre"]
+                m_idx = info_semana["mes_idx"]
+                rango_fechas_str = info_semana["rango_str"]
+                active_week_dates = [d["date"] for d in info_semana["dias_habil"]]
+                st.session_state.cal_semana_escolar = semana_sep_sel
+                st.session_state.cal_mes_nombre = cal_mes_actual
+                semana_seleccionada = semana_sep_sel
+                periodo_sel = f"Semana {semana_seleccionada}"
+            else:
+                idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
+                cal_mes_actual = st.selectbox(
+                    "📅 Mes 2026:",
+                    options=MESES_2026,
+                    index=idx_mes_actual,
+                    key=f"sel_mes_cal_{st.session_state.widget_key}"
+                )
+                st.session_state.cal_mes_nombre = cal_mes_actual
+                m_idx = MESES_2026.index(cal_mes_actual) + 1
+                cal_obj = calendar.Calendar(firstweekday=0)
+                month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
 
-            cal_obj = calendar.Calendar(firstweekday=0)
-            month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
+                def format_sem_label(idx_w: int) -> str:
+                    w_d = month_weeks[idx_w]
+                    m_fin = MESES_2026[w_d[4].month - 1]
+                    return f"Bloque {idx_w + 1} ({w_d[0].day}-{w_d[4].day} {m_fin[:3]})"
 
-            def format_sem_label(idx_w: int) -> str:
-                w_d = month_weeks[idx_w]
-                m_fin = MESES_2026[w_d[4].month - 1]
-                return f"Semana {idx_w + 1} ({w_d[0].day} al {w_d[4].day} de {m_fin})"
+                cal_sem_idx = st.selectbox(
+                    "📆 Bloque Semanal:",
+                    options=range(len(month_weeks)),
+                    format_func=format_sem_label,
+                    index=min(st.session_state.get("cal_sem_idx", 3), len(month_weeks) - 1),
+                    key=f"sel_sem_mes_{st.session_state.widget_key}"
+                )
+                st.session_state.cal_sem_idx = cal_sem_idx
+                active_week_full = month_weeks[cal_sem_idx]
+                active_week_dates = active_week_full[:5]
+                lun_d = active_week_dates[0]
+                vie_d = active_week_dates[4]
+                sem_detectada = CATALOGO_FECHAS_SEP.get((lun_d.month, lun_d.day)) or CATALOGO_FECHAS_SEP.get((vie_d.month, vie_d.day)) or 20
+                semana_sep_sel = sem_detectada
+                st.session_state.cal_semana_escolar = semana_sep_sel
+                semana_seleccionada = semana_sep_sel
+                periodo_sel = f"Semana {semana_seleccionada}"
+                rango_fechas_str = f"{lun_d.day} {MESES_2026[lun_d.month-1][:3]} al {vie_d.day} {MESES_2026[vie_d.month-1][:3]}"
 
-            cal_sem_idx = st.selectbox(
-                "📆 Bloque Semanal en el Mes:",
-                options=range(len(month_weeks)),
-                format_func=format_sem_label,
-                index=min(st.session_state.get("cal_sem_idx", 3), len(month_weeks) - 1),
-                help="Selecciona el bloque semanal de trabajo dentro del mes elegido.",
-                key=f"sel_sem_mes_{st.session_state.widget_key}"
-            )
-            st.session_state.cal_sem_idx = cal_sem_idx
-            active_week_full = month_weeks[cal_sem_idx]
-            active_week_dates = active_week_full[:5]
+        fechas_bloque = {
+            nom: active_week_dates[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
+        }
 
-            # Detección automática dinámica de Semana SEP a partir de la fecha seleccionada
-            lun_d = active_week_dates[0]
-            vie_d = active_week_dates[4]
-            sem_detectada = CATALOGO_FECHAS_SEP.get((lun_d.month, lun_d.day)) or CATALOGO_FECHAS_SEP.get((vie_d.month, vie_d.day)) or 20
-            
-            semana_sep_sel = st.number_input(
-                "🏫 Semana Escolar SEP detectada automáticamente (1 a 56):",
-                min_value=1,
-                max_value=56,
-                value=int(sem_detectada),
-                step=1,
-                help="Semana oficial detectada a partir de las fechas del calendario 2026 (puedes ajustarla si tu escuela maneja una numeración particular).",
-                key=f"num_sem_detectada_{st.session_state.widget_key}"
-            )
-            st.session_state.cal_semana_escolar = semana_sep_sel
-            semana_seleccionada = semana_sep_sel
-            periodo_sel = f"Semana {semana_seleccionada}"
-            rango_fechas_str = f"{lun_d.day} {MESES_2026[lun_d.month-1][:3]} al {vie_d.day} {MESES_2026[vie_d.month-1][:3]}"
+        # Botones rápidos / atajos de selección en una sola línea compacta
+        st.markdown("<div style='font-size: 0.78rem; font-weight: 600; color: #4B5563; margin-top: 0.35rem; margin-bottom: 0.15rem;'>⚡ Atajos de Días:</div>", unsafe_allow_html=True)
+        col_q1, col_q2, col_q3, col_q4 = st.columns(4)
+        with col_q1:
+            if st.button("Lun-Vie", key=f"btn_cal_all_{st.session_state.widget_key}", help="Seleccionar los 5 días hábiles"):
+                st.session_state.dias_seleccionados = DIAS_HABIL_NOMBRES.copy()
+                st.rerun()
+        with col_q2:
+            if st.button("Lun, Mié, Vie", key=f"btn_cal_lmv_{st.session_state.widget_key}", help="Seleccionar Lunes, Miércoles y Viernes"):
+                st.session_state.dias_seleccionados = ["Lunes", "Miércoles", "Viernes"]
+                st.rerun()
+        with col_q3:
+            if st.button("Mar y Jue", key=f"btn_cal_mj_{st.session_state.widget_key}", help="Seleccionar Martes y Jueves"):
+                st.session_state.dias_seleccionados = ["Martes", "Jueves"]
+                st.rerun()
+        with col_q4:
+            if st.button("Solo Lun", key=f"btn_cal_lun_{st.session_state.widget_key}", help="Seleccionar únicamente Lunes"):
+                st.session_state.dias_seleccionados = ["Lunes"]
+                st.rerun()
 
-            st.markdown(
-                f"<div style='background-color: #ECFDF5; border: 1px solid #10B981; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.88rem; color: #065F46; margin-top: 0.3rem;'>"
-                f"🟢 <b>Semana SEP Detectada:</b> Semana {semana_sep_sel} ({rango_fechas_str} 2026)"
-                f"</div>",
-                unsafe_allow_html=True
-            )
+        # Casillas compactas para días
+        col_dias_chk = st.columns(5)
+        dias_elegidos = []
+        dias_fechas_calculadas = {}
+        dias_previos = st.session_state.get("dias_seleccionados", DIAS_HABIL_NOMBRES)
 
-    # Fechas del bloque hábil seleccionado (Lunes a Viernes)
-    fechas_bloque = {
-        nom: active_week_dates[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
-    }
+        for idx_d, nom_d in enumerate(DIAS_HABIL_NOMBRES):
+            dt_obj = fechas_bloque[nom_d]
+            mes_dt_nom = MESES_2026[dt_obj.month - 1]
+            chk_label = f"**{nom_d[:3]}** {dt_obj.day}"
+            fecha_completa = f"{nom_d} {dt_obj.day} de {mes_dt_nom} de {dt_obj.year}"
+            with col_dias_chk[idx_d]:
+                is_checked = st.checkbox(
+                    chk_label,
+                    value=(nom_d in dias_previos),
+                    key=f"chk_dia_{nom_d}_{st.session_state.widget_key}"
+                )
+                if is_checked:
+                    dias_elegidos.append(nom_d)
+                    dias_fechas_calculadas[nom_d] = fecha_completa
 
-    # Casillas interactivas para elegir días específicos del mes
-    st.markdown("**Selección de Días Específicos a Planear en la Semana:**")
-    st.caption("Marca las casillas de los días hábiles del mes en los que se impartirá clase para estructurar las secuencias didácticas:")
+        if not dias_elegidos:
+            dias_elegidos = ["Lunes"]
+            dt_lun = fechas_bloque["Lunes"]
+            dias_fechas_calculadas["Lunes"] = f"Lunes {dt_lun.day} de {MESES_2026[dt_lun.month - 1]} de {dt_lun.year}"
 
-    col_btn_q1, col_btn_q2, col_btn_q3, col_btn_q4 = st.columns([1, 1, 1, 1])
-    with col_btn_q1:
-        if st.button("Semana Completa (Lun-Vie)", key=f"btn_cal_all_{st.session_state.widget_key}", help="Seleccionar los 5 días hábiles"):
-            st.session_state.dias_seleccionados = DIAS_HABIL_NOMBRES.copy()
-            st.rerun()
-    with col_btn_q2:
-        if st.button("Lun, Mié y Vie", key=f"btn_cal_lmv_{st.session_state.widget_key}", help="Seleccionar Lunes, Miércoles y Viernes"):
-            st.session_state.dias_seleccionados = ["Lunes", "Miércoles", "Viernes"]
-            st.rerun()
-    with col_btn_q3:
-        if st.button("Mar y Jue", key=f"btn_cal_mj_{st.session_state.widget_key}", help="Seleccionar Martes y Jueves"):
-            st.session_state.dias_seleccionados = ["Martes", "Jueves"]
-            st.rerun()
-    with col_btn_q4:
-        if st.button("Solo Lunes", key=f"btn_cal_lun_{st.session_state.widget_key}", help="Seleccionar únicamente el Lunes"):
-            st.session_state.dias_seleccionados = ["Lunes"]
-            st.rerun()
+        dias_seleccionados = dias_elegidos
+        st.session_state.dias_seleccionados = dias_seleccionados
+        st.session_state.dias_fechas = dias_fechas_calculadas
 
-    col_dias_chk = st.columns(5)
-    dias_elegidos = []
-    dias_fechas_calculadas = {}
-    dias_previos = st.session_state.get("dias_seleccionados", DIAS_HABIL_NOMBRES)
+        # Actualizar datos_escuela_actual
+        datos_escuela_actual["dias_seleccionados"] = dias_seleccionados
+        datos_escuela_actual["dias_planeados"] = dias_seleccionados
+        datos_escuela_actual["dias_fechas"] = dias_fechas_calculadas
+        datos_escuela_actual["semana"] = semana_seleccionada
+        datos_escuela_actual["semana_seleccionada"] = semana_seleccionada
+        datos_escuela_actual["periodo"] = periodo_sel
 
-    for idx_d, nom_d in enumerate(DIAS_HABIL_NOMBRES):
-        dt_obj = fechas_bloque[nom_d]
-        mes_dt_nom = MESES_2026[dt_obj.month - 1]
-        chk_label = f"**{nom_d}**\n{dt_obj.day} de {mes_dt_nom[:3]}"
-        fecha_completa = f"{nom_d} {dt_obj.day} de {mes_dt_nom} de {dt_obj.year}"
-        with col_dias_chk[idx_d]:
-            is_checked = st.checkbox(
-                chk_label,
-                value=(nom_d in dias_previos),
-                key=f"chk_dia_{nom_d}_{st.session_state.widget_key}"
-            )
-            if is_checked:
-                dias_elegidos.append(nom_d)
-                dias_fechas_calculadas[nom_d] = fecha_completa
-
-    if not dias_elegidos:
-        st.warning("⚠️ Debes seleccionar al menos un día hábil. Se considerará 'Lunes' automáticamente.")
-        dias_elegidos = ["Lunes"]
-        dt_lun = fechas_bloque["Lunes"]
-        dias_fechas_calculadas["Lunes"] = f"Lunes {dt_lun.day} de {MESES_2026[dt_lun.month - 1]} de {dt_lun.year}"
-
-    # Sincronización en session_state y variables de ejecución
-    dias_seleccionados = dias_elegidos
-    st.session_state.dias_seleccionados = dias_seleccionados
-    st.session_state.dias_fechas = dias_fechas_calculadas
-
-    # Actualizar inmediatamente datos_escuela_actual con las fechas y días sincronizados
-    datos_escuela_actual["dias_seleccionados"] = dias_seleccionados
-    datos_escuela_actual["dias_planeados"] = dias_seleccionados
-    datos_escuela_actual["dias_fechas"] = dias_fechas_calculadas
-    datos_escuela_actual["semana"] = semana_seleccionada
-    datos_escuela_actual["semana_seleccionada"] = semana_seleccionada
-    datos_escuela_actual["periodo"] = periodo_sel
-
-    # Visualización gráfica del mes actual (2026) en col_visual
+    # Visualización gráfica compacta del mes actual en col_visual
     with col_visual:
-        st.markdown(f"**Vista Gráfica del Mes: {cal_mes_actual} 2026**")
         cal_obj_vis = calendar.Calendar(firstweekday=0)
         month_weeks_vis = cal_obj_vis.monthdatescalendar(2026, m_idx)
         fechas_activas_set = set(fechas_bloque[d] for d in dias_seleccionados)
@@ -2849,45 +3017,52 @@ if authentication_status:
             cells = []
             for d in w:
                 if d.month != m_idx:
-                    cells.append(f'<td class="cal-cell-empty" style="opacity: 0.35;">{d.day}</td>')
+                    cells.append(f'<td class="cal-mini-empty">{d.day}</td>')
                 elif d in fechas_activas_set:
-                    cells.append(f'<td class="cal-cell-active" title="Día seleccionado para planeación: {d.day} de {cal_mes_actual}"><strong>{d.day}</strong></td>')
+                    cells.append(f'<td class="cal-mini-active" title="Día seleccionado: {d.day} de {cal_mes_actual}"><strong>{d.day}</strong></td>')
                 elif d.weekday() >= 5:
-                    cells.append(f'<td class="cal-cell-weekend">{d.day}</td>')
+                    cells.append(f'<td class="cal-mini-wend">{d.day}</td>')
                 else:
                     cells.append(f'<td>{d.day}</td>')
             cal_html_rows.append('<tr>' + ''.join(cells) + '</tr>')
 
         cal_tabla_html = f"""
-        <div class="cal-wrapper">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">{cal_mes_actual.upper()} 2026</span>
-                <span style="font-size: 0.8rem; color: #6D28D9; font-weight: 600;">Semana Escolar {semana_seleccionada} SEP</span>
+        <div class="cal-mini-wrap">
+            <div class="cal-mini-title">
+                <span>{cal_mes_actual.upper()} 2026</span>
+                <span class="cal-mini-badge">Semana {semana_seleccionada} SEP</span>
             </div>
-            <table class="cal-table">
-                <thead><tr><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th></tr></thead>
+            <table class="cal-mini-table">
+                <thead><tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th>S</th><th>D</th></tr></thead>
                 <tbody>{''.join(cal_html_rows)}</tbody>
             </table>
-            <div style="display: flex; gap: 12px; font-size: 0.78rem; color: #4B5563; margin-top: 4px; justify-content: center;">
-                <span><span style="display: inline-block; width: 10px; height: 10px; background: #7C3AED; border-radius: 3px; margin-right: 4px;"></span>Activo</span>
-                <span><span style="display: inline-block; width: 10px; height: 10px; background: #FAF5FF; border: 1px solid #C4B5FD; border-radius: 3px; margin-right: 4px;"></span>Hábiles</span>
-                <span><span style="display: inline-block; width: 10px; height: 10px; background: #F3F4F6; border-radius: 3px; margin-right: 4px;"></span>Fin de semana</span>
+            <div class="cal-mini-legend">
+                <span><span class="cal-mini-legend-dot" style="background: #7C3AED;"></span>Activo</span>
+                <span><span class="cal-mini-legend-dot" style="background: #FFFFFF; border: 1px solid #CBD5E1;"></span>Hábil</span>
+                <span><span class="cal-mini-legend-dot" style="background: #94A3B8;"></span>Fin sem</span>
             </div>
         </div>
         """
         st.markdown(cal_tabla_html, unsafe_allow_html=True)
 
-    fechas_resumen_txt = ", ".join(dias_fechas_calculadas.values())
+    # Resumen inferior con contraste reforzado y texto oscuro #111111 en la píldora de sesiones
     st.markdown(
-        f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.65rem 1rem; color: #4C1D95; font-size: 0.92rem; font-weight: 600; margin-top: 0.5rem;'>"
-        f"🗓️ <b>Dosificación Oficial SEP 2026 Unificada:</b> Semana {semana_seleccionada} de 56 ({rango_fechas_str} 2026) | "
-        f"<b>Días Activos:</b> {fechas_resumen_txt} "
-        f"<span style='background: #7C3AED; color: #FFFFFF; padding: 2px 8px; border-radius: 12px; font-size: 0.82rem; margin-left: 8px;'>{len(dias_seleccionados)} Sesión(es) Didáctica(s)</span>"
-        f"</div>",
+        f"""
+        <div style="background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 10px; padding: 0.55rem 0.9rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 0.6rem;">
+            <div style="font-size: 0.86rem; color: #4C1D95; font-weight: 600;">
+                🗓️ <b>Semana {semana_seleccionada} de 56 SEP</b> ({rango_fechas_str} 2026) <span style="color: #6D28D9; font-weight: normal; margin-left: 6px;">| Días activos: {', '.join(dias_seleccionados)}</span>
+            </div>
+            <div>
+                <span class="badge-sesiones-count" style="background-color: #DDD6FE !important; color: #111111 !important; -webkit-text-fill-color: #111111 !important; font-weight: 800 !important; font-size: 0.82rem !important; padding: 3px 12px !important; border-radius: 9999px !important; border: 1px solid #7C3AED !important; display: inline-block !important;">
+                    {len(dias_seleccionados)} Sesión(es) Didáctica(s)
+                </span>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
-    st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
 
     # ==========================================
     # SECCIÓN 2: CAMPOS EDITABLES DE CONFIGURACIÓN CURRICULAR (SEP - NEM)
