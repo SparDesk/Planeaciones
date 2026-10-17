@@ -661,7 +661,7 @@ st.set_page_config(
     page_title="Planeaciones Escolares Educación Primaria",
     page_icon="•",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 # ==========================================
@@ -938,9 +938,8 @@ st.markdown("""
 
     /* =======================================================
        3. TEXTOS Y ETIQUETAS: CONTRASTE ESTRICTO
-          - Fondo claro -> Negro profundo (#111111)
-          - Fondo oscuro / lienzo oscuro -> Blanco (#FFFFFF) o gris claro (#F3E8FF)
-          - Contenedores morados -> Blanco puro (#FFFFFF)
+          - Contenedores claros o blancos -> Gris oscuro / negro profundo (#1F2937)
+          - Contenedores oscuros o de color (tarjetas de información, alertas) -> Blanco (#FFFFFF) o lila muy claro (#F3E8FF)
           - Círculos / Puntos decorativos -> Morado vibrante (#7C3AED)
        ======================================================= */
 
@@ -968,37 +967,37 @@ st.markdown("""
         -webkit-text-fill-color: #FFFFFF !important;
     }
 
-    /* Reglas generales para Lienzo Claro */
+    /* Reglas generales para Lienzo Claro: forzar #1F2937 en párrafos, etiquetas y títulos */
     @media (prefers-color-scheme: light) {
         .stApp,
         [data-testid="stAppViewContainer"],
         .block-container,
-        div.stMarkdown p,
-        div.stMarkdown span,
-        div.stMarkdown li,
+        div.stMarkdown p:not([data-testid="stAlert"] *),
+        div.stMarkdown span:not([data-testid="stAlert"] *):not(.purple-dot):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+        div.stMarkdown li:not([data-testid="stAlert"] *),
         [data-testid="stWidgetLabel"] label,
         [data-testid="stWidgetLabel"] p,
         [data-testid="stWidgetLabel"] span {
-            color: #111111 !important;
-            -webkit-text-fill-color: #111111 !important;
+            color: #1F2937 !important;
+            -webkit-text-fill-color: #1F2937 !important;
         }
         h1, h2, h3, h4 {
-            color: #111111 !important;
-            -webkit-text-fill-color: #111111 !important;
+            color: #1F2937 !important;
+            -webkit-text-fill-color: #1F2937 !important;
         }
     }
 
     [data-theme="light"] [data-testid="stWidgetLabel"] label,
     [data-theme="light"] [data-testid="stWidgetLabel"] p,
     [data-theme="light"] [data-testid="stWidgetLabel"] span,
-    [data-theme="light"] div.stMarkdown p,
-    [data-theme="light"] div.stMarkdown span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+    [data-theme="light"] div.stMarkdown p:not([data-testid="stAlert"] *),
+    [data-theme="light"] div.stMarkdown span:not([data-testid="stAlert"] *):not(.purple-dot):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]) {
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
     }
 
-    /* CONTENEDORES CON FONDO CLARO (Sidebar, Tarjetas NEM, Formulario, Alertas, Dropdowns)
-       Se fuerza color negro profundo (#111111) en todo momento para garantizar máxima legibilidad */
+    /* CONTENEDORES CON FONDO CLARO O BLANCO (Sidebar, Tarjetas NEM, Formulario, Dropdowns)
+       Se fuerza color gris oscuro / negro profundo (#1F2937) en todo momento para garantizar máxima legibilidad */
     [data-testid="stSidebar"],
     section[data-testid="stSidebar"],
     [data-testid="stSidebar"] > div:first-child,
@@ -1014,31 +1013,29 @@ st.markdown("""
     [data-testid="stSidebar"] label span,
     [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
     [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
-    [data-testid="stSidebar"] div.stMarkdown p,
-    [data-testid="stSidebar"] div.stMarkdown span,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span:not(.badge-sep):not([data-baseweb="tag"] *):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    [data-testid="stSidebar"] div.stMarkdown p:not([data-testid="stAlert"] *),
+    [data-testid="stSidebar"] div.stMarkdown span:not([data-testid="stAlert"] *):not(.purple-dot):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    [data-testid="stSidebar"] p:not([data-testid="stAlert"] *),
+    [data-testid="stSidebar"] span:not([data-testid="stAlert"] *):not(.badge-sep):not([data-baseweb="tag"] *):not(.purple-dot):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
     [data-testid="stForm"] label,
     [data-testid="stForm"] label *,
-    [data-testid="stForm"] p,
-    [data-testid="stForm"] span:not([data-baseweb="tag"] *):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    [data-testid="stForm"] p:not([data-testid="stAlert"] *),
+    [data-testid="stForm"] span:not([data-testid="stAlert"] *):not([data-baseweb="tag"] *):not(.purple-dot):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
     .nem-card,
-    .nem-card p,
-    .nem-card span:not(.badge-sep):not([data-baseweb="tag"] *):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
-    .nem-card div,
-    .nem-card li,
+    .nem-card p:not([data-testid="stAlert"] *),
+    .nem-card span:not([data-testid="stAlert"] *):not(.badge-sep):not([data-baseweb="tag"] *):not(.purple-dot):not([style*="#7C3AED"]):not([style*="rgb(124, 58, 237)"]),
+    .nem-card div:not([data-testid="stAlert"]):not([data-testid="stAlert"] *),
+    .nem-card li:not([data-testid="stAlert"] *),
     .nem-card label,
     .nem-card label *,
     .nem-card [data-testid="stWidgetLabel"] *,
     .nem-card table,
     .nem-card th,
     .nem-card td,
-    div[data-testid="stAlert"] *,
-    div[data-testid="stExpander"] summary span,
     ul[data-baseweb="menu"] li,
     div[data-baseweb="popover"] li {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
     }
 
     /* Subtítulos y descripciones en contenedores claros */
@@ -1047,8 +1044,8 @@ st.markdown("""
     .nem-card [data-testid="stCaptionContainer"] p,
     .nem-card .stCaption,
     [data-testid="stForm"] [data-testid="stCaptionContainer"] p {
-        color: #374151 !important;
-        -webkit-text-fill-color: #374151 !important;
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
         font-weight: 500 !important;
     }
 
@@ -1063,8 +1060,8 @@ st.markdown("""
     }
 
     .nem-card h1, .nem-card h2, .nem-card h3, .nem-card h4 {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
         font-family: 'Outfit', sans-serif !important;
         font-weight: 700 !important;
     }
@@ -1074,6 +1071,223 @@ st.markdown("""
         -webkit-text-fill-color: #4C1D95 !important;
         font-size: 1.25rem !important;
         font-weight: 700 !important;
+    }
+
+    /* =======================================================
+       TARJETAS DE INFORMACIÓN, ALERTAS Y NOTAS DE RESPALDO SEP
+       (Contenedores oscuros / de color: Texto en Blanco #FFFFFF y Lila muy claro #F3E8FF)
+       Aplica a: Modo de Respaldo SEP, Plantilla de Word, Consejos de Respaldo y Advertencias
+       ======================================================= */
+    div[data-testid="stAlert"],
+    div[data-testid="stNotification"],
+    div.stAlert,
+    [data-testid="stSidebar"] div[data-testid="stAlert"],
+    .nem-card div[data-testid="stAlert"],
+    div[data-testid="stAppViewContainer"] div[data-testid="stAlert"] {
+        background: linear-gradient(135deg, #2E1065 0%, #1E1B4B 100%) !important;
+        background-color: #2E1065 !important;
+        border: 1.5px solid #8B5CF6 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.22) !important;
+        padding: 0.95rem 1.25rem !important;
+        margin: 0.75rem 0 !important;
+    }
+
+    /* Texto principal de notas y alertas en blanco nítido (#FFFFFF) */
+    div[data-testid="stAlert"] *,
+    div[data-testid="stNotification"] *,
+    div.stAlert *,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] *,
+    .nem-card div[data-testid="stAlert"] *,
+    div[data-testid="stAppViewContainer"] div[data-testid="stAlert"] * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    div[data-testid="stAlert"] p,
+    div[data-testid="stAlert"] span,
+    div[data-testid="stAlert"] div,
+    div[data-testid="stAlert"] li,
+    div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p,
+    div[data-testid="stNotification"] p,
+    div[data-testid="stNotification"] span,
+    div.stAlert p,
+    div.stAlert span {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-size: 0.94rem !important;
+        line-height: 1.55 !important;
+    }
+
+    /* Títulos destacados y textos en negrita dentro de alertas en lila muy claro (#F3E8FF) */
+    div[data-testid="stAlert"] strong,
+    div[data-testid="stAlert"] b,
+    div[data-testid="stAlert"] em,
+    div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] strong,
+    div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] b,
+    div[data-testid="stNotification"] strong,
+    div[data-testid="stNotification"] b,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] strong,
+    .nem-card div[data-testid="stAlert"] strong {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+        font-weight: 700 !important;
+    }
+
+    /* Código inline dentro de notas de respaldo y alertas (ej. site:sep.gob.mx) */
+    div[data-testid="stAlert"] code,
+    div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] code,
+    div[data-testid="stNotification"] code,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] code,
+    .nem-card div[data-testid="stAlert"] code {
+        background: #4C1D95 !important;
+        background-color: #4C1D95 !important;
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+        border: 1.5px solid #A78BFA !important;
+        border-radius: 6px !important;
+        padding: 2px 7px !important;
+        font-weight: 600 !important;
+        font-size: 0.88em !important;
+        font-family: 'Consolas', 'Monaco', monospace !important;
+    }
+
+    /* Enlaces dentro de notas y alertas */
+    div[data-testid="stAlert"] a,
+    div[data-testid="stNotification"] a {
+        color: #DDD6FE !important;
+        -webkit-text-fill-color: #DDD6FE !important;
+        text-decoration: underline !important;
+        font-weight: 600 !important;
+    }
+
+    /* Iconos SVG dentro de notas y alertas */
+    div[data-testid="stAlert"] svg,
+    div[data-testid="stNotification"] svg,
+    div.stAlert svg,
+    [data-testid="stSidebar"] div[data-testid="stAlert"] svg,
+    .nem-card div[data-testid="stAlert"] svg {
+        fill: #F3E8FF !important;
+        color: #F3E8FF !important;
+    }
+
+    /* =======================================================
+       BOTÓN / EXPANDER DE PERSONALIZAR CONTENIDOS Y PDA
+       ======================================================= */
+    div[data-testid="stExpander"],
+    details[data-testid="stExpander"] {
+        border: 1.5px solid #8B5CF6 !important;
+        border-radius: 14px !important;
+        background-color: #FFFFFF !important;
+        margin: 1rem 0 !important;
+        overflow: hidden !important;
+        box-shadow: 0 2px 10px rgba(124, 58, 237, 0.08) !important;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
+    }
+
+    div[data-testid="stExpander"]:hover,
+    details[data-testid="stExpander"]:hover {
+        border-color: #7C3AED !important;
+        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.16) !important;
+    }
+
+    /* Botón de cabecera del expander (Summary): claro (#EDE9FE) con texto legible #1F2937 */
+    details[data-testid="stExpander"] summary {
+        background: #EDE9FE !important;
+        background-color: #EDE9FE !important;
+        border-radius: 12px !important;
+        padding: 0.85rem 1.25rem !important;
+        cursor: pointer !important;
+        border-bottom: 1px solid #DDD6FE !important;
+        transition: all 0.25s ease !important;
+    }
+
+    details[data-testid="stExpander"] summary:hover {
+        background: #DDD6FE !important;
+        background-color: #DDD6FE !important;
+    }
+
+    /* Texto del botón de personalizar contenidos: perfectamente legible (#1F2937 sobre contenedor claro) */
+    details[data-testid="stExpander"] summary,
+    details[data-testid="stExpander"] summary span,
+    details[data-testid="stExpander"] summary p,
+    details[data-testid="stExpander"] summary div {
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
+        font-weight: 700 !important;
+        font-size: 0.98rem !important;
+        letter-spacing: 0.2px !important;
+    }
+
+    /* Icono del chevron en expander */
+    details[data-testid="stExpander"] summary svg {
+        fill: #7C3AED !important;
+        color: #7C3AED !important;
+    }
+
+    /* Contenedor desplegado (Details): Fondo claro con textos en #1F2937 */
+    div[data-testid="stExpanderDetails"] {
+        background-color: #FFFFFF !important;
+        padding: 1.25rem !important;
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
+    }
+
+    div[data-testid="stExpanderDetails"] label,
+    div[data-testid="stExpanderDetails"] label p,
+    div[data-testid="stExpanderDetails"] label span,
+    div[data-testid="stExpanderDetails"] p,
+    div[data-testid="stExpanderDetails"] span {
+        color: #1F2937 !important;
+        -webkit-text-fill-color: #1F2937 !important;
+    }
+
+    /* Adaptación en modo oscuro para el botón de personalizar contenidos */
+    @media (prefers-color-scheme: dark) {
+        div[data-testid="stExpander"],
+        details[data-testid="stExpander"] {
+            border-color: #A78BFA !important;
+            background-color: #1E1B4B !important;
+        }
+
+        details[data-testid="stExpander"] summary {
+            background: #2E1065 !important;
+            background-color: #2E1065 !important;
+            border-bottom: 1px solid #4C1D95 !important;
+        }
+
+        details[data-testid="stExpander"] summary:hover {
+            background: #3B0764 !important;
+            background-color: #3B0764 !important;
+        }
+
+        details[data-testid="stExpander"] summary,
+        details[data-testid="stExpander"] summary span,
+        details[data-testid="stExpander"] summary p,
+        details[data-testid="stExpander"] summary div {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+
+        details[data-testid="stExpander"] summary svg {
+            fill: #F3E8FF !important;
+            color: #F3E8FF !important;
+        }
+
+        div[data-testid="stExpanderDetails"] {
+            background-color: #1E1B4B !important;
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
+
+        div[data-testid="stExpanderDetails"] label,
+        div[data-testid="stExpanderDetails"] label p,
+        div[data-testid="stExpanderDetails"] label span,
+        div[data-testid="stExpanderDetails"] p,
+        div[data-testid="stExpanderDetails"] span {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
     }
 
     /* CÍRCULO / PUNTO MORADO DECORATIVO */
@@ -1336,6 +1550,8 @@ st.markdown("""
         border-color: #7C3AED !important;
         background-color: #FAF5FF !important;
         box-shadow: 0 0 16px rgba(124, 58, 237, 0.2) !important;
+    }
+
     /* Reproductor de YouTube embebido (st.components.v1.iframe) */
     [data-testid="stSidebar"] [data-testid="stIFrame"],
     [data-testid="stSidebar"] iframe.stIFrame,
@@ -1349,6 +1565,224 @@ st.markdown("""
         background-color: #000000 !important;
         display: block !important;
         width: 100% !important;
+    }
+
+    /* =======================================================
+       5. OPTIMIZACIÓN Y DISEÑO RESPONSIVO MÓVIL (SMARTPHONES Y TABLETS)
+       ======================================================= */
+
+    /* Fluidez global y prevención estricta de barras de desplazamiento horizontal */
+    html, body, .stApp, [data-testid="stAppViewContainer"] {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+
+    /* Tablas responsivas con desplazamiento táctil horizontal suave */
+    .nem-card table,
+    div[data-testid="stMarkdownContainer"] table,
+    table {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-collapse: collapse !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* Pestañas (Tabs) con desplazamiento táctil horizontal fluido */
+    div[data-baseweb="tab-list"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-wrap: nowrap !important;
+        gap: 0.35rem !important;
+    }
+
+    button[data-baseweb="tab"] {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* --- PANTALLAS MEDIANAS Y TABLETS (<= 992px) --- */
+    @media (max-width: 992px) {
+        .block-container,
+        [data-testid="stMainBlockContainer"] {
+            padding-left: 1.25rem !important;
+            padding-right: 1.25rem !important;
+            max-width: 100% !important;
+        }
+
+        .nem-card {
+            padding: 1.25rem !important;
+        }
+    }
+
+    /* --- SMARTPHONES Y PANTALLAS PEQUEÑAS (<= 768px) --- */
+    @media (max-width: 768px) {
+        /* 1. Ancho completo al 100% sin desbordamiento */
+        .block-container,
+        [data-testid="stMainBlockContainer"] {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Formularios, tarjetas y cuadros al 100% de ancho */
+        [data-testid="stForm"],
+        .nem-card {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 1rem 0.85rem !important;
+            border-radius: 14px !important;
+            box-sizing: border-box !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        /* Apilado automático de columnas en pantallas móviles */
+        div[data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap !important;
+            gap: 0.65rem !important;
+        }
+
+        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            width: 100% !important;
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+
+        /* Insignias escolares en móviles */
+        .badge-sep {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            box-sizing: border-box !important;
+            padding: 0.45rem 0.75rem !important;
+            font-size: 0.84rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        /* 2. Barra lateral responsiva en dispositivos móviles */
+        [data-testid="stSidebar"] {
+            max-width: 88vw !important;
+            width: 88vw !important;
+            box-sizing: border-box !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+            padding-left: 0.85rem !important;
+            padding-right: 0.85rem !important;
+        }
+
+        /* Reproductor Sound en barra lateral móvil */
+        [data-testid="stSidebar"] [data-testid="stIFrame"],
+        [data-testid="stSidebar"] iframe.stIFrame,
+        [data-testid="stSidebar"] iframe {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 160px !important;
+            box-sizing: border-box !important;
+        }
+
+        /* 3. Tipografías adaptativas para evitar encimamientos */
+        h1 {
+            font-size: 1.5rem !important;
+            line-height: 1.25 !important;
+            margin-bottom: 0.65rem !important;
+        }
+
+        h2, .login-header-title {
+            font-size: 1.3rem !important;
+            line-height: 1.3 !important;
+        }
+
+        h3, .nem-card-title {
+            font-size: 1.15rem !important;
+            line-height: 1.3 !important;
+        }
+
+        h4 {
+            font-size: 1.02rem !important;
+            line-height: 1.3 !important;
+        }
+
+        p, span, label, div {
+            line-height: 1.45 !important;
+        }
+
+        /* Inputs y campos con tamaño táctil cómodo (16px evita auto-zoom en iOS Safari) */
+        input,
+        textarea,
+        select,
+        div.stTextInput input,
+        div.stTextArea textarea,
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stTextArea"] textarea,
+        div[data-baseweb="input"] input,
+        div[data-baseweb="select"] input {
+            font-size: 16px !important;
+            min-height: 46px !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Botones táctiles principales con altura y padding generoso (área táctil >= 48px) */
+        div.stButton > button,
+        div.stDownloadButton > button,
+        div[data-testid="stFormSubmitButton"] > button {
+            min-height: 48px !important;
+            padding: 0.75rem 1.15rem !important;
+            font-size: 0.98rem !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            touch-action: manipulation !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Píldoras de multiselect fáciles de pulsar */
+        div[data-testid="stMultiSelect"] [data-baseweb="tag"],
+        .stMultiSelect [data-baseweb="tag"],
+        [data-baseweb="tag"] {
+            padding: 6px 12px !important;
+            font-size: 0.88rem !important;
+            min-height: 32px !important;
+            margin: 3px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+        }
+
+        /* Pestañas adaptadas para pantalla táctil */
+        button[data-baseweb="tab"] {
+            padding: 0.65rem 0.95rem !important;
+            font-size: 0.88rem !important;
+            min-height: 44px !important;
+        }
+    }
+
+    /* --- PANTALLAS EXTRA PEQUEÑAS (<= 480px) --- */
+    @media (max-width: 480px) {
+        .block-container,
+        [data-testid="stMainBlockContainer"] {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+
+        h1 {
+            font-size: 1.35rem !important;
+        }
+
+        .login-header-title {
+            font-size: 1.25rem !important;
+        }
+
+        .nem-card {
+            padding: 0.85rem 0.65rem !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
