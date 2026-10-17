@@ -561,48 +561,97 @@ def get_cached_conaliteg_books():
     return obtener_libros_conaliteg()
 
 import re
+from urllib.parse import urlparse, parse_qs
+import streamlit.components.v1 as components
 
 def extraer_embed_youtube(url_o_id: str) -> str:
-    """Extrae y formatea la URL limpia para incrustar en un iframe de YouTube."""
+    """
+    Convierte cualquier enlace o identificador de YouTube al formato oficial de inserción embebida (embed).
+    Asegura que los enlaces de formato 'watch?v=', 'youtu.be/', '/live/', '/shorts/', listas de reproducción
+    o códigos iframe se transformen rigurosamente a 'https://www.youtube.com/embed/...' sin errores de disponibilidad ni bloqueos.
+    """
     if not url_o_id or not str(url_o_id).strip():
         return "https://www.youtube.com/embed/jfKfPfyJRdk"
     
-    url = str(url_o_id).strip()
+    texto = str(url_o_id).strip()
     
-    if "youtube.com/embed/" in url:
-        return url
-        
-    if "playlist?list=" in url:
-        match_list = re.search(r"list=([a-zA-Z0-9_-]+)", url)
-        if match_list:
-            return f"https://www.youtube.com/embed/videoseries?list={match_list.group(1)}"
-            
-    if "youtu.be/" in url:
-        match_short = re.search(r"youtu\.be/([a-zA-Z0-9_-]+)", url)
+    # 1. Si el usuario pegó el código iframe HTML completo (<iframe src="...">)
+    match_iframe = re.search(r'src=["\']([^"\']+)["\']', texto)
+    if match_iframe:
+        texto = match_iframe.group(1).strip()
+    
+    # 2. Si ya es una URL embed limpia de YouTube
+    if "youtube.com/embed/" in texto or "youtube-nocookie.com/embed/" in texto:
+        if texto.startswith("//"):
+            return "https:" + texto
+        elif not texto.startswith("http"):
+            return "https://" + texto
+        return texto
+    
+    # 3. Limpieza de protocolo
+    url_limpia = texto
+    if url_limpia.startswith("//"):
+        url_limpia = "https:" + url_limpia
+    elif not url_limpia.startswith("http://") and not url_limpia.startswith("https://"):
+        if "/" in url_limpia or "?" in url_limpia:
+            url_limpia = "https://" + url_limpia
+
+    video_id = None
+    list_id = None
+
+    # Extraer parámetros de query string mediante urlparse
+    try:
+        parsed = urlparse(url_limpia)
+        qs = parse_qs(parsed.query)
+        if "list" in qs and qs["list"]:
+            list_id = qs["list"][0]
+        if "v" in qs and qs["v"]:
+            candidate_v = qs["v"][0]
+            if re.match(r'^[a-zA-Z0-9_-]{11}$', candidate_v):
+                video_id = candidate_v
+    except Exception:
+        pass
+
+    # Si aún no tenemos video_id, probar expresiones regulares
+    if not video_id:
+        # youtu.be/<id>
+        match_short = re.search(r'youtu\.be/([a-zA-Z0-9_-]{11})', texto)
         if match_short:
-            vid = match_short.group(1)
-            match_list = re.search(r"list=([a-zA-Z0-9_-]+)", url)
-            if match_list:
-                return f"https://www.youtube.com/embed/{vid}?list={match_list.group(1)}"
-            return f"https://www.youtube.com/embed/{vid}"
-            
-    if "watch?v=" in url:
-        match_v = re.search(r"v=([a-zA-Z0-9_-]+)", url)
-        if match_v:
-            vid = match_v.group(1)
-            match_list = re.search(r"list=([a-zA-Z0-9_-]+)", url)
-            if match_list:
-                return f"https://www.youtube.com/embed/{vid}?list={match_list.group(1)}"
-            return f"https://www.youtube.com/embed/{vid}"
-            
-    if "/live/" in url:
-        match_live = re.search(r"/live/([a-zA-Z0-9_-]+)", url)
-        if match_live:
-            return f"https://www.youtube.com/embed/{match_live.group(1)}"
-            
-    if re.match(r"^[a-zA-Z0-9_-]{11}$", url):
-        return f"https://www.youtube.com/embed/{url}"
-        
+            video_id = match_short.group(1)
+        # /live/<id>
+        elif "/live/" in texto:
+            match_live = re.search(r'/live/([a-zA-Z0-9_-]{11})', texto)
+            if match_live:
+                video_id = match_live.group(1)
+        # /shorts/<id>
+        elif "/shorts/" in texto:
+            match_shorts = re.search(r'/shorts/([a-zA-Z0-9_-]{11})', texto)
+            if match_shorts:
+                video_id = match_shorts.group(1)
+        # watch?v=<id> o &v=<id>
+        elif "v=" in texto:
+            match_v = re.search(r'[?&]v=([a-zA-Z0-9_-]{11})', texto)
+            if match_v:
+                video_id = match_v.group(1)
+        # ID directo de 11 caracteres alfanuméricos
+        elif re.match(r'^[a-zA-Z0-9_-]{11}$', texto):
+            video_id = texto
+
+    # Si no se encontró lista en parse_qs, buscar con regex
+    if not list_id:
+        match_list = re.search(r'[?&]list=([a-zA-Z0-9_-]+)', texto)
+        if match_list:
+            list_id = match_list.group(1)
+
+    # Construir la URL embebida oficial
+    if video_id:
+        if list_id:
+            return f"https://www.youtube.com/embed/{video_id}?list={list_id}"
+        return f"https://www.youtube.com/embed/{video_id}"
+    elif list_id:
+        return f"https://www.youtube.com/embed/videoseries?list={list_id}"
+
+    # Fallback predeterminado seguro
     return "https://www.youtube.com/embed/jfKfPfyJRdk"
 
 # ==========================================
@@ -1287,6 +1336,19 @@ st.markdown("""
         border-color: #7C3AED !important;
         background-color: #FAF5FF !important;
         box-shadow: 0 0 16px rgba(124, 58, 237, 0.2) !important;
+    /* Reproductor de YouTube embebido (st.components.v1.iframe) */
+    [data-testid="stSidebar"] [data-testid="stIFrame"],
+    [data-testid="stSidebar"] iframe.stIFrame,
+    [data-testid="stSidebar"] iframe {
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        border: 1.5px solid #8B5CF6 !important;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.18) !important;
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.5rem !important;
+        background-color: #000000 !important;
+        display: block !important;
+        width: 100% !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1694,23 +1756,14 @@ if authentication_status:
         else:
             url_embed_activa = "https://www.youtube.com/embed/jfKfPfyJRdk"
 
-        # Reproductor compacto estilizado en morado
-        st.markdown(
-            f"""
-            <div style="border-radius: 12px; overflow: hidden; border: 1.5px solid #8B5CF6; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.18); margin-top: 0.35rem; margin-bottom: 0.6rem; background-color: #000000;">
-                <iframe 
-                    width="100%" 
-                    height="150" 
-                    src="{url_embed_activa}" 
-                    title="Sound" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowfullscreen
-                    style="display: block; width: 100%; border: none;">
-                </iframe>
-            </div>
-            """,
-            unsafe_allow_html=True
+        # Garantizar que la URL activa sea estrictamente formato embed oficial
+        url_embed_activa = extraer_embed_youtube(url_embed_activa)
+
+        # Reproductor seguro de YouTube incrustado mediante st.components.v1.iframe
+        st.components.v1.iframe(
+            src=url_embed_activa,
+            height=160,
+            scrolling=False
         )
     
     # Empaquetar datos de escuela
