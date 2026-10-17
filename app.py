@@ -565,7 +565,7 @@ def get_cached_conaliteg_books():
 # ==========================================
 st.set_page_config(
     page_title="Planeaciones Escolares Educación Primaria",
-    page_icon="🇲🇽",
+    page_icon="📚",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -586,187 +586,257 @@ st.markdown("""
         font-family: 'Outfit', sans-serif;
     }
 
-    /* Paleta Femenina Elegante y Cósmica (Estilo Gemini) */
+    /* =======================================================
+       PALETA DEFINITIVA: MORADOS, LILAS Y ALTO CONTRASTE
+       ======================================================= */
     :root {
-        --gemini-pink: #FF758F;
-        --gemini-magenta: #F72585;
-        --gemini-purple: #B5179E;
-        --gemini-amethyst: #7209B7;
-        --gemini-deep: #5A189A;
-        --gemini-cosmic: #3A0CA3;
-        --gemini-lavender: #E0AAFF;
-        --gemini-lilac: #C77DFF;
-        --gemini-soft-bg: #FAF5FF;
+        --purple-vibrant: #7C3AED;
+        --purple-deep: #6D28D9;
+        --purple-dark: #5B21B6;
+        --purple-accent: #8B5CF6;
+        --purple-border: #8B5CF6;
+        --lila-soft: #EDE9FE;
+        --lila-light: #F3E8FF;
+        --lila-canvas: #FAF5FF;
+        --text-pure-white: #FFFFFF;
+        --text-deep-black: #111111;
+        --text-user-input: #000000;
         --border-radius-base: 12px;
     }
 
     /* =======================================================
-       1. REGLAS ESTRICTAS DE COLOR: BOTONES PRINCIPALES (ST.BUTTON)
-       Fondo en color Morado Intenso / Vibrante (#7209B7 o #4A148C),
-       con texto en Blanco (#FFFFFF) y bordes redondeados limpios (12px).
-       Al pasar el cursor (hover), un tono morado más claro (#9C27B0).
+       1. TEXTOS GENERALES Y ETIQUETAS: CONTRASTE GARANTIZADO
+          - Fondo oscuro o modo oscuro -> Blanco o gris muy claro (#F3E8FF / #FFFFFF)
+          - Contenedor o fondo claro -> Negro profundo (#111111)
+          Ningún texto clave queda sin contraste.
        ======================================================= */
-    div.stButton > button,
-    div.stDownloadButton > button,
-    .st-key-btn_generar_web button,
-    div[class*="st-key-btn_generar_web"] button,
-    .st-key-btn_ddgs_buscar button,
-    div[class*="st-key-btn_ddgs_buscar"] button,
-    .st-key-btn_nueva_planeacion button,
-    div[class*="st-key-btn_nueva_planeacion"] button,
-    .st-key-btn_limpiar_busqueda button,
-    div[class*="st-key-btn_limpiar_busqueda"] button,
-    [data-testid="stSidebar"] div.stButton > button,
-    [data-testid="stForm"] div.stButton > button,
-    button[kind="primary"],
-    button[kind="secondary"],
-    div.stButton > button[data-testid="baseButton-primary"],
-    div.stButton > button[data-testid="baseButton-secondary"] {
-        background: linear-gradient(135deg, #7209B7 0%, #4A148C 100%) !important;
-        background-color: #7209B7 !important;
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 12px !important;
-        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.3px !important;
-        padding: 0.55rem 1.25rem !important;
-        box-shadow: 0 4px 14px rgba(114, 9, 183, 0.3) !important;
-        transition: all 0.25s ease !important;
+
+    /* Regla base adaptativa para modo oscuro (OS o tema oscuro de Streamlit) */
+    @media (prefers-color-scheme: dark) {
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        .block-container {
+            color: #F3E8FF !important;
+        }
+        [data-testid="stAppViewContainer"] p,
+        [data-testid="stAppViewContainer"] span,
+        [data-testid="stAppViewContainer"] label,
+        [data-testid="stAppViewContainer"] div.stMarkdown,
+        [data-testid="stAppViewContainer"] div.stMarkdown p,
+        [data-testid="stAppViewContainer"] div.stMarkdown span,
+        [data-testid="stAppViewContainer"] div.stMarkdown li,
+        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
+        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
+        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
+        [data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"] p {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
+        [data-testid="stAppViewContainer"] h1,
+        [data-testid="stAppViewContainer"] h2,
+        [data-testid="stAppViewContainer"] h3,
+        [data-testid="stAppViewContainer"] h4 {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
     }
 
-    div.stButton > button:hover,
-    div.stDownloadButton > button:hover,
-    .st-key-btn_generar_web button:hover,
-    div[class*="st-key-btn_generar_web"] button:hover,
-    .st-key-btn_ddgs_buscar button:hover,
-    div[class*="st-key-btn_ddgs_buscar"] button:hover,
-    .st-key-btn_nueva_planeacion button:hover,
-    div[class*="st-key-btn_nueva_planeacion"] button:hover,
-    .st-key-btn_limpiar_busqueda button:hover,
-    div[class*="st-key-btn_limpiar_busqueda"] button:hover,
-    [data-testid="stSidebar"] div.stButton > button:hover,
-    [data-testid="stForm"] div.stButton > button:hover,
-    button[kind="primary"]:hover,
-    button[kind="secondary"]:hover,
-    div.stButton > button[data-testid="baseButton-primary"]:hover,
-    div.stButton > button[data-testid="baseButton-secondary"]:hover {
-        background: linear-gradient(135deg, #9C27B0 0%, #7209B7 100%) !important;
-        background-color: #9C27B0 !important;
+    /* Si Streamlit tiene data-theme='dark' explícito */
+    [data-theme="dark"] .stApp,
+    [data-theme="dark"] [data-testid="stAppViewContainer"],
+    .stApp[data-theme="dark"] {
+        color: #F3E8FF !important;
+    }
+    [data-theme="dark"] [data-testid="stAppViewContainer"] p,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] span,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] label,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown p,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown span,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown li,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"] p {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+    }
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h1,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h2,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h3,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h4 {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
-        box-shadow: 0 6px 20px rgba(156, 39, 176, 0.45), 0 0 14px rgba(186, 104, 200, 0.35) !important;
-        transform: translateY(-1px) !important;
     }
 
-    button p,
-    button span,
-    div.stButton > button p,
-    div.stButton > button span,
-    div.stDownloadButton > button p,
-    div.stDownloadButton > button span {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+    /* Regla base adaptativa para modo claro */
+    @media (prefers-color-scheme: light) {
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        .block-container,
+        div.stMarkdown p,
+        div.stMarkdown span,
+        div.stMarkdown li,
+        [data-testid="stWidgetLabel"] label,
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stWidgetLabel"] span {
+            color: #111111 !important;
+            -webkit-text-fill-color: #111111 !important;
+        }
+        h1, h2, h3, h4 {
+            color: #111111 !important;
+            -webkit-text-fill-color: #111111 !important;
+        }
+    }
+
+    [data-theme="light"] div.stMarkdown p,
+    [data-theme="light"] div.stMarkdown span,
+    [data-theme="light"] div.stMarkdown li,
+    [data-theme="light"] [data-testid="stWidgetLabel"] label,
+    [data-theme="light"] [data-testid="stWidgetLabel"] p,
+    [data-theme="light"] [data-testid="stWidgetLabel"] span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }
+
+    /* CONTENEDORES CON FONDO CLARO: TEXTO OBLIGATORIAMENTE NEGRO PROFUNDO (#111111) */
+    .nem-card,
+    .nem-card p,
+    .nem-card span,
+    .nem-card div,
+    .nem-card li,
+    .nem-card label,
+    .nem-card [data-testid="stWidgetLabel"] *,
+    [data-testid="stForm"],
+    [data-testid="stForm"] p,
+    [data-testid="stForm"] span,
+    [data-testid="stForm"] label,
+    [data-testid="stForm"] [data-testid="stWidgetLabel"] *,
+    [data-testid="stSidebar"],
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown span,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+    div[data-testid="stAlert"] *,
+    ul[data-baseweb="menu"] li,
+    div[data-baseweb="popover"] li {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }
+
+    .nem-card h1, .nem-card h2, .nem-card h3, .nem-card h4,
+    [data-testid="stForm"] h1, [data-testid="stForm"] h2, [data-testid="stForm"] h3, [data-testid="stForm"] h4,
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+    }
+
+    .nem-card-title {
+        color: #5B21B6 !important;
+        -webkit-text-fill-color: #5B21B6 !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
     }
 
     /* =======================================================
-       2. CAMPOS DE ENTRADA Y SELECCIÓN (INPUTS, TEXT_INPUT, SELECTBOX, TEXTAREA)
-       Fondo en lila muy suave (#FAF5FF), bordes en morado tenue (#BA68C8)
-       y texto que escribe el usuario de color negro o gris muy oscuro (#111111).
+       2. CAJAS DE TEXTO, SELECTBOXES Y SELECTORES DE DÍAS/SEMANAS
+          - Fondo lila suave (#EDE9FE o #F3E8FF)
+          - Bordes en morado (#8B5CF6)
+          - Texto escrito por el usuario en color negro (#000000)
        ======================================================= */
 
-    /* Cajas de texto, inputs y textareas (fondo lila suave y texto #111111) */
+    /* Inputs y textareas (fondo lila suave y texto escrito en #000000) */
     input,
     textarea,
     select,
     input[type="text"],
     input[type="password"],
+    input[type="number"],
     div.stTextInput input,
     div.stTextArea textarea,
     div[data-baseweb="input"] input,
     div[data-baseweb="textarea"] textarea,
+    div[data-baseweb="select"] input,
+    [data-testid="stNumberInput"] input,
     [data-testid="stForm"] input,
     [data-testid="stSidebar"] input,
     [data-testid="stSidebar"] textarea {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-        background-color: #FAF5FF !important;
-        font-size: 0.95rem !important;
-        font-weight: 500 !important;
+        background-color: #EDE9FE !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        font-size: 0.96rem !important;
+        font-weight: 600 !important;
         opacity: 1 !important;
     }
 
-    /* Contenedores base de inputs y textareas con borde #BA68C8 */
+    /* Contenedores base de input, textarea y selectbox con borde morado #8B5CF6 */
     div[data-baseweb="input"],
     div[data-baseweb="input"] > div,
     div[data-baseweb="textarea"],
     div[data-baseweb="textarea"] > div,
-    div[data-baseweb="base-input"] {
+    div[data-baseweb="base-input"],
+    div[data-baseweb="select"] > div,
+    div[data-testid="stTextInput"] div[data-baseweb="input"] > div,
+    div[data-testid="stTextArea"] div[data-baseweb="textarea"] > div,
+    div[data-testid="stNumberInput"] div[data-baseweb="input"] > div,
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+        background-color: #EDE9FE !important;
+        border: 1.5px solid #8B5CF6 !important;
         border-radius: 12px !important;
-        border: 1.5px solid #BA68C8 !important;
-        background-color: #FAF5FF !important;
-        color: #111111 !important;
+        color: #000000 !important;
         transition: all 0.25s ease !important;
     }
 
+    /* Estado Focus de inputs y selectores */
     div[data-baseweb="input"]:focus-within,
     div[data-baseweb="input"]:focus-within > div,
     div[data-baseweb="textarea"]:focus-within,
     div[data-baseweb="textarea"]:focus-within > div,
+    div[data-baseweb="select"] > div:focus-within,
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within,
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within,
     input:focus,
     textarea:focus {
-        border-color: #7209B7 !important;
-        box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.28) !important;
+        border-color: #7C3AED !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.35) !important;
         background-color: #FFFFFF !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
-    /* Placeholders legibles */
-    ::placeholder,
-    input::placeholder,
-    textarea::placeholder {
-        color: #64748B !important;
-        -webkit-text-fill-color: #64748B !important;
-        opacity: 0.85 !important;
-    }
-
-    /* Selectores (Selectbox y Multiselect) */
-    .stMultiSelect [data-baseweb="select"] > div, 
-    .stSelectbox [data-baseweb="select"] > div,
-    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] > div {
-        border: 1.5px solid #BA68C8 !important;
-        border-radius: 12px !important;
-        background-color: #FAF5FF !important;
-        color: #111111 !important;
-        transition: all 0.25s ease !important;
-    }
-
+    /* Texto seleccionado en Selectboxes */
     div[data-baseweb="select"] div,
-    div[data-baseweb="select"] input,
+    div[data-baseweb="select"] span,
     .stSelectbox div[data-baseweb="select"] span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
         font-weight: 500 !important;
     }
 
-    .stMultiSelect [data-baseweb="select"] > div:focus-within, 
-    .stSelectbox [data-baseweb="select"] > div:focus-within,
-    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within,
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
-        border-color: #7209B7 !important;
-        box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.28) !important;
-        background-color: #FFFFFF !important;
+    /* Placeholders nítidos */
+    ::placeholder,
+    input::placeholder,
+    textarea::placeholder {
+        color: #6B7280 !important;
+        -webkit-text-fill-color: #6B7280 !important;
+        opacity: 0.8 !important;
     }
 
-    /* Píldoras de opciones seleccionadas en multiselect */
+    /* SELECTOR DE DÍAS (Píldoras y etiquetas de multiselect) */
     .stMultiSelect [data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background: linear-gradient(135deg, #7209B7 0%, #BA68C8 100%) !important;
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"],
+    span[data-baseweb="tag"] {
+        background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%) !important;
+        background-color: #7C3AED !important;
         border: none !important;
         border-radius: 8px !important;
+        padding: 2px 8px !important;
     }
     
     .stMultiSelect [data-baseweb="tag"] span, 
@@ -776,138 +846,186 @@ st.markdown("""
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
         fill: #FFFFFF !important;
+        font-weight: 600 !important;
     }
 
-    /* Menú desplegable emergente (dropdown menu) */
+    /* SELECTOR DE SEMANA (Botones de incremento/decremento en number_input) */
+    div[data-testid="stNumberInput"] button,
+    div[data-testid="stNumberInputStepDown"] button,
+    div[data-testid="stNumberInputStepUp"] button {
+        background-color: #EDE9FE !important;
+        border: 1px solid #8B5CF6 !important;
+        border-radius: 8px !important;
+        color: #7C3AED !important;
+        transition: all 0.2s ease !important;
+    }
+
+    div[data-testid="stNumberInput"] button:hover,
+    div[data-testid="stNumberInputStepDown"] button:hover,
+    div[data-testid="stNumberInputStepUp"] button:hover {
+        background-color: #7C3AED !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Menú desplegable emergente de selección (Dropdown) */
     ul[data-baseweb="menu"],
     div[data-baseweb="popover"] ul {
         background-color: #FAF5FF !important;
         border-radius: 12px !important;
-        border: 1.5px solid #BA68C8 !important;
-        box-shadow: 0 8px 24px rgba(114, 9, 183, 0.12) !important;
+        border: 1.5px solid #8B5CF6 !important;
+        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.16) !important;
     }
 
     li[data-baseweb="menu-item"],
     ul[data-baseweb="menu"] li {
-        color: #111111 !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
         background-color: #FAF5FF !important;
         font-weight: 500 !important;
     }
 
     li[data-baseweb="menu-item"]:hover,
     li[data-baseweb="menu-item"][aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(224, 170, 255, 0.35) 0%, rgba(186, 104, 200, 0.25) 100%) !important;
-        color: #4A148C !important;
+        background: #EDE9FE !important;
+        color: #5B21B6 !important;
+        -webkit-text-fill-color: #5B21B6 !important;
     }
 
     /* =======================================================
-       3. TEXTOS GENERALES, ETIQUETAS (LABELS) Y TÍTULOS (#212121)
-       Forzar color gris oscuro o negro (#212121) en todos los
-       labels, párrafos y títulos para evitar que queden ocultos.
+       3. BOTONES: MORADO VIBRANTE (#7C3AED / #6D28D9),
+          TEXTO EN BLANCO PURO (#FFFFFF) Y BORDES REDONDEADOS.
+          EVITA FONDOS NEGROS EN HOVER / ACTIVE / FOCUS.
        ======================================================= */
-    label,
-    label p,
-    label span,
-    [data-testid="stWidgetLabel"],
-    [data-testid="stWidgetLabel"] p,
-    [data-testid="stWidgetLabel"] span,
-    [data-testid="stWidgetLabel"] label,
-    div.stTextInput label,
-    div.stTextInput label p,
-    div.stTextInput label span,
-    div.stTextArea label,
-    div.stTextArea label p,
-    div.stTextArea label span,
-    div.stSelectbox label,
-    div.stSelectbox label p,
-    div.stSelectbox label span,
-    div.stMultiSelect label,
-    div.stMultiSelect label p,
-    div.stMultiSelect label span,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] label p,
-    [data-testid="stSidebar"] label span,
-    [data-testid="stSidebar"] .stMarkdown p,
-    [data-testid="stSidebar"] .stMarkdown span,
-    [data-testid="stForm"] label,
-    [data-testid="stForm"] label p,
-    [data-testid="stForm"] label span,
-    [data-testid="stForm"] p,
-    [data-testid="stForm"] span {
-        color: #212121 !important;
-        -webkit-text-fill-color: #212121 !important;
+    div.stButton > button,
+    div.stDownloadButton > button,
+    div[data-testid="stFormSubmitButton"] > button,
+    button[kind="primary"],
+    button[kind="secondary"],
+    button[data-testid="baseButton-primary"],
+    button[data-testid="baseButton-secondary"],
+    [data-testid="stSidebar"] div.stButton > button,
+    [data-testid="stForm"] div.stButton > button,
+    .st-key-btn_generar_web button,
+    div[class*="st-key-btn_generar_web"] button,
+    .st-key-btn_ddgs_buscar button,
+    div[class*="st-key-btn_ddgs_buscar"] button,
+    .st-key-btn_nueva_planeacion button,
+    div[class*="st-key-btn_nueva_planeacion"] button,
+    .st-key-btn_limpiar_busqueda button,
+    div[class*="st-key-btn_limpiar_busqueda"] button {
+        background: #7C3AED !important;
+        background-color: #7C3AED !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        border: 1px solid #7C3AED !important;
+        border-radius: 12px !important;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif !important;
         font-weight: 600 !important;
-        letter-spacing: 0.2px !important;
-        opacity: 1 !important;
+        letter-spacing: 0.3px !important;
+        padding: 0.55rem 1.25rem !important;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
+        transition: all 0.25s ease !important;
     }
 
-    h1, h2, h3, h4,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
-    [data-testid="stForm"] h1,
-    [data-testid="stForm"] h2,
-    [data-testid="stForm"] h3,
-    [data-testid="stForm"] h4 {
-        color: #212121 !important;
-        font-family: 'Outfit', sans-serif !important;
-        font-weight: 700 !important;
+    /* Hover en botones: morado ligeramente más oscuro y vibrante (#6D28D9) */
+    div.stButton > button:hover,
+    div.stDownloadButton > button:hover,
+    div[data-testid="stFormSubmitButton"] > button:hover,
+    button[kind="primary"]:hover,
+    button[kind="secondary"]:hover,
+    button[data-testid="baseButton-primary"]:hover,
+    button[data-testid="baseButton-secondary"]:hover,
+    [data-testid="stSidebar"] div.stButton > button:hover,
+    [data-testid="stForm"] div.stButton > button:hover {
+        background: #6D28D9 !important;
+        background-color: #6D28D9 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        border-color: #6D28D9 !important;
+        box-shadow: 0 6px 20px rgba(109, 40, 217, 0.45) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* PREVENCIÓN DE FONDOS NEGROS O GRISES OSCUROS EN ACTIVE / FOCUS */
+    div.stButton > button:active,
+    div.stButton > button:focus,
+    div.stButton > button:focus:not(:focus-visible),
+    div.stDownloadButton > button:active,
+    div.stDownloadButton > button:focus,
+    div[data-testid="stFormSubmitButton"] > button:active,
+    div[data-testid="stFormSubmitButton"] > button:focus,
+    button[kind="primary"]:active,
+    button[kind="primary"]:focus,
+    button[kind="secondary"]:active,
+    button[kind="secondary"]:focus,
+    button[data-testid="baseButton-primary"]:active,
+    button[data-testid="baseButton-primary"]:focus,
+    button[data-testid="baseButton-secondary"]:active,
+    button[data-testid="baseButton-secondary"]:focus {
+        background: #5B21B6 !important;
+        background-color: #5B21B6 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        border-color: #5B21B6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4) !important;
+    }
+
+    /* Asegurar texto blanco en todos los hijos internos del botón */
+    button p,
+    button span,
+    button div,
+    div.stButton > button p,
+    div.stButton > button span,
+    div.stDownloadButton > button p,
+    div.stDownloadButton > button span,
+    div[data-testid="stFormSubmitButton"] button p,
+    div[data-testid="stFormSubmitButton"] button span {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    /* Pestañas de visualización (Tabs) */
+    button[data-baseweb="tab"] {
+        border-radius: 8px 8px 0 0 !important;
+        font-weight: 600 !important;
+        padding: 0.6rem 1.1rem !important;
+        color: #7C3AED !important;
+        -webkit-text-fill-color: #7C3AED !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background-color: #EDE9FE !important;
+        border-bottom: 3px solid #7C3AED !important;
+        color: #5B21B6 !important;
+        -webkit-text-fill-color: #5B21B6 !important;
+    }
+    div[data-baseweb="tab-highlight"] {
+        background-color: #7C3AED !important;
     }
 
     /* Tarjeta de Inicio de Sesión (Login) */
     [data-testid="stForm"] {
         background: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%) !important;
-        border: 1.5px solid #BA68C8 !important;
+        border: 1.5px solid #8B5CF6 !important;
         border-radius: 20px !important;
         padding: 2.2rem !important;
-        box-shadow: 0 10px 30px rgba(114, 9, 183, 0.08) !important;
-    }
-
-    [data-testid="stForm"] div[data-baseweb="input"] > div {
-        background-color: #FAF5FF !important;
-        border: 1.5px solid #BA68C8 !important;
-        border-radius: 12px !important;
+        box-shadow: 0 12px 36px rgba(124, 58, 237, 0.12) !important;
     }
 
     /* Barra lateral */
     [data-testid="stSidebar"] {
         background-color: #FAF5FF !important;
-        border-right: 1px solid #BA68C8 !important;
+        border-right: 1.5px solid #EDE9FE !important;
     }
 
-    [data-testid="stSidebar"] div[data-baseweb="input"] > div,
-    [data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        background-color: #FAF5FF !important;
-        border: 1.5px solid #BA68C8 !important;
-        border-radius: 10px !important;
-    }
-
-    /* Área de arrastre de archivos (file_uploader) */
-    section[data-testid="stFileUploadDropzone"],
-    div[data-testid="stFileUploader"] section {
-        border: 2px dashed #D8B4FE !important;
-        border-radius: 14px !important;
-        background-color: #FDF9FE !important;
-        transition: all 0.3s ease !important;
-    }
-
-    section[data-testid="stFileUploadDropzone"]:hover,
-    div[data-testid="stFileUploader"] section:hover {
-        border-color: #F72585 !important;
-        background-color: #FFF5F9 !important;
-        box-shadow: 0 0 16px rgba(247, 37, 133, 0.16) !important;
-    }
-
-    /* Hero Banner y Tarjetas con Estética Gemini */
+    /* Hero Banner y Tarjetas con Estética Morada Profesional */
     .hero-banner {
-        background: linear-gradient(135deg, #3C096C 0%, #5A189A 35%, #7209B7 70%, #B5179E 100%);
-        color: white;
+        background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 40%, #7C3AED 75%, #8B5CF6 100%);
+        color: #FFFFFF !important;
         padding: 2.2rem 2.5rem;
         border-radius: 18px;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 30px -5px rgba(114, 9, 183, 0.35);
-        border: 1px solid rgba(255, 117, 143, 0.3);
+        box-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.35);
+        border: 1px solid rgba(224, 170, 255, 0.3);
         position: relative;
         overflow: hidden;
     }
@@ -924,7 +1042,7 @@ st.markdown("""
     }
 
     .hero-subtitle {
-        color: #FFD6FF;
+        color: #F3E8FF !important;
         font-size: 0.95rem;
         letter-spacing: 1.5px;
         text-transform: uppercase;
@@ -933,7 +1051,7 @@ st.markdown("""
     }
 
     .hero-title {
-        color: #FFFFFF;
+        color: #FFFFFF !important;
         font-size: 2rem;
         font-weight: 700;
         margin: 0 0 0.5rem 0;
@@ -941,76 +1059,70 @@ st.markdown("""
     }
 
     .hero-desc {
-        color: #F8F0FC;
+        color: #F3E8FF !important;
         font-size: 1.02rem;
         max-width: 900px;
         line-height: 1.5;
         margin: 0;
     }
 
-    /* Insignias / Badges */
-    .badge-sep {
-        background: #FAF5FF;
-        color: #5A189A;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        border: 1px solid #D8B4FE;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    /* Tarjetas de sección */
+    /* Tarjetas de sección (NEM Cards) */
     .nem-card {
-        background-color: #FFFFFF;
+        background-color: #FFFFFF !important;
         border-radius: 16px;
         padding: 1.5rem;
-        border: 1px solid #F1E4F7;
-        box-shadow: 0 2px 10px rgba(114, 9, 183, 0.04);
+        border: 1.5px solid #EDE9FE;
+        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.05);
         margin-bottom: 1.5rem;
         transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .nem-card:hover {
-        box-shadow: 0 6px 20px rgba(114, 9, 183, 0.08);
-        border-color: #E0AAFF;
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.1);
+        border-color: #8B5CF6;
     }
 
     .nem-card-header {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        border-bottom: 2px solid #F8EFFC;
+        border-bottom: 2px solid #EDE9FE;
         padding-bottom: 0.75rem;
         margin-bottom: 1.25rem;
-    }
-
-    .nem-card-title {
-        color: #5A189A;
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin: 0;
     }
 
     /* Píldoras de Ejes Articuladores */
     .eje-pill {
         display: inline-block;
-        background-color: #FAF5FF;
-        border: 1px solid #D8B4FE;
+        background-color: #EDE9FE;
+        border: 1px solid #8B5CF6;
         border-radius: 20px;
         padding: 4px 12px;
         margin: 4px;
         font-size: 0.85rem;
-        color: #5A189A;
+        color: #5B21B6 !important;
+        font-weight: 600;
+    }
+
+    /* Insignias / Badges */
+    .badge-sep {
+        background: #EDE9FE;
+        color: #5B21B6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        border: 1px solid #8B5CF6;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
     }
 
     /* Status de API Key */
     .key-status-ok {
-        background-color: #F3E8FF;
-        color: #6B21A8;
-        border: 1px solid #D8B4FE;
+        background-color: #EDE9FE;
+        color: #5B21B6;
+        border: 1px solid #8B5CF6;
         padding: 0.35rem 0.75rem;
         border-radius: 8px;
         font-size: 0.82rem;
@@ -1027,6 +1139,22 @@ st.markdown("""
         font-size: 0.82rem;
         font-weight: 600;
         display: inline-block;
+    }
+
+    /* Área de arrastre de archivos (file_uploader) */
+    section[data-testid="stFileUploadDropzone"],
+    div[data-testid="stFileUploader"] section {
+        border: 2px dashed #8B5CF6 !important;
+        border-radius: 14px !important;
+        background-color: #EDE9FE !important;
+        transition: all 0.3s ease !important;
+    }
+
+    section[data-testid="stFileUploadDropzone"]:hover,
+    div[data-testid="stFileUploader"] section:hover {
+        border-color: #7C3AED !important;
+        background-color: #FAF5FF !important;
+        box-shadow: 0 0 16px rgba(124, 58, 237, 0.2) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1188,13 +1316,13 @@ if not st.session_state.get("authentication_status"):
     with col_l2:
         st.markdown("""
         <div style="text-align: center; margin-top: 2rem; margin-bottom: 1.5rem;">
-            <div style="display: inline-block; background: linear-gradient(135deg, #7209B7, #B5179E); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2rem; color: #FFFFFF; box-shadow: 0 6px 18px rgba(114, 9, 183, 0.28);">
-                🇲🇽
+            <div style="display: inline-block; background: linear-gradient(135deg, #7C3AED, #6D28D9); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2rem; color: #FFFFFF; box-shadow: 0 6px 18px rgba(124, 58, 237, 0.28);">
+                📚
             </div>
-            <h2 style="font-family: 'Outfit', sans-serif; color: #5A189A; margin-top: 0.75rem; margin-bottom: 0.25rem; font-size: 1.8rem; font-weight: 700;">
+            <h2 style="font-family: 'Outfit', sans-serif; color: #5B21B6; margin-top: 0.75rem; margin-bottom: 0.25rem; font-size: 1.8rem; font-weight: 700;">
                 Planeaciones Escolares NEM
             </h2>
-            <p style="color: #7B2CBF; font-size: 0.95rem; margin-bottom: 1.5rem;">
+            <p style="color: #7C3AED; font-size: 0.95rem; margin-bottom: 1.5rem; font-weight: 500;">
                 Sistema Integral de Intervención Docente • Educación Primaria
             </p>
         </div>
