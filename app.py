@@ -595,193 +595,126 @@ st.markdown("""
         --purple-dark: #5B21B6;
         --purple-accent: #8B5CF6;
         --purple-border: #8B5CF6;
-        --lila-soft: #EDE9FE;
-        --lila-light: #F3E8FF;
+        --lila-soft: #F3E8FF;
         --lila-canvas: #FAF5FF;
         --text-pure-white: #FFFFFF;
         --text-deep-black: #111111;
         --text-user-input: #000000;
-        --border-radius-base: 12px;
+        --border-radius-base: 10px;
     }
 
     /* =======================================================
-       1. TEXTOS GENERALES, ETIQUETAS (LABELS) Y CONTRASTE
-          - Fondo oscuro o modo oscuro -> Blanco o gris muy claro (#F3E8FF / #FFFFFF)
-          - Contenedor o fondo claro -> Negro profundo (#111111)
-          Garantiza legibilidad sin importar el tema del sistema.
+       1. PANTALLA DE LOGIN: TEXTOS, ETIQUETAS Y CAMPOS LIMPIOS
        ======================================================= */
 
-    /* Regla base adaptativa para modo oscuro (OS o tema oscuro de Streamlit) */
+    /* Título y subtítulo del Login adaptativos */
+    .login-header-title {
+        font-family: 'Outfit', sans-serif !important;
+        color: #111111 !important;
+        margin-top: 0.75rem !important;
+        margin-bottom: 0.25rem !important;
+        font-size: 1.85rem !important;
+        font-weight: 700 !important;
+    }
+
+    .login-header-desc {
+        color: #5B21B6 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 1.5rem !important;
+        font-weight: 600 !important;
+    }
+
     @media (prefers-color-scheme: dark) {
-        .stApp,
-        [data-testid="stAppViewContainer"],
-        .block-container {
-            color: #F3E8FF !important;
-        }
-        [data-testid="stAppViewContainer"] p,
-        [data-testid="stAppViewContainer"] span,
-        [data-testid="stAppViewContainer"] label,
-        [data-testid="stAppViewContainer"] div.stMarkdown,
-        [data-testid="stAppViewContainer"] div.stMarkdown p,
-        [data-testid="stAppViewContainer"] div.stMarkdown span,
-        [data-testid="stAppViewContainer"] div.stMarkdown li,
-        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
-        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
-        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
-        [data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"] p {
-            color: #F3E8FF !important;
-            -webkit-text-fill-color: #F3E8FF !important;
-        }
-        [data-testid="stAppViewContainer"] h1,
-        [data-testid="stAppViewContainer"] h2,
-        [data-testid="stAppViewContainer"] h3,
-        [data-testid="stAppViewContainer"] h4 {
+        .login-header-title {
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
         }
+        .login-header-desc {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
     }
 
-    /* Streamlit data-theme='dark' explícito */
-    [data-theme="dark"] .stApp,
-    [data-theme="dark"] [data-testid="stAppViewContainer"],
-    .stApp[data-theme="dark"] {
-        color: #F3E8FF !important;
-    }
-    [data-theme="dark"] [data-testid="stAppViewContainer"] p,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] span,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] label,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown p,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown span,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown li,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"] p {
-        color: #F3E8FF !important;
-        -webkit-text-fill-color: #F3E8FF !important;
-    }
-    [data-theme="dark"] [data-testid="stAppViewContainer"] h1,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] h2,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] h3,
-    [data-theme="dark"] [data-testid="stAppViewContainer"] h4 {
+    [data-theme="dark"] .login-header-title {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
     }
 
-    /* Regla base adaptativa para modo claro */
-    @media (prefers-color-scheme: light) {
-        .stApp,
-        [data-testid="stAppViewContainer"],
-        .block-container,
-        div.stMarkdown p,
-        div.stMarkdown span,
-        div.stMarkdown li,
-        [data-testid="stWidgetLabel"] label,
-        [data-testid="stWidgetLabel"] p,
-        [data-testid="stWidgetLabel"] span {
-            color: #111111 !important;
-            -webkit-text-fill-color: #111111 !important;
-        }
-        h1, h2, h3, h4 {
-            color: #111111 !important;
-            -webkit-text-fill-color: #111111 !important;
-        }
+    [data-theme="dark"] .login-header-desc {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
     }
 
-    [data-theme="light"] div.stMarkdown p,
-    [data-theme="light"] div.stMarkdown span,
-    [data-theme="light"] div.stMarkdown li,
-    [data-theme="light"] [data-testid="stWidgetLabel"] label,
-    [data-theme="light"] [data-testid="stWidgetLabel"] p,
-    [data-theme="light"] [data-testid="stWidgetLabel"] span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
+    /* Tarjeta del Formulario de Login */
+    [data-testid="stForm"] {
+        background: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%) !important;
+        border: 1.5px solid #8B5CF6 !important;
+        border-radius: 20px !important;
+        padding: 2.2rem !important;
+        box-shadow: 0 12px 36px rgba(124, 58, 237, 0.12) !important;
     }
 
-    /* BARRA LATERAL (SIDEBAR): FONDO LILA SUAVE Y TEXTO NEGRO PROFUNDO (#111111) */
-    [data-testid="stSidebar"],
-    section[data-testid="stSidebar"],
-    [data-testid="stSidebar"] > div:first-child,
-    [data-testid="stSidebarContent"],
-    [data-testid="stSidebarUserContent"],
-    div[data-testid="stSidebarUserContent"] {
-        background-color: #FAF5FF !important;
-        border-right: 1.5px solid #EDE9FE !important;
-    }
-
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] label p,
-    [data-testid="stSidebar"] label span,
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
-    [data-testid="stSidebar"] div.stMarkdown p,
-    [data-testid="stSidebar"] div.stMarkdown span,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-        font-weight: 600 !important;
-        font-size: 0.92rem !important;
-    }
-
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4 {
-        color: #4C1D95 !important;
-        -webkit-text-fill-color: #4C1D95 !important;
-        font-weight: 700 !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
-    [data-testid="stSidebar"] .stCaption {
-        color: #5B21B6 !important;
-        -webkit-text-fill-color: #5B21B6 !important;
-        font-weight: 500 !important;
-    }
-
-    /* CONTENEDORES CON FONDO CLARO EN ÁREA PRINCIPAL */
-    .nem-card,
-    .nem-card p,
-    .nem-card span,
-    .nem-card div,
-    .nem-card li,
-    .nem-card label,
-    .nem-card [data-testid="stWidgetLabel"] *,
-    [data-testid="stForm"],
-    [data-testid="stForm"] p,
-    [data-testid="stForm"] span,
-    [data-testid="stForm"] label,
-    [data-testid="stForm"] [data-testid="stWidgetLabel"] *,
-    div[data-testid="stAlert"] *,
-    ul[data-baseweb="menu"] li,
-    div[data-baseweb="popover"] li {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-    }
-
-    .nem-card h1, .nem-card h2, .nem-card h3, .nem-card h4,
-    [data-testid="stForm"] h1, [data-testid="stForm"] h2, [data-testid="stForm"] h3, [data-testid="stForm"] h4 {
+    /* Título dentro de la tarjeta de Login */
+    [data-testid="stForm"] h1,
+    [data-testid="stForm"] h2,
+    [data-testid="stForm"] h3,
+    [data-testid="stForm"] h4 {
         color: #111111 !important;
         -webkit-text-fill-color: #111111 !important;
         font-family: 'Outfit', sans-serif !important;
         font-weight: 700 !important;
+        text-align: center !important;
+        margin-bottom: 1.25rem !important;
     }
 
-    .nem-card-title {
-        color: #5B21B6 !important;
-        -webkit-text-fill-color: #5B21B6 !important;
-        font-size: 1.25rem !important;
-        font-weight: 700 !important;
+    /* Etiquetas del formulario de Login (Usuario, Contraseña) */
+    [data-testid="stForm"] label,
+    [data-testid="stForm"] label p,
+    [data-testid="stForm"] label span,
+    [data-testid="stForm"] [data-testid="stWidgetLabel"],
+    [data-testid="stForm"] [data-testid="stWidgetLabel"] *,
+    [data-testid="stForm"] p,
+    [data-testid="stForm"] span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Cajas de texto en el formulario de Login (Usuario y Contraseña) */
+    [data-testid="stForm"] input,
+    [data-testid="stForm"] input[type="text"],
+    [data-testid="stForm"] input[type="password"],
+    [data-testid="stForm"] div[data-baseweb="input"],
+    [data-testid="stForm"] div[data-baseweb="input"] > div,
+    [data-testid="stForm"] div[data-baseweb="base-input"] {
+        background: #F3E8FF !important;
+        background-color: #F3E8FF !important;
+        border: 1.5px solid #8B5CF6 !important;
+        border-radius: 10px !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        font-size: 0.96rem !important;
+        font-weight: 600 !important;
+    }
+
+    [data-testid="stForm"] div[data-baseweb="input"]:focus-within,
+    [data-testid="stForm"] div[data-baseweb="input"]:focus-within > div,
+    [data-testid="stForm"] input:focus {
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        border-color: #7C3AED !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.35) !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
     /* =======================================================
-       2. CAJAS DE TEXTO Y CAMPOS DE ENTRADA (INPUTS / TEXTBOX)
-          - Fondo lila suave (#EDE9FE)
-          - Bordes morados (#8B5CF6)
-          - Texto que escribe el usuario en negro puro (#000000)
+       2. CAJAS DE TEXTO E INPUTS GENERALES: ELIMINACIÓN DE FONDO NEGRO O VERDE
+          Fondo suave (#F3E8FF), bordes morados (#8B5CF6), texto en negro (#000000).
        ======================================================= */
+
+    /* Inputs, textareas y selects base */
     input,
     textarea,
     select,
@@ -800,7 +733,8 @@ st.markdown("""
     [data-testid="stSidebar"] textarea,
     [data-testid="stSidebar"] div[data-baseweb="input"] input,
     [data-testid="stSidebar"] div[data-baseweb="select"] input {
-        background-color: #EDE9FE !important;
+        background: #F3E8FF !important;
+        background-color: #F3E8FF !important;
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
         font-size: 0.95rem !important;
@@ -808,28 +742,49 @@ st.markdown("""
         opacity: 1 !important;
     }
 
-    /* Contenedores envolventes de inputs y selectores */
+    /* Contenedores envolventes de inputs y selectores (sin fondos verdes ni negros) */
     div[data-baseweb="input"],
     div[data-baseweb="input"] > div,
     div[data-baseweb="textarea"],
     div[data-baseweb="textarea"] > div,
     div[data-baseweb="base-input"],
+    div[data-baseweb="base-input"] > div,
     div[data-baseweb="select"] > div,
+    div[data-testid="stTextInput"] div[data-baseweb="input"],
     div[data-testid="stTextInput"] div[data-baseweb="input"] > div,
+    div[data-testid="stTextArea"] div[data-baseweb="textarea"],
     div[data-testid="stTextArea"] div[data-baseweb="textarea"] > div,
+    div[data-testid="stNumberInput"] div[data-baseweb="input"],
     div[data-testid="stNumberInput"] div[data-baseweb="input"] > div,
     div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
     div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
     [data-testid="stSidebar"] div[data-baseweb="input"] > div,
     [data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        background-color: #EDE9FE !important;
+        background: #F3E8FF !important;
+        background-color: #F3E8FF !important;
         border: 1.5px solid #8B5CF6 !important;
         border-radius: 10px !important;
         color: #000000 !important;
         transition: all 0.25s ease !important;
     }
 
-    /* En foco: iluminación y borde definido */
+    /* Evitar fondos verdes / amarillos / negros causados por autocompletado del navegador */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px #F3E8FF inset !important;
+        box-shadow: 0 0 0 1000px #F3E8FF inset !important;
+        -webkit-text-fill-color: #000000 !important;
+        color: #000000 !important;
+        caret-color: #000000 !important;
+        background-color: #F3E8FF !important;
+        transition: background-color 5000s ease-in-out 0s !important;
+    }
+
+    /* Estado en foco de inputs y selectores */
     div[data-baseweb="input"]:focus-within,
     div[data-baseweb="input"]:focus-within > div,
     div[data-baseweb="textarea"]:focus-within,
@@ -839,7 +794,8 @@ st.markdown("""
     textarea:focus {
         border-color: #7C3AED !important;
         box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.35) !important;
-        background-color: #EDE9FE !important;
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
     }
@@ -881,15 +837,167 @@ st.markdown("""
 
     li[data-baseweb="menu-item"]:hover,
     li[data-baseweb="menu-item"][aria-selected="true"] {
-        background: #EDE9FE !important;
+        background: #F3E8FF !important;
         color: #5B21B6 !important;
         -webkit-text-fill-color: #5B21B6 !important;
     }
 
     /* =======================================================
-       3. BOTONES Y SELECTORES: ELIMINACIÓN TOTAL DE FONDOS NEGROS
-          Fondo morado vibrante (#7C3AED), hover (#6D28D9),
-          active/focus (#5B21B6), texto blanco puro (#FFFFFF).
+       3. TEXTOS Y ETIQUETAS: CONTRASTE ESTRICTO
+          - Fondo claro -> Negro o gris muy oscuro (#111111)
+          - Fondo oscuro / lienzo oscuro -> Blanco (#FFFFFF) o gris claro (#F3E8FF)
+          - Contenedores morados -> Blanco puro (#FFFFFF)
+       ======================================================= */
+
+    /* CONTENEDORES CON FONDO CLARO (Sidebar, NEM Cards, Alerts, Popovers) */
+    [data-testid="stSidebar"],
+    section[data-testid="stSidebar"],
+    [data-testid="stSidebar"] > div:first-child,
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"],
+    div[data-testid="stSidebarUserContent"] {
+        background-color: #FAF5FF !important;
+        border-right: 1.5px solid #EDE9FE !important;
+    }
+
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] label p,
+    [data-testid="stSidebar"] label span,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
+    [data-testid="stSidebar"] div.stMarkdown p,
+    [data-testid="stSidebar"] div.stMarkdown span,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-weight: 600 !important;
+        font-size: 0.92rem !important;
+    }
+
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4 {
+        color: #4C1D95 !important;
+        -webkit-text-fill-color: #4C1D95 !important;
+        font-weight: 700 !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+    [data-testid="stSidebar"] .stCaption {
+        color: #5B21B6 !important;
+        -webkit-text-fill-color: #5B21B6 !important;
+        font-weight: 500 !important;
+    }
+
+    .nem-card,
+    .nem-card p,
+    .nem-card span,
+    .nem-card div,
+    .nem-card li,
+    .nem-card label,
+    .nem-card [data-testid="stWidgetLabel"] *,
+    div[data-testid="stAlert"] *,
+    ul[data-baseweb="menu"] li,
+    div[data-baseweb="popover"] li {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }
+
+    .nem-card h1, .nem-card h2, .nem-card h3, .nem-card h4 {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+    }
+
+    .nem-card-title {
+        color: #5B21B6 !important;
+        -webkit-text-fill-color: #5B21B6 !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* MODO OSCURO (LIENZO GENERAL OSCURO) */
+    @media (prefers-color-scheme: dark) {
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        .block-container {
+            color: #F3E8FF !important;
+        }
+        [data-testid="stAppViewContainer"] p,
+        [data-testid="stAppViewContainer"] span,
+        [data-testid="stAppViewContainer"] label,
+        [data-testid="stAppViewContainer"] div.stMarkdown p,
+        [data-testid="stAppViewContainer"] div.stMarkdown span,
+        [data-testid="stAppViewContainer"] div.stMarkdown li,
+        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
+        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
+        [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
+        [data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"] p {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
+        [data-testid="stAppViewContainer"] h1,
+        [data-testid="stAppViewContainer"] h2,
+        [data-testid="stAppViewContainer"] h3,
+        [data-testid="stAppViewContainer"] h4 {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+    }
+
+    [data-theme="dark"] [data-testid="stAppViewContainer"] p,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] span,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] label,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown p,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] div.stMarkdown span,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] label,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+    }
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h1,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h2,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h3,
+    [data-theme="dark"] [data-testid="stAppViewContainer"] h4 {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    /* MODO CLARO (LIENZO GENERAL CLARO) */
+    @media (prefers-color-scheme: light) {
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        .block-container,
+        div.stMarkdown p,
+        div.stMarkdown span,
+        div.stMarkdown li,
+        [data-testid="stWidgetLabel"] label,
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stWidgetLabel"] span {
+            color: #111111 !important;
+            -webkit-text-fill-color: #111111 !important;
+        }
+        h1, h2, h3, h4 {
+            color: #111111 !important;
+            -webkit-text-fill-color: #111111 !important;
+        }
+    }
+
+    [data-theme="light"] [data-testid="stWidgetLabel"] label,
+    [data-theme="light"] [data-testid="stWidgetLabel"] p,
+    [data-theme="light"] [data-testid="stWidgetLabel"] span,
+    [data-theme="light"] div.stMarkdown p,
+    [data-theme="light"] div.stMarkdown span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }
+
+    /* =======================================================
+       4. BOTONES Y SELECTORES: MORADO VIBRANTE Y TEXTO BLANCO
        ======================================================= */
     div.stButton > button,
     div.stDownloadButton > button,
@@ -1039,22 +1147,13 @@ st.markdown("""
         -webkit-text-fill-color: #7C3AED !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
-        background-color: #EDE9FE !important;
+        background-color: #F3E8FF !important;
         border-bottom: 3px solid #7C3AED !important;
         color: #5B21B6 !important;
         -webkit-text-fill-color: #5B21B6 !important;
     }
     div[data-baseweb="tab-highlight"] {
         background-color: #7C3AED !important;
-    }
-
-    /* Tarjeta de Inicio de Sesión (Login) */
-    [data-testid="stForm"] {
-        background: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%) !important;
-        border: 1.5px solid #8B5CF6 !important;
-        border-radius: 20px !important;
-        padding: 2.2rem !important;
-        box-shadow: 0 12px 36px rgba(124, 58, 237, 0.12) !important;
     }
 
     /* Tarjetas de sección (NEM Cards) */
@@ -1085,7 +1184,7 @@ st.markdown("""
     /* Píldoras de Ejes Articuladores */
     .eje-pill {
         display: inline-block;
-        background-color: #EDE9FE;
+        background-color: #F3E8FF;
         border: 1px solid #8B5CF6;
         border-radius: 20px;
         padding: 4px 12px;
@@ -1097,7 +1196,7 @@ st.markdown("""
 
     /* Insignias / Badges */
     .badge-sep {
-        background: #EDE9FE;
+        background: #F3E8FF;
         color: #5B21B6;
         padding: 0.25rem 0.75rem;
         border-radius: 9999px;
@@ -1111,7 +1210,7 @@ st.markdown("""
 
     /* Status de API Key */
     .key-status-ok {
-        background-color: #EDE9FE;
+        background-color: #F3E8FF;
         color: #5B21B6;
         border: 1px solid #8B5CF6;
         padding: 0.35rem 0.75rem;
@@ -1137,7 +1236,7 @@ st.markdown("""
     div[data-testid="stFileUploader"] section {
         border: 2px dashed #8B5CF6 !important;
         border-radius: 14px !important;
-        background-color: #EDE9FE !important;
+        background-color: #F3E8FF !important;
         transition: all 0.3s ease !important;
     }
 
@@ -1310,10 +1409,10 @@ if not st.session_state.get("authentication_status"):
             <div style="display: inline-block; background: linear-gradient(135deg, #7C3AED, #6D28D9); width: 68px; height: 68px; border-radius: 50%; line-height: 68px; font-size: 2rem; color: #FFFFFF; box-shadow: 0 6px 18px rgba(124, 58, 237, 0.28);">
                 📚
             </div>
-            <h2 style="font-family: 'Outfit', sans-serif; color: #5B21B6; margin-top: 0.75rem; margin-bottom: 0.25rem; font-size: 1.8rem; font-weight: 700;">
+            <h2 class="login-header-title">
                 Planeaciones Escolares NEM
             </h2>
-            <p style="color: #7C3AED; font-size: 0.95rem; margin-bottom: 1.5rem; font-weight: 500;">
+            <p class="login-header-desc">
                 Sistema Integral de Intervención Docente • Educación Primaria
             </p>
         </div>
