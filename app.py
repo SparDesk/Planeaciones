@@ -601,181 +601,210 @@ st.markdown("""
     }
 
     /* =======================================================
-       1. BOTÓN PRINCIPAL: Generar Planeación con Búsqueda Web
-       Degradado dinámico e iluminado con texto blanco, sombra sutil
-       y ligero resplandor al pasar el cursor (hover).
+       1. REGLAS ESTRICTAS DE COLOR: BOTONES PRINCIPALES (ST.BUTTON)
+       Fondo en color Morado Intenso / Vibrante (#7209B7 o #4A148C),
+       con texto en Blanco (#FFFFFF) y bordes redondeados limpios (12px).
+       Al pasar el cursor (hover), un tono morado más claro (#9C27B0).
        ======================================================= */
+    div.stButton > button,
+    div.stDownloadButton > button,
     .st-key-btn_generar_web button,
-    div[class*="st-key-btn_generar_web"] button {
-        background: linear-gradient(135deg, #FF758F 0%, #B5179E 50%, #7209B7 100%) !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.3px !important;
-        box-shadow: 0 4px 15px rgba(181, 23, 158, 0.35) !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .st-key-btn_generar_web button:hover,
-    div[class*="st-key-btn_generar_web"] button:hover {
-        background: linear-gradient(135deg, #FF8FA3 0%, #C72CAE 50%, #8318C7 100%) !important;
-        box-shadow: 0 6px 22px rgba(181, 23, 158, 0.55), 0 0 18px rgba(255, 117, 143, 0.45) !important;
-        transform: translateY(-2px) !important;
-    }
-
-    /* =======================================================
-       2. BOTÓN: Buscar en la Web
-       Degradado complementario con sombra y suave transición
-       ======================================================= */
+    div[class*="st-key-btn_generar_web"] button,
     .st-key-btn_ddgs_buscar button,
-    div[class*="st-key-btn_ddgs_buscar"] button {
-        background: linear-gradient(135deg, #F72585 0%, #7209B7 100%) !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.2px !important;
-        box-shadow: 0 4px 14px rgba(247, 37, 133, 0.3) !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .st-key-btn_ddgs_buscar button:hover,
-    div[class*="st-key-btn_ddgs_buscar"] button:hover {
-        background: linear-gradient(135deg, #FF3B96 0%, #8318C7 100%) !important;
-        box-shadow: 0 6px 20px rgba(247, 37, 133, 0.48), 0 0 14px rgba(247, 37, 133, 0.35) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* =======================================================
-       3. BOTÓN: 🔄 Nueva Planeación en la barra lateral
-       Fondo sutil semitransparente con borde iluminado y texto
-       en tonos lavanda, lila y rosa pastel.
-       ======================================================= */
-    [data-testid="stSidebar"] div.stButton > button,
+    div[class*="st-key-btn_ddgs_buscar"] button,
     .st-key-btn_nueva_planeacion button,
-    div[class*="st-key-btn_nueva_planeacion"] button {
-        background: rgba(255, 255, 255, 0.92) !important;
-        backdrop-filter: blur(8px) !important;
-        border: 1.5px solid #C77DFF !important;
-        color: #7209B7 !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.2px !important;
-        box-shadow: 0 2px 10px rgba(199, 125, 255, 0.2) !important;
-        transition: all 0.3s ease !important;
-    }
-
-    [data-testid="stSidebar"] div.stButton > button:hover,
-    .st-key-btn_nueva_planeacion button:hover,
-    div[class*="st-key-btn_nueva_planeacion"] button:hover {
-        background: linear-gradient(135deg, rgba(255, 117, 143, 0.15) 0%, rgba(181, 23, 158, 0.15) 100%) !important;
-        border-color: #F72585 !important;
-        color: #5A189A !important;
-        box-shadow: 0 4px 18px rgba(247, 37, 133, 0.35), 0 0 14px rgba(199, 125, 255, 0.35) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* =======================================================
-       4. BOTONES DE ACCIÓN SECUNDARIA: Limpiar Búsqueda y Limpiar Todo
-       Estilo de borde fino (outline) en tonos rosa/morado suave con
-       transiciones delicadas.
-       ======================================================= */
+    div[class*="st-key-btn_nueva_planeacion"] button,
     .st-key-btn_limpiar_busqueda button,
     div[class*="st-key-btn_limpiar_busqueda"] button,
-    .btn-outline-delicado button {
-        background: #FFFFFF !important;
-        border: 1.5px solid #E0AAFF !important;
-        color: #7209B7 !important;
-        border-radius: 12px !important;
-        font-weight: 500 !important;
-        letter-spacing: 0.2px !important;
-        box-shadow: 0 2px 6px rgba(114, 9, 183, 0.08) !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .st-key-btn_limpiar_busqueda button:hover,
-    div[class*="st-key-btn_limpiar_busqueda"] button:hover,
-    .btn-outline-delicado button:hover {
-        background: #FAF5FF !important;
-        border-color: #B5179E !important;
-        color: #B5179E !important;
-        box-shadow: 0 3px 12px rgba(181, 23, 158, 0.2) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* =======================================================
-       5. REGLAS GLOBALES DE BOTONES:
-       border-radius: 12px, fuentes elegantes y transiciones fluidas.
-       ======================================================= */
-    div.stButton > button {
+    [data-testid="stSidebar"] div.stButton > button,
+    [data-testid="stForm"] div.stButton > button,
+    button[kind="primary"],
+    button[kind="secondary"],
+    div.stButton > button[data-testid="baseButton-primary"],
+    div.stButton > button[data-testid="baseButton-secondary"] {
+        background: linear-gradient(135deg, #7209B7 0%, #4A148C 100%) !important;
+        background-color: #7209B7 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        border: none !important;
         border-radius: 12px !important;
         font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif !important;
         font-weight: 600 !important;
-        letter-spacing: 0.2px !important;
-        transition: all 0.3s ease !important;
-    }
-
-    /* Botones primarios por defecto (ej. Generar Planeación con Gemini) */
-    div.stButton > button[kind="primary"],
-    div.stButton > button[data-testid="baseButton-primary"] {
-        background: linear-gradient(135deg, #7209B7 0%, #3A0CA3 100%) !important;
-        color: #FFFFFF !important;
-        border: none !important;
+        letter-spacing: 0.3px !important;
+        padding: 0.55rem 1.25rem !important;
         box-shadow: 0 4px 14px rgba(114, 9, 183, 0.3) !important;
+        transition: all 0.25s ease !important;
     }
 
-    div.stButton > button[kind="primary"]:hover,
-    div.stButton > button[data-testid="baseButton-primary"]:hover {
-        background: linear-gradient(135deg, #8318C7 0%, #480CA8 100%) !important;
-        box-shadow: 0 6px 20px rgba(114, 9, 183, 0.45), 0 0 14px rgba(157, 78, 221, 0.35) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* Botones secundarios por defecto */
-    div.stButton > button[kind="secondary"],
-    div.stButton > button[data-testid="baseButton-secondary"] {
-        border-radius: 12px !important;
-        border: 1.5px solid #E2E8F0 !important;
-        background-color: #FFFFFF !important;
-        color: #3C096C !important;
-    }
-
-    div.stButton > button[kind="secondary"]:hover,
+    div.stButton > button:hover,
+    div.stDownloadButton > button:hover,
+    .st-key-btn_generar_web button:hover,
+    div[class*="st-key-btn_generar_web"] button:hover,
+    .st-key-btn_ddgs_buscar button:hover,
+    div[class*="st-key-btn_ddgs_buscar"] button:hover,
+    .st-key-btn_nueva_planeacion button:hover,
+    div[class*="st-key-btn_nueva_planeacion"] button:hover,
+    .st-key-btn_limpiar_busqueda button:hover,
+    div[class*="st-key-btn_limpiar_busqueda"] button:hover,
+    [data-testid="stSidebar"] div.stButton > button:hover,
+    [data-testid="stForm"] div.stButton > button:hover,
+    button[kind="primary"]:hover,
+    button[kind="secondary"]:hover,
+    div.stButton > button[data-testid="baseButton-primary"]:hover,
     div.stButton > button[data-testid="baseButton-secondary"]:hover {
-        border-color: #C77DFF !important;
-        background-color: #FAF5FF !important;
-        color: #7209B7 !important;
-        box-shadow: 0 3px 12px rgba(199, 125, 255, 0.2) !important;
+        background: linear-gradient(135deg, #9C27B0 0%, #7209B7 100%) !important;
+        background-color: #9C27B0 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        box-shadow: 0 6px 20px rgba(156, 39, 176, 0.45), 0 0 14px rgba(186, 104, 200, 0.35) !important;
         transform: translateY(-1px) !important;
     }
 
-    /* Botones de descarga */
-    div.stDownloadButton > button {
-        border-radius: 12px !important;
-        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
-        font-weight: 600 !important;
-        border: 1.5px solid #E0AAFF !important;
-        background-color: #FFFFFF !important;
-        color: #7209B7 !important;
-        transition: all 0.3s ease !important;
-    }
-
-    div.stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #FAF5FF 0%, #FDF4F8 100%) !important;
-        border-color: #B5179E !important;
-        color: #B5179E !important;
-        box-shadow: 0 4px 14px rgba(181, 23, 158, 0.2) !important;
-        transform: translateY(-1px) !important;
+    button p,
+    button span,
+    div.stButton > button p,
+    div.stButton > button span,
+    div.stDownloadButton > button p,
+    div.stDownloadButton > button span {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
     }
 
     /* =======================================================
-       6. ESTILOS GLOBALES DE INPUTS, LABELS Y TEXTOS (TONOS MORADOS Y LILAS)
-       Fondo lila suave (#FAF5FF), bordes en morado tenue (#C77DFF / #D8B4FE)
-       y color de texto del usuario en #212121 para una lectura perfecta y armoniosa.
+       2. CAMPOS DE ENTRADA Y SELECCIÓN (INPUTS, TEXT_INPUT, SELECTBOX, TEXTAREA)
+       Fondo en lila muy suave (#FAF5FF), bordes en morado tenue (#BA68C8)
+       y texto que escribe el usuario de color negro o gris muy oscuro (#111111).
        ======================================================= */
 
-    /* 6.1 Etiquetas (labels), párrafos y títulos de widgets en tonos morados armónicos */
+    /* Cajas de texto, inputs y textareas (fondo lila suave y texto #111111) */
+    input,
+    textarea,
+    select,
+    input[type="text"],
+    input[type="password"],
+    div.stTextInput input,
+    div.stTextArea textarea,
+    div[data-baseweb="input"] input,
+    div[data-baseweb="textarea"] textarea,
+    [data-testid="stForm"] input,
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] textarea {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        background-color: #FAF5FF !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+    }
+
+    /* Contenedores base de inputs y textareas con borde #BA68C8 */
+    div[data-baseweb="input"],
+    div[data-baseweb="input"] > div,
+    div[data-baseweb="textarea"],
+    div[data-baseweb="textarea"] > div,
+    div[data-baseweb="base-input"] {
+        border-radius: 12px !important;
+        border: 1.5px solid #BA68C8 !important;
+        background-color: #FAF5FF !important;
+        color: #111111 !important;
+        transition: all 0.25s ease !important;
+    }
+
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="input"]:focus-within > div,
+    div[data-baseweb="textarea"]:focus-within,
+    div[data-baseweb="textarea"]:focus-within > div,
+    input:focus,
+    textarea:focus {
+        border-color: #7209B7 !important;
+        box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.28) !important;
+        background-color: #FFFFFF !important;
+    }
+
+    /* Placeholders legibles */
+    ::placeholder,
+    input::placeholder,
+    textarea::placeholder {
+        color: #64748B !important;
+        -webkit-text-fill-color: #64748B !important;
+        opacity: 0.85 !important;
+    }
+
+    /* Selectores (Selectbox y Multiselect) */
+    .stMultiSelect [data-baseweb="select"] > div, 
+    .stSelectbox [data-baseweb="select"] > div,
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div {
+        border: 1.5px solid #BA68C8 !important;
+        border-radius: 12px !important;
+        background-color: #FAF5FF !important;
+        color: #111111 !important;
+        transition: all 0.25s ease !important;
+    }
+
+    div[data-baseweb="select"] div,
+    div[data-baseweb="select"] input,
+    .stSelectbox div[data-baseweb="select"] span {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-weight: 500 !important;
+    }
+
+    .stMultiSelect [data-baseweb="select"] > div:focus-within, 
+    .stSelectbox [data-baseweb="select"] > div:focus-within,
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within,
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
+        border-color: #7209B7 !important;
+        box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.28) !important;
+        background-color: #FFFFFF !important;
+    }
+
+    /* Píldoras de opciones seleccionadas en multiselect */
+    .stMultiSelect [data-baseweb="tag"],
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"],
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
+        background: linear-gradient(135deg, #7209B7 0%, #BA68C8 100%) !important;
+        border: none !important;
+        border-radius: 8px !important;
+    }
+    
+    .stMultiSelect [data-baseweb="tag"] span, 
+    .stMultiSelect [data-baseweb="tag"] svg,
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span,
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+    }
+
+    /* Menú desplegable emergente (dropdown menu) */
+    ul[data-baseweb="menu"],
+    div[data-baseweb="popover"] ul {
+        background-color: #FAF5FF !important;
+        border-radius: 12px !important;
+        border: 1.5px solid #BA68C8 !important;
+        box-shadow: 0 8px 24px rgba(114, 9, 183, 0.12) !important;
+    }
+
+    li[data-baseweb="menu-item"],
+    ul[data-baseweb="menu"] li {
+        color: #111111 !important;
+        background-color: #FAF5FF !important;
+        font-weight: 500 !important;
+    }
+
+    li[data-baseweb="menu-item"]:hover,
+    li[data-baseweb="menu-item"][aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(224, 170, 255, 0.35) 0%, rgba(186, 104, 200, 0.25) 100%) !important;
+        color: #4A148C !important;
+    }
+
+    /* =======================================================
+       3. TEXTOS GENERALES, ETIQUETAS (LABELS) Y TÍTULOS (#212121)
+       Forzar color gris oscuro o negro (#212121) en todos los
+       labels, párrafos y títulos para evitar que queden ocultos.
+       ======================================================= */
     label,
     label p,
     label span,
@@ -798,217 +827,60 @@ st.markdown("""
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] label p,
     [data-testid="stSidebar"] label span,
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown span,
     [data-testid="stForm"] label,
     [data-testid="stForm"] label p,
-    [data-testid="stForm"] label span {
-        color: #5A189A !important;
-        -webkit-text-fill-color: #5A189A !important;
+    [data-testid="stForm"] label span,
+    [data-testid="stForm"] p,
+    [data-testid="stForm"] span {
+        color: #212121 !important;
+        -webkit-text-fill-color: #212121 !important;
         font-weight: 600 !important;
         letter-spacing: 0.2px !important;
         opacity: 1 !important;
     }
 
-    /* 6.2 Cajas de entrada (input, textarea, select) con fondo lila suave y texto #212121 */
-    input,
-    textarea,
-    select,
-    input[type="text"],
-    input[type="password"],
-    div.stTextInput input,
-    div.stTextArea textarea,
-    div[data-baseweb="input"] input,
-    div[data-baseweb="textarea"] textarea,
-    [data-testid="stForm"] input,
-    [data-testid="stSidebar"] input,
-    [data-testid="stSidebar"] textarea {
+    h1, h2, h3, h4,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stForm"] h1,
+    [data-testid="stForm"] h2,
+    [data-testid="stForm"] h3,
+    [data-testid="stForm"] h4 {
         color: #212121 !important;
-        -webkit-text-fill-color: #212121 !important;
-        background-color: #FAF5FF !important;
-        font-size: 0.95rem !important;
-        font-weight: 500 !important;
-        opacity: 1 !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
     }
 
-    /* Contenedores BaseWeb de inputs y textareas con bordes morados sutiles */
-    div[data-baseweb="input"],
-    div[data-baseweb="input"] > div,
-    div[data-baseweb="textarea"],
-    div[data-baseweb="textarea"] > div,
-    div[data-baseweb="base-input"] {
-        border-radius: 12px !important;
-        border: 1.5px solid #D8B4FE !important;
-        background-color: #FAF5FF !important;
-        color: #212121 !important;
-        transition: all 0.25s ease !important;
-    }
-
-    div[data-baseweb="input"]:focus-within,
-    div[data-baseweb="input"]:focus-within > div,
-    div[data-baseweb="textarea"]:focus-within,
-    div[data-baseweb="textarea"]:focus-within > div,
-    input:focus,
-    textarea:focus {
-        border-color: #7209B7 !important;
-        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.22) !important;
-        background-color: #FFFFFF !important;
-    }
-
-    /* Placeholders en tono lila-grisáceo suave y legible */
-    ::placeholder,
-    input::placeholder,
-    textarea::placeholder {
-        color: #7B6888 !important;
-        -webkit-text-fill-color: #7B6888 !important;
-        opacity: 0.85 !important;
-    }
-
-    /* 6.3 Sección de Inicio de Sesión (Login) armonizada en tonos morados/lilas */
+    /* Tarjeta de Inicio de Sesión (Login) */
     [data-testid="stForm"] {
         background: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%) !important;
-        border: 1.5px solid #D8B4FE !important;
+        border: 1.5px solid #BA68C8 !important;
         border-radius: 20px !important;
         padding: 2.2rem !important;
         box-shadow: 0 10px 30px rgba(114, 9, 183, 0.08) !important;
     }
 
-    [data-testid="stForm"] h1,
-    [data-testid="stForm"] h2,
-    [data-testid="stForm"] h3,
-    [data-testid="stForm"] h4 {
-        color: #5A189A !important;
-        font-family: 'Outfit', sans-serif !important;
-        font-weight: 700 !important;
-    }
-
-    [data-testid="stForm"] p,
-    [data-testid="stForm"] span {
-        color: #4A154B !important;
-    }
-
     [data-testid="stForm"] div[data-baseweb="input"] > div {
         background-color: #FAF5FF !important;
-        border: 1.5px solid #C77DFF !important;
+        border: 1.5px solid #BA68C8 !important;
         border-radius: 12px !important;
     }
 
-    [data-testid="stForm"] div.stButton > button {
-        background: linear-gradient(135deg, #7209B7 0%, #B5179E 100%) !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 14px rgba(114, 9, 183, 0.3) !important;
-        transition: all 0.3s ease !important;
-    }
-
-    [data-testid="stForm"] div.stButton > button:hover {
-        background: linear-gradient(135deg, #8318C7 0%, #C72CAE 100%) !important;
-        box-shadow: 0 6px 20px rgba(114, 9, 183, 0.45) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* 6.4 Inputs de la barra lateral (Datos de la Escuela y configuración) */
+    /* Barra lateral */
     [data-testid="stSidebar"] {
         background-color: #FAF5FF !important;
-        border-right: 1px solid #E0AAFF !important;
-    }
-
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4 {
-        color: #5A189A !important;
-        font-family: 'Outfit', sans-serif !important;
-    }
-
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] .stMarkdown p,
-    [data-testid="stSidebar"] .stMarkdown span {
-        color: #4A154B !important;
+        border-right: 1px solid #BA68C8 !important;
     }
 
     [data-testid="stSidebar"] div[data-baseweb="input"] > div,
     [data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        background-color: #FFFFFF !important;
-        border: 1.5px solid #D8B4FE !important;
+        background-color: #FAF5FF !important;
+        border: 1.5px solid #BA68C8 !important;
         border-radius: 10px !important;
-    }
-
-    /* =======================================================
-       35. ESTILOS PARA SELECTORES (SELECTBOX Y MULTISELECT)
-       Fondo lila suave (#FAF5FF), bordes morados y texto #212121.
-       ======================================================= */
-    /* Borde y fondo principal de las cajas de selección */
-    .stMultiSelect [data-baseweb="select"] > div, 
-    .stSelectbox [data-baseweb="select"] > div,
-    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] > div {
-        border: 1.5px solid #D8B4FE !important;
-        border-radius: 12px !important;
-        background-color: #FAF5FF !important;
-        color: #212121 !important;
-        transition: all 0.25s ease !important;
-    }
-
-    /* Texto seleccionado y buscador dentro del select */
-    div[data-baseweb="select"] div,
-    div[data-baseweb="select"] input,
-    .stSelectbox div[data-baseweb="select"] span {
-        color: #212121 !important;
-        -webkit-text-fill-color: #212121 !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Color de fondo degradado para las etiquetas (opciones seleccionadas) en multiselect */
-    .stMultiSelect [data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background: linear-gradient(135deg, #FF758F 0%, #7209B7 100%) !important;
-        border: none !important;
-        border-radius: 8px !important;
-    }
-    
-    /* Color del texto y la 'X' dentro de las etiquetas multiselect */
-    .stMultiSelect [data-baseweb="tag"] span, 
-    .stMultiSelect [data-baseweb="tag"] svg,
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span,
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        fill: #FFFFFF !important;
-    }
-    
-    /* Efecto de iluminación al hacer clic (focus) */
-    .stMultiSelect [data-baseweb="select"] > div:focus-within, 
-    .stSelectbox [data-baseweb="select"] > div:focus-within,
-    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within,
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
-        border-color: #7209B7 !important;
-        box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.22) !important;
-        background-color: #FFFFFF !important;
-    }
-
-    /* Menú desplegable emergente (dropdown options) con fondo lila/blanco y texto oscuro */
-    ul[data-baseweb="menu"],
-    div[data-baseweb="popover"] ul {
-        background-color: #FAF5FF !important;
-        border-radius: 12px !important;
-        border: 1.5px solid #D8B4FE !important;
-        box-shadow: 0 8px 24px rgba(114, 9, 183, 0.12) !important;
-    }
-
-    li[data-baseweb="menu-item"],
-    ul[data-baseweb="menu"] li {
-        color: #212121 !important;
-        background-color: #FAF5FF !important;
-        font-weight: 500 !important;
-    }
-
-    li[data-baseweb="menu-item"]:hover,
-    li[data-baseweb="menu-item"][aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(224, 170, 255, 0.35) 0%, rgba(199, 125, 255, 0.35) 100%) !important;
-        color: #5A189A !important;
     }
 
     /* Área de arrastre de archivos (file_uploader) */
