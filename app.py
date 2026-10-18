@@ -12,14 +12,21 @@ from dotenv import load_dotenv
 from planeaciones_storage import (
     init_db,
     guardar_planeacion,
+    guardar_planeacion_con_nombre,
+    guardar_planeacion_nombre_ruta,
+    cargar_planeacion,
     listar_planeaciones,
+    listar_archivos_guardados,
     obtener_planeacion_por_id,
     obtener_planeacion_por_nombre,
     eliminar_planeacion_por_id,
+    eliminar_planeacion,
     obtener_resumen_semanas_cubiertas,
     calcular_hash_planeacion,
     CATEGORIAS_RUTAS_DEFAULT,
-    sanitizar_nombre_ruta
+    CATEGORIAS_RUTAS,
+    sanitizar_nombre_ruta,
+    guardar_archivo_fisico_json
 )
 
 # Cargar variables de entorno desde .env si existe
