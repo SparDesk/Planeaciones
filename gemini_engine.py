@@ -78,22 +78,38 @@ def build_system_instruction() -> str:
     """Instrucción de sistema para el rol de Especialista Pedagógico SEP."""
     return """Eres el Especialista Principal en Pedagogía Curricular y Didáctica de la Secretaría de Educación Pública (SEP) de México, experto consumado en el Plan de Estudio 2022 y el modelo de la Nueva Escuela Mexicana (NEM).
 
-Tu misión es diseñar planeaciones didácticas auténticas, contextualizadas, profundas y rigurosamente estructuradas para el trabajo docente en educación primaria (Fases 3, 4 y 5).
+Tu misión es diseñar planeaciones didácticas auténticas, contextualizadas, profundas y rigurosamente estructuradas para el trabajo docente en educación primaria (Fases 3, 4 y 5), con especialización en 6° de Primaria (Fase 5).
 
 REGLAS PEDAGÓGICAS INQUEBRANTABLES:
 1. Lenguaje docente mexicano formal, constructivo, inclusivo y orientado a la comunidad.
-2. Cada sesión didáctica DEBE estructurarse explícitamente en tres momentos:
-   - **Inicio** (Recuperación de conocimientos previos, detonación del interés, problematización, 15-20 min).
-   - **Desarrollo** (Construcción colaborativa o individual, indagación, trabajo con libros de texto SEP - LTG, análisis, 50-60 min).
-   - **Cierre** (Metacognición, puesta en común comunitaria, síntesis y valoración del aprendizaje, 15-20 min).
-3. Incluir las ACTIVIDADES DE INICIO DEL DÍA (rutina matutina permanente de 5 sesiones) con:
-   - Dictado reflexivo (5 palabras/enunciados vinculados a la temática).
-   - Cálculo mental contextualizado (5 operaciones acordes a la fase y grado).
-   - Problema matemático razonado (con datos, operaciones y resultado interpretado).
-4. Vinculación estricta con los Libros de Texto Gratuitos (LTG) de la SEP:
+2. ARTICULACIÓN TRANSVERSAL DE LOS 4 CAMPOS FORMATIVOS:
+   - Debes cruzar e integrar de manera interdisciplinaria los 4 Campos Formativos de la NEM:
+     a) Lenguajes
+     b) Saberes y Pensamiento Científico
+     c) Ética, Naturaleza y Sociedades
+     d) De lo Humano y lo Comunitario
+3. INTEGRACIÓN DIRECTA DE LAS PROBLEMÁTICAS DEL PROGRAMA ANALÍTICO (CICLO 2026-2027):
+   - Atender y resolver transversalmente en las actividades diarias y de inicio:
+     * Comprensión lectora profunda e inferencial.
+     * Velocidad y fluidez lectora (lectura cronometrada en voz alta, dicción, modulación).
+     * Ortografía y redacción autónoma (reglas de acentuación, signos de puntuación, grafías de uso dudoso).
+     * Asuntos comunitarios (promoción de la lectura en familias/comunidad, acceso y uso crítico/ético/pedagógico de tecnologías digitales y recursos).
+4. CALENDARIO ESCOLAR OFICIAL SEP (37 SEMANAS LECTIVAS / 185 DÍAS):
+   - La dosificación y temporalidad corresponden estrictamente a las 37 semanas lectivas oficiales del Ciclo Escolar 2026-2027.
+   - Sitúa el nivel de complejidad y avance curricular de acuerdo a la semana seleccionada de las 37 semanas oficiales.
+5. ATENCIÓN AL GRUPO Y DUA (26 ALUMNOS - ESTILOS KINESTÉSICO Y VISUAL):
+   - Cada sesión didáctica DEBE estructurarse explícitamente en tres momentos (Inicio, Desarrollo y Cierre) e incorporar obligatoriamente:
+     * Estímulos KINESTÉSICOS vivenciales (manipulación de materiales concretos, estaciones de aprendizaje activas, dramatización, proyectos por equipos).
+     * Recursos VISUALES estructurados (organizadores gráficos, mapas conceptuales, esquemas ilustrados con códigos de color, infografías).
+6. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA PERMANENTE):
+   - Dictado reflexivo y ortográfico (5 palabras/enunciados con reto ortográfico explícito).
+   - Velocidad y fluidez lectora (1 minuto cronometrado con modulación y registro).
+   - Cálculo mental contextualizado (5 operaciones contextualizadas al grado y semana).
+   - Problema matemático razonado (enunciado vinculado a la comunidad, datos, operaciones y resultado interpretado).
+7. Vinculación estricta con los Libros de Texto Gratuitos (LTG) de la SEP:
    - Cita explícitamente sugerencias de páginas de los libros: Proyectos de Aula / Escolares / Comunitarios, Nuestros Saberes y Múltiples Lenguajes.
-5. Evaluación formativa real: Evitar generalidades; describe criterios observables y diseña un instrumento concreto (como rúbrica analítica o lista de cotejo con indicadores claros de logro).
-6. Ajustes razonables / Inclusión: Estrategias de atención a la diversidad (DUA) y barreras para el aprendizaje y la participación (BAP).
+8. Evaluación formativa real: Evitar generalidades; describe criterios observables y diseña un instrumento concreto (como rúbrica analítica o lista de cotejo con indicadores claros de logro).
+9. Ajustes razonables / Inclusión: Estrategias de atención a la diversidad (DUA) y barreras para el aprendizaje y la participación (BAP).
 """
 
 def generate_planeacion(
@@ -127,7 +143,7 @@ def generate_planeacion(
         guia_cte: Guía u orientaciones de Consejo Técnico Escolar seleccionadas.
         programa_sintetico: Texto extraído o directrices del Programa Sintético de la NEM.
         dias_seleccionados: Lista de días de la semana a planear seleccionados por el usuario.
-        semana_seleccionada: Número de semana (1 a 56) del calendario oficial SEP.
+        semana_seleccionada: Número de semana (1 a 37) del calendario escolar oficial SEP.
         fase_seleccionada: Fase oficial de la Nueva Escuela Mexicana (ej. 'Fase 5' o '5').
         fallback_programa_sintetico: Booleano que indica si se debe usar la directriz de fallback si no hay archivo oficial.
         contexto_url: Texto extraído de una URL de referencia pedagógica mediante web scraping.
@@ -158,7 +174,7 @@ def generate_planeacion(
 
     num_sesiones = len(dias_seleccionados)
 
-    # 2. REGLA DE TEMPORALIDAD (56 SEMANAS)
+    # 2. REGLA DE TEMPORALIDAD (37 SEMANAS OFICIALES SEP)
     if semana_seleccionada is None:
         semana_seleccionada = (
             kwargs.get("semana_seleccionada") or
@@ -173,6 +189,12 @@ def generate_planeacion(
                 semana_seleccionada = int(m.group())
         if not semana_seleccionada:
             semana_seleccionada = 20
+    try:
+        semana_seleccionada = int(semana_seleccionada)
+        if semana_seleccionada > 37:
+            semana_seleccionada = 20
+    except (ValueError, TypeError):
+        semana_seleccionada = 20
 
     # 3. FASE CURRICULAR (NEM)
     fase_correspondiente = datos_escuela.get('fase', 'Fase 5')
@@ -263,19 +285,53 @@ El usuario ha proporcionado el siguiente material de referencia extraído de una
 Elabora la planeación didáctica completa, oficial y lista para aplicar, bajo las siguientes especificaciones:
 
 === DATOS GENERALES DE LA INSTITUCIÓN ===
-- Escuela: {datos_escuela.get('nombre_escuela', 'Primaria Revolucion Social 1910')}
+- Escuela: {datos_escuela.get('nombre_escuela', 'Escuela Primaria “Revolución Social de 1910”')}
 - CCT: {datos_escuela.get('cct', '10EPR0361N')}
-- Docente Titular: {datos_escuela.get('docente', 'Aday Domínguez Domínguez')}
-- Director de la Escuela: {datos_escuela.get('director', 'José Guillermo Borjas Díaz')}
-- Grado y Fase: {datos_escuela.get('grado', '5° de Primaria')} ({fase_correspondiente}) Grupo '{datos_escuela.get('grupo', 'A')}'
+- Zona Escolar y Sector: {datos_escuela.get('zona_escolar', 'Zona 49')}, {datos_escuela.get('sector', 'Sector 02')} ({datos_escuela.get('entidad', 'Durango')})
+- Docente Titular: {datos_escuela.get('docente', 'Maestra Aday Domínguez Domínguez')}
+- Director de la Escuela: {datos_escuela.get('director', 'Guillermo Gerardo Borjas Díaz')}
+- Grado y Fase: {datos_escuela.get('grado', '6° de Primaria')} ({fase_correspondiente}) Grupo '{datos_escuela.get('grupo', 'A')}'
 - Temporalidad: {datos_escuela.get('periodo', f'Semana {semana_seleccionada}')} ({num_sesiones} sesiones didácticas programadas: {', '.join(dias_seleccionados)})
-- Ciclo Escolar: {datos_escuela.get('ciclo_escolar', '2025-2026')}
+- Ciclo Escolar: {datos_escuela.get('ciclo_escolar', '2026-2027')}
 - Turno: {datos_escuela.get('turno', 'Matutino')}
 
-=== TEMPORALIDAD Y CALENDARIO OFICIAL SEP (56 SEMANAS) ===
-- Semana seleccionada: Semana {semana_seleccionada} de las 56 semanas del calendario escolar oficial de la SEP
-REGLA DE TEMPORALIDAD (56 SEMANAS):
-Ajusta la profundidad de los Contenidos y los PDA para que correspondan exactamente a la Semana {semana_seleccionada} de las 56 semanas del calendario escolar oficial de la SEP. El nivel de exigencia debe reflejar el avance esperado para esta etapa del ciclo escolar.
+=== CONTEXTO DEL ENTORNO, DIAGNÓSTICO Y ESTILOS DE APRENDIZAJE DEL GRUPO (OBLIGATORIO) ===
+- Diagnóstico Grupal: Grupo de 6° Grado Grupo “A” integrado por 26 alumnos.
+- Estilos de Aprendizaje Predominantes: KINESTÉSICO (actividades vivenciales, manipulación de material concreto, proyectos prácticos, dinámicas activas y estaciones de aprendizaje) y VISUAL (organizadores gráficos, mapas conceptuales, esquemas con colores, diagramas e infografías ilustradas).
+- Contexto Escolar y Comunitario: Entorno urbano en Durango con familias trabajadoras, profesionistas y personas jubiladas con fuerte sentido de pertenencia comunitaria.
+- REGLA PEDAGÓGICA (DUA Y ESTILOS DE APRENDIZAJE):
+  Es OBLIGATORIO que cada sesión didáctica integre estímulos VISUALES estructurados y dinámicas KINESTÉSICAS vivenciales, fundamentando la dosificación y las secuencias en el perfil de estos 26 alumnos.
+
+=== PROBLEMÁTICAS IDENTIFICADAS DEL PROGRAMA ANALÍTICO (EJES DE TRABAJO PRIORITARIOS) ===
+1. Comprensión Lectora: Fortalecer el análisis inferencial, extracción de ideas clave, juicio crítico y comprensión profunda de textos informativos y argumentativos.
+2. Velocidad y Fluidez Lectora: Desarrollar entonación, ritmo, dicción y fluidez en lectura en voz alta.
+3. Ortografía y Redacción: Consolidar reglas de acentuación, signos de puntuación, grafías dudosas y redacción de textos argumentativos e informativos propios.
+4. Asuntos Comunitarios y Tecnologías: Promover la lectura en familias y comunidad, así como el acceso equitativo y uso crítico, ético y pedagógico de tecnologías digitales y recursos de información.
+- REGLA DE FUNDAMENTACIÓN DEL MOTOR DE IA:
+  Fundamenta el plano didáctico, las rutinas de inicio (dictado ortográfico, cálculo mental), las preguntas detonadoras y los productos en la atención y resolución de estas 4 problemáticas oficiales del Programa Analítico.
+
+=== DIRECTRIZ MANDATORIA DE ARTICULACIÓN TRANSVERSAL DE CAMPOS FORMATIVOS Y PROGRAMA ANALÍTICO ===
+Debes cruzar e incorporar de manera transversal y obligatoria las 4 problemáticas prioritarias del Programa Analítico a lo largo de los 4 Campos Formativos de la Nueva Escuela Mexicana:
+1. Lenguajes:
+   - Comprensión lectora profunda: Identificación de ideas clave, inferencias complejas y análisis crítico de textos informativos y argumentativos.
+   - Velocidad y fluidez lectora: Cronometrado de lectura en voz alta (1 minuto), entonación, dicción clara y ritmo fluido.
+   - Ortografía y producción escrita: Aplicación sistemática de reglas de acentuación (agudas, graves, esdrújulas), signos de puntuación y grafías dudosas (b/v, c/s/z, g/j, h) en redacciones originales.
+2. Saberes y Pensamiento Científico:
+   - Lectura reflexiva de textos informativos científicos, tablas, datos experimentales y gráficas.
+   - Cálculo mental contextualizado y problemas matemáticos razonados vinculados a la vida comunitaria y escolar de Durango (proporcionalidad, porcentajes, medidas).
+   - Registro y redacción rigurosa de hipótesis, procedimientos de indagación y conclusiones fundamentadas.
+3. Ética, Naturaleza y Sociedades:
+   - Comprensión lectora crítica de dilemas éticos, normatividad ciudadana, derechos humanos y memoria histórica (incluyendo la Revolución Social de 1910 y los ideales de justicia social).
+   - Diálogo deliberativo, posturas argumentativas fundadas y redacción con ortografía cuidada de compromisos ciudadanos.
+4. De lo Humano y lo Comunitario:
+   - Asuntos comunitarios: Estrategias vivenciales para involucrar a las familias y personas de la comunidad de Durango en el fomento y gusto por la lectura.
+   - Acceso y uso crítico de tecnologías: Incorporar el uso ético, colaborativo y pedagógico de dispositivos digitales, fuentes de internet y recursos tecnológicos para la resolución de problemáticas locales.
+   - Trabajo colaborativo, autoconocimiento, autorregulación y empatía grupal.
+
+=== TEMPORALIDAD Y CALENDARIO ESCOLAR OFICIAL SEP (37 SEMANAS LECTIVAS) ===
+- Semana seleccionada: Semana {semana_seleccionada} de las 37 semanas lectivas del calendario escolar oficial de la SEP (Ciclo Escolar 2026-2027)
+REGLA DE TEMPORALIDAD Y DOSIFICACIÓN ANUAL (37 SEMANAS OFICIALES DE LA SEP):
+Ajusta la profundidad, alcance y progresión de los Contenidos y los PDA para que correspondan con total fidelidad pedagógica a la Semana {semana_seleccionada} de las 37 semanas lectivas oficiales de la SEP. Modula la exigencia y complejidad de las secuencias didácticas y la evaluación formativa considerando el avance anual esperado dentro de las 37 semanas lectivas del ciclo escolar 2026-2027.
 
 === DÍAS DE LA SEMANA A PLANEAR Y CALENDARIO INTERACTIVO 2026 (OBLIGATORIO) ===
 - Días de la semana a planear: {dias_seleccionados}
@@ -317,46 +373,55 @@ ESTRUCTURA DE RESPUESTA EXIGIDA (Usa Markdown profesional, encabezados claros y 
 
 # I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
 - Nombre sugerido para el Proyecto Integrador (atractivo y motivante para las y los alumnos).
-- Propósito general del proyecto.
+- Propósito general del proyecto (articulando transversalmente las problemáticas del Programa Analítico).
 - Escenario (Aula, Escolar o Comunitario).
-- Metodología y justificación pedagógica.
+- Metodología sociocrítica y justificación pedagógica.
 - Ejes articuladores en acción.
-- Temporalidad: Semana {semana_seleccionada} de 56 del calendario SEP ({num_sesiones} sesiones).
+- Temporalidad: Semana {semana_seleccionada} de 37 del calendario escolar oficial de la SEP ({num_sesiones} sesiones didácticas).
 
-# II. ARTICULACIÓN CURRICULAR (TABLA NEM)
+# II. ARTICULACIÓN CURRICULAR TRANSVERSAL (TABLA NEM - 4 CAMPOS FORMATIVOS)
+Articula transversalmente los Contenidos y PDA de los Campos Formativos involucrados (Lenguajes, Saberes y Pensamiento Científico, Ética Naturaleza y Sociedades, De lo Humano y lo Comunitario) atendiendo y cruzando las 4 problemáticas prioritarias del Programa Analítico.
 Genera una tabla con:
-| Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) |
+| Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
 
-# III. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA)
-Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. No inventes días adicionales.
-Desarrolla la rutina matutina ÚNICAMENTE para los siguientes días: {dias_seleccionados}. No inventes actividades para los días que no estén en esta lista. Genera exactamente {num_sesiones} rutinas, una por cada día:
+# III. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA - {num_sesiones} SESIONES)
+Genera la rutina matutina ÚNICAMENTE para los siguientes días: {dias_seleccionados}. Cada día debe atender directamente las problemáticas de ortografía, velocidad lectora y cálculo mental:
 Para cada día en {dias_seleccionados}:
 - Sesión N ([Día de la semana]):
-  * Dictado: 5 palabras u oraciones con dificultad ortográfica acorde a la temática.
-  * Cálculo Mental: 5 operaciones contextualizadas.
-  * Problema Matemático Razonado: Enunciado, datos, operaciones y resultado interpretado.
+  * Dictado Ortográfico: 5 palabras u oraciones con dificultad ortográfica explícita (acentuación, grafías b/v, c/s/z, g/j, h o signos).
+  * Velocidad y Fluidez Lectora: Ejercicio guiado de lectura en voz alta (1 minuto cronometrado o lectura en atril) con registro de fluidez, modulación y comprensión rápida.
+  * Cálculo Mental Contextualizado: 5 operaciones mentales acordes al grado y dosificación de la Semana {semana_seleccionada} de 37.
+  * Problema Matemático Razonado: Situación problemática contextualizada en la comunidad escolar de Durango con enunciado, datos, operaciones y resultado interpretado.
 
-# IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES)
+# IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES: {', '.join(dias_seleccionados)})
 Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. No inventes días adicionales.
-Estructura la Secuencia Didáctica separando claramente cada día. Para cada día incluido en {dias_seleccionados}, debes proporcionar sus respectivas actividades de Inicio, Desarrollo y Cierre. No agrupes todos los días en un solo bloque. Desarrolla detalladamente exactamente una sesión por cada día en {dias_seleccionados} (total: {num_sesiones} sesiones):
+Estructura la Secuencia Didáctica separando claramente cada día. Desarrolla detalladamente exactamente una sesión por cada día en {dias_seleccionados} (total: {num_sesiones} sesiones):
 ### Sesión N: [Día de la semana] - [Nombre de la Sesión y Fase/Momento Metodológico correspondiente]
 - **Tiempo estimado:** (ej. 90 minutos)
-- **Inicio (15-20 min):** Descripción paso a paso de actividades, preguntas detonadoras y recuperación de conocimientos previos.
-- **Desarrollo (50-60 min):** Pasos concretos, dinámicas de trabajo (equipos/individual), consulta de páginas sugeridas de libros SEP (Nuestros Saberes, Proyectos, Múltiples Lenguajes) y producción de evidencias tangibles.
-- **Cierre (15-20 min):** Socialización, síntesis, conclusiones colectivas y metacognición.
-- **Recursos didácticos y materiales:** Materiales concretos, cuadernos, impresiones o láminas.
-- **Evidencia / Producto de la sesión:** Qué entregará o registrará el estudiante.
+- **Inicio (15-20 min):** Preguntas detonadoras, recuperación de conocimientos previos y activación del interés.
+- **Desarrollo (50-60 min):**
+  * Actividades con estímulos KINESTÉSICOS vivenciales (manipulación de material concreto, dinámicas activas, dramatización, estaciones de trabajo colaborativo para los 26 alumnos).
+  * Actividades con recursos VISUALES estructurados (elaboración de organizadores gráficos, esquemas ilustrados, infografías a color).
+  * Articulación transversal de los 4 Campos Formativos y consulta de páginas sugeridas de libros SEP (Proyectos, Nuestros Saberes, Múltiples Lenguajes).
+- **Cierre (15-20 min):** Socialización comunitaria, síntesis, conclusiones colectivas y metacognición.
+- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP y recursos tecnológicos.
+- **Evidencia / Producto de la sesión:** Qué registrará o elaborará el estudiante.
 
 # V. INSTRUMENTO DE EVALUACIÓN FORMATIVA
 ### Rúbrica Analítica de Desempeño ({fase_correspondiente} - {grado_seleccionado})
-Diseña una tabla de Instrumento de Evaluación (Rúbrica Analítica o Lista de Cotejo) con:
+Diseña una tabla de Rúbrica Analítica con indicadores observables que evalúen:
+1) Comprensión lectora e inferencias.
+2) Velocidad y fluidez lectora.
+3) Ortografía y redacción autónoma.
+4) Participación comunitaria y uso crítico de tecnologías.
+5) Desempeño vivencial kinestésico y visual de los 26 alumnos.
 | Criterio / Indicador de Logro | Nivel Sobresaliente | Nivel Satisfactorio | Nivel Básico | Requiere Apoyo |
 
 # VI. AJUSTES RAZONABLES Y ATENCIÓN A LA DIVERSIDAD (BAP - DUA)
-Estrategias concretas para estudiantes con ritmos de aprendizaje diversos, apoyo en lectura/escritura y barreras de aprendizaje.
+Estrategias concretas para los 26 alumnos del grupo, atendiendo de manera prioritaria a los estilos KINESTÉSICO y VISUAL, la nivelación en fluidez lectora/ortografía y el acceso equitativo a tecnologías y recursos.
 
 # VII. OBSERVACIONES GENERALES Y ESPACIO DE SEGUIMIENTO
-Reflexiones docentes para el diario de clase y seguimiento directivo.
+Reflexiones docentes para el diario de clase y vinculación con los compromisos del Programa Analítico oficial (Ciclo 2026-2027).
 """
 
     # Configuración de búsqueda web (Google Search Grounding: tools='google_search_retrieval' / google_search)
@@ -441,15 +506,15 @@ def generate_sample_fallback(
     el usuario desee visualizar el resultado o explorar la app antes de ingresar su API Key,
     ajustando las rutinas y sesiones estrictamente a los días seleccionados.
     """
-    escuela = datos_escuela.get('nombre_escuela', 'Primaria Revolución Social 1910')
+    escuela = datos_escuela.get('nombre_escuela', 'Escuela Primaria “Revolución Social de 1910”')
     cct = datos_escuela.get('cct', '10EPR0361N')
-    docente = datos_escuela.get('docente', 'Aday Domínguez Domínguez')
-    director = datos_escuela.get('director', 'José Guillermo Borjas Díaz')
-    grado_seleccionado = datos_escuela.get('grado', '5° de Primaria')
+    docente = datos_escuela.get('docente', 'Maestra Aday Domínguez Domínguez')
+    director = datos_escuela.get('director', 'Guillermo Gerardo Borjas Díaz')
+    grado_seleccionado = datos_escuela.get('grado', '6° de Primaria')
     fase_correspondiente = datos_escuela.get('fase', 'Fase 5')
     grupo = datos_escuela.get('grupo', 'A')
-    periodo = datos_escuela.get('periodo', 'Semana 20')
-    ciclo = datos_escuela.get('ciclo_escolar', '2025-2026')
+    periodo = datos_escuela.get('periodo', 'Semana 20 de 37')
+    ciclo = datos_escuela.get('ciclo_escolar', '2026-2027')
 
     if dias_seleccionados is None:
         dias_seleccionados = datos_escuela.get('dias_seleccionados') or datos_escuela.get('dias_planeados') or ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
@@ -459,11 +524,11 @@ def generate_sample_fallback(
     num_sesiones = len(dias_seleccionados)
 
     sample_rutinas = {
-        "Lunes": "- **Dictado:** 1. Nutrición, 2. Biodiversidad, 3. Ultraprocesados, 4. Investigación, 5. Convivencia.\n- **Cálculo Mental:** a) 250 + 750, b) 1200 - 450, c) 8 x 7 + 14, d) La mitad de 350, e) 100 x 3.5.\n- **Problema Razonado:** En la cooperativa escolar se vendieron 45 paquetes de fruta fresca a $18 pesos cada uno. ¿Cuánto dinero se recaudó en total y cuál sería la ganancia si el costo inicial fue de $420 pesos?",
-        "Martes": "- **Dictado:** 1. Digestión, 2. Equitativo, 3. Tríptico, 4. Argumentación, 5. Colaboración.\n- **Cálculo Mental:** a) 3/4 + 1/4, b) 450 ÷ 9, c) 60 x 5, d) 1000 - 325, e) Doble de 2.75.\n- **Problema Razonado:** Para una receta comunitaria se necesitan 3/4 kg de manzanas y 1/2 kg de peras. ¿Cuántos kilogramos de fruta se utilizarán en total?",
-        "Miércoles": "- **Dictado:** 1. Concientización, 2. Hidratación, 3. Metabolismo, 4. Ciudadanía, 5. Democracia.\n- **Cálculo Mental:** a) 15 x 6, b) 800 - 260, c) 1/2 de 120, d) 4.5 + 3.8, e) 72 ÷ 8.\n- **Problema Razonado:** Don José compró una caja de 120 naranjas. Si 1/4 de las naranjas están verdes y el resto maduras, ¿cuántas naranjas maduras tiene disponibles?",
-        "Jueves": "- **Dictado:** 1. Información, 2. Proporción, 3. Vitaminas, 4. Hábitos, 5. Respeto.\n- **Cálculo Mental:** a) 50 x 8, b) 2000 - 650, c) 2/5 + 1/5, d) Triple de 45, e) 63 ÷ 7 + 12.\n- **Problema Razonado:** Un vaso de agua natural tiene 250 mililitros. Si un estudiante bebe 8 vasos al día, ¿cuántos litros de agua consume en total en una semana de 5 días escolares?",
-        "Viernes": "- **Dictado:** 1. Evaluación, 2. Solidaridad, 3. Sustentable, 4. Análisis, 5. Transformación.\n- **Cálculo Mental:** a) 90 x 4, b) 500 - 185, c) 0.75 + 0.25, d) 48 ÷ 6, e) 150 x 3.\n- **Problema Razonado:** Si una familia gasta $1,800 pesos a la semana en alimentos frescos y $650 en comida ultraprocesada, ¿cuánto dinero ahorraría si reduce a la mitad el gasto en productos ultraprocesados?"
+        "Lunes": "- **Dictado Ortográfico (Reglas y Acentuación):** 1. Comprensión, 2. Argumentación, 3. Tecnología, 4. Científico, 5. Análisis.\n- **Velocidad y Fluidez Lectora:** Lectura guiada en voz alta (1 minuto) de un fragmento de *Múltiples Lenguajes (6° grado)*, cronometrando palabras por minuto y evaluando modulación.\n- **Cálculo Mental Contextualizado:** a) 350 + 650, b) 1500 - 450, c) 12 x 8, d) El 25% de 800, e) 4.5 x 10.\n- **Problema Razonado:** En la biblioteca escolar de la Primaria Revolución Social de 1910 hay 650 libros. Si el 40% son textos informativos y el resto narrativos, ¿cuántos libros informativos hay y cuántos faltan para duplicar la colección?",
+        "Martes": "- **Dictado Ortográfico (Grafías B/V y C/S/Z):** 1. Convivencia, 2. Civilización, 3. Accesibilidad, 4. Búsqueda, 5. Precisión.\n- **Velocidad y Fluidez Lectora:** Lectura por parejas en eco para corregir pausas y silabeos con énfasis en signos de puntuación.\n- **Cálculo Mental Contextualizado:** a) 3/4 + 2/4, b) 480 ÷ 6, c) 25 x 4, d) 2000 - 675, e) Triple de 3.25.\n- **Problema Razonado:** Para equipar el rincón de lectura comunitaria, 26 alumnos reunieron $78 pesos cada uno. ¿Cuánto dinero recolectaron en total y cuánto sobrará si adquieren 12 paquetes de libros de $145 pesos cada uno?",
+        "Miércoles": "- **Dictado Ortográfico (Palabras Graves y Esdrújulas):** 1. Sintético, 2. Analítico, 3. Préstamo, 4. Crítico, 5. Éxito.\n- **Velocidad y Fluidez Lectora:** Lectura individual con registro de palabras leídas por minuto y rescate oral de la idea central del texto.\n- **Cálculo Mental Contextualizado:** a) 15 x 7, b) 1200 - 380, c) 1/2 de 450, d) 6.8 + 3.2, e) 81 ÷ 9.\n- **Problema Razonado:** De los 26 alumnos del grupo de 6° 'A', 18 utilizan computadoras o tabletas para consultar información en internet y el resto consulta enciclopedias físicas. ¿Qué fracción y qué porcentaje del grupo utiliza medios digitales?",
+        "Jueves": "- **Dictado Ortográfico (Signos de Puntuación y Conectores):** 1. Por consiguiente, 2. No obstante, 3. Explicación, 4. Indagación, 5. Cohesión.\n- **Velocidad y Fluidez Lectora:** Dinámica 'Lectura de relevos': cada alumno lee un párrafo cuidando entonación y volumen audible.\n- **Cálculo Mental Contextualizado:** a) 60 x 7, b) 3000 - 850, c) 3/5 + 1/5, d) Cuádruple de 25, e) 72 ÷ 8 + 15.\n- **Problema Razonado:** Un informe escolar de investigación comunitaria tiene 1,200 palabras. Si un estudiante lee a una velocidad promedio de 150 palabras por minuto, ¿cuántos minutos tardará en leer el informe completo?",
+        "Viernes": "- **Dictado Ortográfico (Léxico Científico e Informativo):** 1. Hipótesis, 2. Verificación, 3. Sociedad, 4. Biodiversidad, 5. Solidaridad.\n- **Velocidad y Fluidez Lectora:** Círculo de lectura compartida: lectura expresiva dramatizada con énfasis en posturas y gesticulación kinestésica.\n- **Cálculo Mental Contextualizado:** a) 90 x 5, b) 800 - 245, c) 0.50 + 0.75, d) 56 ÷ 7, e) 250 x 4.\n- **Problema Razonado:** Si se imprimen 26 trípticos informativos para promover la lectura comunitaria y cada juego de copias cuesta $6.50 pesos, ¿cuál es el costo total y cuál sería el descuento si se aplica el 15% por volumen?"
     }
 
     sample_sesiones = {
@@ -560,25 +625,26 @@ def generate_sample_fallback(
 
     return f"""# I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
 
-- **Nombre del Proyecto:** "Guardianes de la Memoria y la Salud Comunitaria"
-- **Escuela:** {escuela} | **C.C.T.:** {cct}
-- **Docente:** Prof(a). {docente} | **Director:** Prof. {director}
-- **Fase y Grado:** {fase_correspondiente} — {grado_seleccionado} Grupo '{grupo}'
+- **Nombre del Proyecto:** "Voces Comunitarias en Acción: Lectura, Ortografía y Tecnologías para el Bienestar"
+- **Escuela:** {escuela} | **C.C.T.:** {cct} | **Zona 49, Sector 02, Durango**
+- **Docente:** {docente} | **Director:** {director}
+- **Fase y Grado:** {fase_correspondiente} — {grado_seleccionado} Grupo '{grupo}' (Matrícula: 26 alumnos)
 - **Temporalidad:** {periodo} ({num_sesiones} sesiones: {dias_str}) | **Ciclo Escolar:** {ciclo}
-- **Escenario:** Comunitario y de Aula
+- **Escenario:** Comunitario, Escolar y de Aula
 - **Metodología Sociocrítica:** {metodologia}
 - **Ejes Articuladores:** {', '.join(ejes)}
-- **Propósito:** Que las y los alumnos de {grado_seleccionado} investiguen, mediante textos informativos y el método de proyectos comunitarios, los hábitos de alimentación saludable en su entorno escolar y local, desarrollando habilidades de producción escrita (trípticos y cápsulas informativas) y resolución de problemas fraccionarios y porcentuales vinculados con la nutrición.
+- **Propósito:** Que las y los 26 alumnos de 6° Grado Grupo “A” investiguen y elaboren textos informativos y argumentativos sobre temas de interés comunitario, superando las dificultades detectadas en comprensión lectora, velocidad lectora y ortografía, mediante dinámicas activas kinestésicas y organizadores visuales estructurados, promoviendo la lectura en familia y el uso crítico de tecnologías.
 
 ---
 
-# II. ARTICULACIÓN CURRICULAR (TABLA NEM)
+# II. ARTICULACIÓN CURRICULAR TRANSVERSAL (TABLA NEM - 4 CAMPOS FORMATIVOS)
 
-| Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) |
-| :--- | :--- | :--- | :--- |
-| **Lenguajes** | Comprensión y producción de textos informativos sobre temas colectivos. | Selecciona y lee textos informativos; elabora resúmenes, cuadros sinópticos y trípticos para prevenir problemas de salud comunitaria. | *Proyectos Comunitarios* (págs. 20-33) y *Múltiples Lenguajes* (págs. 42-45) |
-| **Saberes y Pensamiento Científico** | Alimentación saludable y resolución de operaciones fraccionarias. | Explica las características de la dieta correcta (completa, equilibrada, variada, inocua) y resuelve problemas que implican calcular fracciones de cantidades. | *Nuestros Saberes* (págs. 68-75) |
-| **De lo Humano y lo Comunitario** | Acciones individuales que repercuten en la conservación y mejora de la salud. | Construye alternativas saludables de alimentación y estilo de vida con base en la toma de decisiones asertivas. | *Proyectos de Aula* (págs. 54-61) |
+| Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
+| :--- | :--- | :--- | :--- | :--- |
+| **Lenguajes** | Comprensión y producción de textos informativos y argumentativos sobre temas comunitarios. | Lee comprensivamente textos informativos y reflexiona sobre su organización; elabora resúmenes, fichas de opinión y trípticos con ortografía cuidada y coherencia sintáctica para difundir en su comunidad. | *Proyectos Comunitarios (6° grado)* (págs. 20-35) y *Múltiples lenguajes (6° grado)* (págs. 40-47) | Comprensión lectora, velocidad y ortografía |
+| **Saberes y Pensamiento Científico** | Relaciones de proporcionalidad y cálculo de porcentajes aplicados a la comunidad. | Resuelve situaciones problemáticas cotidianas que implican calcular porcentajes, fracciones y razones aplicadas a datos estadísticos de lectura y salud comunitaria. | *Nuestros Saberes (6° grado)* (págs. 68-76) y *Proyectos de Aula (6° grado)* (págs. 82-95) | Comprensión de textos científicos y cálculo mental |
+| **Ética, Naturaleza y Sociedades** | Movimientos sociales en el México de los siglos XIX y XX: la Independencia y la Revolución Social de 1910. | Analiza críticamente las causas y consecuencias de la Revolución Social de 1910 y los ideales de justicia social, reconociendo su vigencia en la transformación democrática de su entorno escolar y comunitario. | *Nuestros Saberes (6° grado)* (págs. 140-149) y *Proyectos Escolares (6° grado)* (págs. 80-92) | Análisis crítico de fuentes y redacción cívica |
+| **De lo Humano y lo Comunitario** | La comunidad como espacio para el aprendizaje y el bienestar común. | Diseña y organiza acciones colectivas para fomentar la lectura compartida en el hogar y promover el acceso ético y equitativo a tecnologías y recursos de información. | *Proyectos Comunitarios (6° grado)* (págs. 50-63) | Fomento a la lectura comunitaria y acceso a tecnologías |
 
 ---
 
@@ -600,24 +666,31 @@ def generate_sample_fallback(
 
 | Criterio de Evaluación | Nivel Sobresaliente (10 - 9) | Nivel Satisfactorio (8 - 7) | Nivel Básico (6) | Requiere Apoyo (5) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Comprensión y Análisis Curricular** | Explica con claridad científica los nutrientes, el Plato del Bien Comer y contrasta de forma crítica con la realidad comunitaria. | Identifica los grupos de alimentos y reconoce hábitos saludables en su entorno con pocos errores conceptuales. | Menciona algunos alimentos saludables pero le cuesta diferenciarlos de los procesados. | Muestra confusión entre alimentos nutritivos y perjudiciales. |
-| **Producción Escrita (Tríptico)** | Elabora un tríptico con estructura completa, ortografía impecable, imágenes alusivas y argumentos sólidos y persuasivos. | Diseña el tríptico con estructura comprensible; comete pocos errores ortográficos menores que no afectan el sentido. | El tríptico carece de alguno de los elementos formales o presenta varios errores de redacción. | Presenta un texto incompleto sin formato de tríptico ni organización visual. |
-| **Habilidades Matemáticas (Cálculo y Razonamiento)** | Resuelve con autonomía problemas de fracciones, sumas y medidas de capacidad, interpretando el resultado en su vida diaria. | Resuelve la mayoría de los problemas de cálculo mental y razonamiento con mínima orientación del docente. | Resuelve operaciones mecánicas pero requiere apoyo constante en el planteamiento razonado. | Dificultad severa para realizar cálculos básicos y comprender los enunciados. |
-| **Trabajo Colaborativo y Ejes Articuladores** | Participa de manera empática, solidaria e inclusiva en su comunidad de aula, respetando la diversidad de opiniones. | Colabora adecuadamente en el equipo cumpliendo con las tareas asignadas en tiempo y forma. | Participa de manera intermitente o requiere mediación docente para integrarse al equipo. | Muestra resistencia para colaborar con sus pares en el aula. |
+| **Comprensión Lectora e Inferencias** | Identifica ideas centrales y secundarias, infiere intenciones del autor y emite juicios críticos fundamentados en textos informativos. | Reconoce ideas principales y responde preguntas inferenciales básicas con autonomía. | Comprende el sentido global del texto pero requiere orientación para realizar inferencias. | Dificultad para rescatar ideas principales y comprender vocabulario contextual. |
+| **Fluidez y Velocidad Lectora** | Lee en voz alta con modulación impecable, ritmo adecuado, dicción clara y respetando todos los signos de puntuación. | Lee con fluidez aceptable y volumen adecuado; comete pocas pausas innecesarias. | Lee con ritmo lento o silabeo ocasional, requiriendo apoyo para respetar signos de puntuación. | Lectura silábica o entrecortada que dificulta la comprensión personal y grupal. |
+| **Ortografía y Producción Textual** | Redacta textos argumentativos/informativos con acentuación precisa, grafías correctas y conectores lógicos variados. | Elabora textos con estructura coherente y comete errores ortográficos mínimos que no alteran el sentido. | Textos con ideas aisladas o varios errores de concordancia, acentuación y puntuación. | Escritos breves e incompletos con deficiencias ortográficas severas. |
+| **Trabajo Kinestésico y Visual (26 Alumnos)** | Participa proactivamente en dinámicas vivenciales y elabora esquemas visuales de alta calidad y creatividad. | Cumple adecuadamente en las estaciones prácticas y colabora en el diseño de organizadores visuales. | Participa en dinámicas pero muestra dispersión en el trabajo visual o manual. | Escasa participación en las dinámicas vivenciales y de trabajo en equipo. |
 
 ---
 
 # VI. AJUSTES RAZONABLES Y ATENCIÓN A LA DIVERSIDAD (BAP - DUA)
 
-1. **Principio de Múltiples Formas de Representación (DUA):** Uso constante de apoyos visuales (láminas del Plato del Bien Comer, colores para identificar fracciones y esquemas gráficos sintetizados) para alumnos con estilos de aprendizaje visual y cinestésico.
-2. **Atención a alumnos con ritmo de lectura en consolidación:** Se propicia el trabajo en parejas pedagógicas (tutoría entre pares solidaria) para la lectura de los libros de texto y la redacción del borrador del tríptico.
-3. **Graduación de actividades matemáticas:** Para estudiantes que requieren apoyo en cálculo mental y problemas fraccionarios, se permite el uso de material concreto (fichas, regletas o tiras de fracciones) antes de pasar a la notación abstracta.
-4. **Inclusión socioemocional:** Fortalecimiento del valor del respeto y escucha activa en el momento de las asambleas de aula.
+1. **Principio de Múltiples Formas de Representación (DUA - Enfoque Visual):**
+   - Uso intensivo de apoyos visuales de alto contraste (organizadores gráficos, tablas comparativas, infografías ilustradas y códigos de color para identificar sujeto, verbo y nexos en la redacción).
+   - Proyección o exposición en láminas de modelos visuales para anclar conceptos abstractos en los 26 alumnos.
+2. **Principio de Acción y Expresión (DUA - Enfoque Kinestésico):**
+   - Estaciones de aprendizaje activas donde los alumnos manipulan fichas ortográficas móviles (acentuación, grafías dudosas b/v, c/s/z) y material concreto para resolver problemas de proporcionalidad y porcentajes.
+   - Dinámicas vivenciales de juego de roles (entrevistadores, moderadores de debate y bibliotecarios comunitarios) para favorecer el aprendizaje por la acción.
+3. **Atención a la Comprensión y Velocidad Lectora:**
+   - Lectura en parejas solidarias (tutoría entre pares) con cronometrado amistoso y registro personal de avances de velocidad y fluidez.
+   - Guías de interrogación de textos con preguntas detonadoras visuales para facilitar inferencias.
+4. **Asuntos Comunitarios y Acceso a Tecnologías:**
+   - Trabajo colaborativo en equipos heterogéneos para garantizar que los alumnos sin conectividad permanente en casa tengan acceso equitativo a dispositivos y recursos digitales escolares.
 
 ---
 
 # VII. OBSERVACIONES GENERALES Y ESPACIO DE SEGUIMIENTO
 
-- **Seguimiento del Diario de Clase:** Anotar diariamente incidentes críticos, alumnos que mostraron liderazgo pedagógico y aquellos que requieren retroalimentación personalizada el día siguiente.
-- **Vinculación con el Programa Escolar de Mejora Continua (PEMC / Plan Analítico):** Este proyecto impacta de manera directa en la meta de reducción del consumo de comida chatarra y el aumento de la comprensión lectora en {fase_correspondiente}.
+- **Seguimiento del Diario de Clase:** Registro diario de los avances individuales de los 26 alumnos en fluidez lectora, precisión ortográfica y participación activa en proyectos.
+- **Vinculación con el Programa Analítico Oficial (Ciclo 2026-2027):** Este plano didáctico atiende de forma directa los 4 ejes prioritarios identificados en el diagnóstico institucional de la Primaria “Revolución Social de 1910” (CCT: 10EPR0361N, Durango): comprensión lectora, velocidad lectora, ortografía y promoción de la lectura con acceso a tecnologías.
 """

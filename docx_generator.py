@@ -236,8 +236,8 @@ def add_initial_signatures(doc, datos_escuela: Dict[str, Any]):
     Distribución Inicial Paso 1:
     Genera las líneas de firmas centradas para el Director Escolar y Docente titular del Grupo.
     """
-    docente = datos_escuela.get("docente", "Aday Domínguez Domínguez") if datos_escuela else "Aday Domínguez Domínguez"
-    director = datos_escuela.get("director", "José Guillermo Borjas Díaz") if datos_escuela else "José Guillermo Borjas Díaz"
+    docente = datos_escuela.get("docente", "Maestra Aday Domínguez Domínguez") if datos_escuela else "Maestra Aday Domínguez Domínguez"
+    director = datos_escuela.get("director", "Guillermo Gerardo Borjas Díaz") if datos_escuela else "Guillermo Gerardo Borjas Díaz"
 
     table_firmas = doc.add_table(rows=2, cols=2)
     table_firmas.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -274,14 +274,15 @@ def add_institutional_header_table(doc, datos_escuela: Dict[str, Any]):
     Crea la tabla de encabezado institucional con paleta estilo Gemini:
     Fondo Lavanda/Lila Suave (#F3E8FF) con texto Morado Oscuro (#311B92).
     """
-    nombre_escuela = datos_escuela.get("nombre_escuela", "Primaria Revolución Social 1910") if datos_escuela else "Primaria Revolución Social 1910"
+    nombre_escuela = datos_escuela.get("nombre_escuela", "Escuela Primaria “Revolución Social de 1910”") if datos_escuela else "Escuela Primaria “Revolución Social de 1910”"
     cct = datos_escuela.get("cct", "10EPR0361N") if datos_escuela else "10EPR0361N"
-    periodo = datos_escuela.get("periodo", "Semana 20") if datos_escuela else "Semana 20"
-    ciclo = datos_escuela.get("ciclo_escolar", "2025-2026") if datos_escuela else "2025-2026"
-    grado = datos_escuela.get("grado", "5° de Primaria") if datos_escuela else "5° de Primaria"
+    periodo = datos_escuela.get("periodo", "Semana 20 de 37") if datos_escuela else "Semana 20 de 37"
+    ciclo = datos_escuela.get("ciclo_escolar", "2026-2027") if datos_escuela else "2026-2027"
+    grado = datos_escuela.get("grado", "6° de Primaria") if datos_escuela else "6° de Primaria"
     grupo = datos_escuela.get("grupo", "A") if datos_escuela else "A"
     fase = datos_escuela.get("fase", "Fase 5") if datos_escuela else "Fase 5"
     turno = datos_escuela.get("turno", "Matutino") if datos_escuela else "Matutino"
+    zona_str = f"{datos_escuela.get('zona_escolar', 'Zona 49')} / {datos_escuela.get('sector', 'Sector 02')}" if datos_escuela else "Zona 49 / Sector 02"
 
     t_inst = doc.add_table(rows=2, cols=4)
     t_inst.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -290,7 +291,7 @@ def add_institutional_header_table(doc, datos_escuela: Dict[str, Any]):
 
     meta_rows = [
         [("Nombre de la Escuela:", nombre_escuela.upper()), ("C.C.T.:", cct), ("Semana:", periodo), ("Ciclo Escolar:", ciclo)],
-        [("Grado y Grupo:", f"{grado} '{grupo}'"), ("Fase Curricular:", fase), ("Turno:", turno), ("Zona Escolar:", "014 / Sector 03")]
+        [("Grado y Grupo:", f"{grado} '{grupo}'"), ("Fase Curricular:", fase), ("Turno:", turno), ("Zona Escolar:", zona_str)]
     ]
     for r_i, r_data in enumerate(meta_rows):
         for c_i, (lbl, val) in enumerate(r_data):
@@ -415,7 +416,7 @@ def add_project_metadata_table(doc, parsed_info: Dict[str, Any], datos_escuela: 
         else:
             campo_formativo = str(datos_escuela["campos_formativos"])
 
-    periodo = datos_escuela.get('periodo', 'Semana 20') if datos_escuela else 'Semana 20'
+    periodo = datos_escuela.get('periodo', 'Semana 20 de 37') if datos_escuela else 'Semana 20'
     duracion = parsed_info.get("duracion", f"{periodo} (2 semanas)")
     fase = datos_escuela.get('fase', 'Fase 5') if datos_escuela else 'Fase 5'
     grado = datos_escuela.get('grado', '5° de Primaria') if datos_escuela else '5° de Primaria'

@@ -37,7 +37,7 @@ def extract_text_from_pdf(file_bytes: bytes, max_pages: int = 200) -> str:
 def extraer_contenidos_pda_fase5(texto: str) -> List[Dict[str, str]]:
     """
     Analiza el texto extraído del Programa Sintético de la Fase 5 (5° y 6° de primaria)
-    para identificar los bloques de Campo Formativo, Contenido y PDA de 5° grado.
+    para identificar los bloques de Campo Formativo, Contenido y PDA (5° y 6° grado).
     """
     import re
     resultados = []
@@ -48,20 +48,33 @@ def extraer_contenidos_pda_fase5(texto: str) -> List[Dict[str, str]]:
     patron = re.compile(
         r'(?:Campo\s+Formativo[:\s]+(?P<campo>[^\n]+)\n)?'
         r'Contenido[:\s]+(?P<contenido>[^\n]+)\n'
-        r'(?:PDA(?:\s+5[°o]?\s+Grado)?[:\s]+(?P<pda>[^\n]+))',
+        r'(?:PDA(?:\s+(?P<grado_pda>[56])[°o]?\s+Grado)?[:\s]+(?P<pda>[^\n]+))',
         re.IGNORECASE
     )
     for m in patron.finditer(texto):
         c_dict = m.groupdict()
-        campo_val = (c_dict.get("campo") or "Lenguajes").strip()
+        campo_raw = (c_dict.get("campo") or "Lenguajes").strip()
+        campo_clean = campo_raw.lower()
+        if "lenguaje" in campo_clean:
+            campo_val = "Lenguajes"
+        elif "saber" in campo_clean or "cient" in campo_clean:
+            campo_val = "Saberes y Pensamiento Científico"
+        elif "ética" in campo_clean or "etica" in campo_clean or "sociedad" in campo_clean:
+            campo_val = "Ética, Naturaleza y Sociedades"
+        elif "humano" in campo_clean or "comunitario" in campo_clean:
+            campo_val = "De lo Humano y lo Comunitario"
+        else:
+            campo_val = campo_raw
+
         cont_val = (c_dict.get("contenido") or "").strip()
         pda_val = (c_dict.get("pda") or "").strip()
+        g_val = c_dict.get("grado_pda") or "6"
         if cont_val and pda_val:
             resultados.append({
                 "campo": campo_val,
                 "contenido": cont_val,
                 "pda": pda_val,
-                "grado": "5° de Primaria"
+                "grado": f"{g_val}° de Primaria"
             })
     return resultados
 

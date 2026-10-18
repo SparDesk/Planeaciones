@@ -8,26 +8,41 @@ import os
 import streamlit as st
 import streamlit_authenticator as stauth
 from dotenv import load_dotenv
+from planeaciones_storage import (
+    init_db,
+    guardar_planeacion,
+    listar_planeaciones,
+    obtener_planeacion_por_id,
+    eliminar_planeacion_por_id,
+    obtener_resumen_semanas_cubiertas,
+    calcular_hash_planeacion
+)
 
 # Cargar variables de entorno desde .env si existe
 load_dotenv()
+
+# Inicializar almacenamiento local SQLite para persistencia y autoguardado
+init_db()
 
 # ==========================================
 # CATÁLOGOS CURRICULARES NEM Y DICCIONARIO DE RESPALDO (FALLBACK)
 # ==========================================
 DATOS_PREDETERMINADOS = {
-    "nombre_escuela": "Primaria Revolucion Social 1910",
+    "nombre_escuela": "Escuela Primaria “Revolución Social de 1910”",
     "cct": "10EPR0361N",
-    "docente": "Aday Domínguez Domínguez",
-    "director": "José Guillermo Borjas Díaz",
-    "grado": "5° de Primaria",
+    "zona_escolar": "Zona 49",
+    "sector": "Sector 02",
+    "entidad": "Durango",
+    "docente": "Maestra Aday Domínguez Domínguez",
+    "director": "Guillermo Gerardo Borjas Díaz",
+    "grado": "6° de Primaria",
     "fase": "Fase 5",
     "grupo": "A",
-    "periodo": "Semana 20",
-    "ciclo_escolar": "2025-2026",
-    "turno": "Matutino",
-    "zona_escolar": "014",
-    "sector": "03"
+    "matricula": 26,
+    "estilos_aprendizaje": "Kinestésico y Visual",
+    "periodo": "Semana 20 de 37",
+    "ciclo_escolar": "2026-2027",
+    "turno": "Matutino"
 }
 
 CAMPOS_FORMATIVOS = [
@@ -139,7 +154,7 @@ LIBROS_SEP_POR_GRADO = {
     ]
 }
 
-LIBROS_SEP_RECOMENDADOS = LIBROS_SEP_POR_GRADO["5° de Primaria"]
+LIBROS_SEP_RECOMENDADOS = LIBROS_SEP_POR_GRADO["6° de Primaria"]
 
 GUIAS_CTE_CATALOGO = {
     "Orientaciones CTE - 5ª Sesión Ordinaria (Febrero 2026 - Fase 5)": {
@@ -501,6 +516,10 @@ CONTENIDOS_PDA_POR_GRADO = {
             {
                 "contenido": "Cultura de paz: derechos humanos, justicia social y resolución pacífica de controversias.",
                 "pda": "Analiza el papel de las instituciones garantes de los derechos humanos y propone acciones para erradicar cualquier tipo de violencia."
+            },
+            {
+                "contenido": "Movimientos sociales en el México de los siglos XIX y XX: la Independencia y la Revolución Social de 1910.",
+                "pda": "Analiza críticamente las causas y consecuencias de la Revolución Social de 1910 y los ideales de justicia social, reconociendo su vigencia en la transformación democrática de su entorno escolar y comunitario."
             }
         ],
         "De lo Humano y lo Comunitario": [
@@ -511,15 +530,57 @@ CONTENIDOS_PDA_POR_GRADO = {
             {
                 "contenido": "Estilos de vida activos y saludables para la prevención de enfermedades crónicas.",
                 "pda": "Diseña y evalúa un plan semanal de actividad física y alimentación balanceada para su comunidad escolar."
+            },
+            {
+                "contenido": "La comunidad como el espacio para el aprendizaje y el bienestar común.",
+                "pda": "Diseña, organiza y participa en acciones colectivas y círculos comunitarios para promover el acceso equitativo a tecnologías y la lectura compartida en el entorno familiar."
             }
         ]
     }
 }
 
-CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["5° de Primaria"]
+CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["6° de Primaria"]
 
-EJEMPLO_PROBLEMICA_ANALITICO = """Problemática comunitaria identificada en el Consejo Técnico Escolar (CTE):
-En el diagnóstico integral de la Escuela Primaria Revolución Social 1910, se detectó una necesidad apremiante de fortalecer la comprensión lectora, la redacción propia y la resolución de problemas multiplicativos y fraccionarios contextualizados. Además, se observa en la convivencia escolar la necesidad de reforzar la empatía, el cuidado del entorno escolar y la resolución pacífica de conflictos mediante el diálogo."""
+CONTEXTO_ESCOLAR_PREDETERMINADO = """Entorno Escolar y Comunitario (Durango):
+La Escuela Primaria “Revolución Social de 1910” (CCT: 10EPR0361N, Zona 49, Sector 02) está ubicada en una zona urbana consolidada de Durango. El entorno escolar y comunitario se caracteriza por familias trabajadoras con una presencia notable de profesionistas, empleados y jubilados con fuerte arraigo social. En general, las familias muestran interés y respaldo hacia la formación escolar de sus hijos; no obstante, se detecta la conveniencia de vincular aún más las actividades escolares con la vida práctica y fortalecer el acompañamiento lector continuo en el hogar."""
+
+CONTEXTO_GRUPAL_PREDETERMINADO = """Diagnóstico del Grupo (6° Grado Grupo “A” - Fase 5):
+Matrícula oficial de 26 alumnos (niñas y niños activos, curiosos, con disposición al trabajo en equipo y alta sensibilidad social).
+- Canales y Estilos de Aprendizaje Predominantes:
+  * Estilo Kinestésico (predominante): El grupo aprende significativamente a través de la acción vivencial, la experimentación práctica, la manipulación de materiales concretos, la dramatización, juegos de roles y dinámicas por estaciones o proyectos activos.
+  * Estilo Visual (ampliamente desarrollado): Manifiestan una excelente asimilación de conceptos mediante el empleo de organizadores gráficos (mapas mentales, mapas conceptuales, cuadros sinópticos), infografías, colores de jerarquización, esquemas interactivos y recursos audiovisuales.
+- Enfoque DUA y Atención a la Diversidad: Ritmos de aprendizaje heterogéneos que demandan diversificación didáctica mediante el Diseño Universal para el Aprendizaje, trabajo en parejas pedagógicas y tutoría entre pares solidaria."""
+
+PROBLEMATIZACIONES_PREDETERMINADAS = """Ejes de Trabajo y Problemáticas Priorizadas (Programa Analítico Ciclo Escolar 2026-2027):
+1. Comprensión Lectora:
+   Dificultad detectada en un porcentaje significativo de alumnos para recuperar ideas centrales, realizar inferencias complejas, deducir vocabulario contextual y estructurar posturas críticas fundadas al analizar textos informativos, literarios y científicos.
+2. Velocidad y Fluidez Lectora:
+   Necesidad de incrementar la precisión, dicción, modulación y velocidad en la lectura en voz alta para favorecer la seguridad personal, la expresión oral elocuente y la asimilación ágil de contenidos extensos.
+3. Ortografía y Producción de Textos Escritos:
+   Rezago en la aplicación sistemática de reglas de acentuación (agudas, graves, esdrújulas), manejo de grafías de uso dudoso (b/v, c/s/z, g/j, h), uso riguroso de signos de puntuación y estructuración lógica de párrafos en la redacción autónoma de textos argumentativos e informativos.
+4. Asuntos Comunitarios (Promoción de la Lectura, Acceso a Tecnologías y Recursos):
+   Poco hábito de lectura compartida en el contexto familiar y comunitario. Necesidad de reducir brechas de acceso a recursos de información y guiar a las y los alumnos en el uso crítico, ético y pedagógico de tecnologías digitales para la indagación, la divulgación y la resolución colaborativa de problemas del entorno."""
+
+EJEMPLO_PROBLEMICA_ANALITICO = f"""PROGRAMA ANALÍTICO OFICIAL (CICLO ESCOLAR 2026-2027)
+Escuela Primaria “Revolución Social de 1910” (CCT: 10EPR0361N) - Zona 49, Sector 02, Durango.
+Docente Titular: Maestra Aday Domínguez Domínguez | Director: Guillermo Gerardo Borjas Díaz | 6° Grado Grupo “A” (Fase 5, 26 alumnos).
+
+I. CONTEXTO ESCOLAR Y COMUNITARIO (DURANGO):
+{CONTEXTO_ESCOLAR_PREDETERMINADO}
+
+II. CONTEXTO GRUPAL Y ESTILOS DE APRENDIZAJE:
+{CONTEXTO_GRUPAL_PREDETERMINADO}
+
+III. PROBLEMATIZACIONES IDENTIFICADAS (EJES DE TRABAJO PRIORITARIOS):
+{PROBLEMATIZACIONES_PREDETERMINADAS}
+
+IV. FUNDAMENTACIÓN Y DIRECTRICES PARA EL MOTOR DE IA:
+- Cruzar de manera transversal e interdisciplinaria las 4 problemáticas (comprensión lectora, velocidad lectora, ortografía y promoción comunitaria de la lectura con uso reflexivo de tecnologías) a través de los 4 Campos Formativos: Lenguajes, Saberes y Pensamiento Científico, Ética Naturaleza y Sociedades, y De lo Humano y lo Comunitario.
+- Dosificar el avance pedagógico y nivel de exigencia a lo largo de las 37 semanas oficiales del Calendario Escolar SEP (Ciclo 2026-2027).
+- En las rutinas matutinas de inicio, integrar dictados con retos ortográficos específicos (acentuación, grafías dudosas), cálculo mental contextualizado, lectura cronometrada de fluidez (1 minuto) y problemas matemáticos razonados vinculados a la comunidad.
+- En la secuencia didáctica diaria (Inicio, Desarrollo y Cierre), incorporar obligatoriamente dinámicas kinestésicas vivenciales (manipulación, dramatización, estaciones de trabajo activas) y recursos visuales estructurados (organizadores gráficos, infografías, diagramas) para potenciar el aprendizaje de los 26 alumnos de 6° "A".
+- Aplicar el enfoque DUA (Diseño Universal para el Aprendizaje) con ajustes razonables para eliminar barreras de aprendizaje y garantizar la inclusión plena.
+- Diseñar productos formativos y rúbricas analíticas orientadas a la acción comunitaria en Durango y al uso pedagógico, crítico y ético de herramientas digitales."""
 import calendar
 import datetime
 from file_processor import (
@@ -1553,6 +1614,50 @@ st.markdown("""
         -webkit-text-fill-color: #CBD5E1 !important;
         opacity: 0.3;
     }
+    .cal-mini-vac {
+        background: #FEF3C7 !important;
+        color: #92400E !important;
+        -webkit-text-fill-color: #92400E !important;
+        border: 1px dashed #F59E0B !important;
+        border-radius: 4px !important;
+        font-size: 0.70rem !important;
+    }
+    .cal-mini-cte {
+        background: #FCE7F3 !important;
+        color: #9D174D !important;
+        -webkit-text-fill-color: #9D174D !important;
+        border: 1px solid #F472B6 !important;
+        font-weight: 700 !important;
+        border-radius: 4px !important;
+        font-size: 0.70rem !important;
+    }
+    @media (prefers-color-scheme: dark) {
+        .cal-mini-vac {
+            background: #78350F !important;
+            color: #FEF3C7 !important;
+            -webkit-text-fill-color: #FEF3C7 !important;
+            border-color: #D97706 !important;
+        }
+        .cal-mini-cte {
+            background: #831843 !important;
+            color: #FCE7F3 !important;
+            -webkit-text-fill-color: #FCE7F3 !important;
+            border-color: #DB2777 !important;
+        }
+    }
+    [data-theme="dark"] .cal-mini-vac {
+        background: #78350F !important;
+        color: #FEF3C7 !important;
+        -webkit-text-fill-color: #FEF3C7 !important;
+        border-color: #D97706 !important;
+    }
+    [data-theme="dark"] .cal-mini-cte {
+        background: #831843 !important;
+        color: #FCE7F3 !important;
+        -webkit-text-fill-color: #FCE7F3 !important;
+        border-color: #DB2777 !important;
+    }
+
     .cal-mini-legend {
         display: flex;
         gap: 8px;
@@ -2204,48 +2309,116 @@ MESES_2026 = [
 ]
 DIAS_HABIL_NOMBRES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 
+# ==========================================
+# CALENDARIO OFICIAL SEP: 37 SEMANAS LECTIVAS (185 DÍAS), PERIODOS VACACIONALES Y CTE
+# ==========================================
+PERIODOS_VACACIONALES_SEP = [
+    {
+        "nombre": "Vacaciones de Invierno",
+        "inicio": datetime.date(2025, 12, 22),
+        "fin": datetime.date(2026, 1, 9),
+        "tipo": "invierno",
+        "icono": "❄️"
+    },
+    {
+        "nombre": "Vacaciones de Semana Santa",
+        "inicio": datetime.date(2026, 3, 30),
+        "fin": datetime.date(2026, 4, 10),
+        "tipo": "semana_santa",
+        "icono": "🌿"
+    },
+    {
+        "nombre": "Receso de Verano",
+        "inicio": datetime.date(2026, 7, 16),
+        "fin": datetime.date(2026, 8, 28),
+        "tipo": "verano",
+        "icono": "🏖️"
+    }
+]
+
+FECHAS_CTE_OFICIALES = {
+    datetime.date(2025, 9, 26): "1ª Sesión Ordinaria CTE",
+    datetime.date(2025, 10, 31): "2ª Sesión Ordinaria CTE",
+    datetime.date(2025, 11, 28): "3ª Sesión Ordinaria CTE",
+    datetime.date(2026, 1, 30): "4ª Sesión Ordinaria CTE",
+    datetime.date(2026, 2, 27): "5ª Sesión Ordinaria CTE",
+    datetime.date(2026, 3, 27): "6ª Sesión Ordinaria CTE",
+    datetime.date(2026, 5, 29): "7ª Sesión Ordinaria CTE",
+    datetime.date(2026, 6, 26): "8ª Sesión Ordinaria CTE"
+}
+
+def es_fecha_vacaciones(d_obj: datetime.date):
+    for v in PERIODOS_VACACIONALES_SEP:
+        if v["inicio"] <= d_obj <= v["fin"]:
+            return v
+    return None
+
 def construir_catalogo_sep_2026():
     """
-    Construye las 56 semanas escolares oficiales SEP del ciclo 2026.
-    Semana 1 inicia el primer lunes hábil de 2026 (5 de enero de 2026).
+    Construye las 37 semanas escolares oficiales (185 días lectivos de clase)
+    del ciclo escolar SEP 2025-2026 / 2026.
+    Sincroniza periodos lectivos, vacaciones oficiales (Invierno, Semana Santa y Verano)
+    y sesiones de Consejo Técnico Escolar (CTE).
     Mapea bi-direccionalmente:
-      - número de semana (1 a 56) -> fechas y mes
-      - fecha (mes, día) -> número de semana (1 a 56)
+      - número de semana (1 a 37) -> fechas, mes y sesión CTE
+      - fecha (mes, día) -> número de semana (1 a 37)
     """
     catalogo_por_semana = {}
     catalogo_por_fecha = {}
 
-    lunes_base = datetime.date(2026, 1, 5)
-    for s_num in range(1, 57):
-        lunes = lunes_base + datetime.timedelta(weeks=s_num - 1)
-        viernes = lunes + datetime.timedelta(days=4)
-        
+    lunes_inicio_ciclo = datetime.date(2025, 9, 1)
+    curr = lunes_inicio_ciclo
+    s_num = 1
+
+    while s_num <= 37:
+        viernes = curr + datetime.timedelta(days=4)
+        # Si la semana completa cae en periodo vacacional oficial SEP, saltarla
+        if es_fecha_vacaciones(curr) and es_fecha_vacaciones(viernes):
+            curr += datetime.timedelta(weeks=1)
+            continue
+
         dias_semana = []
+        tiene_cte = False
+        cte_nombre = ""
+
         for i, nom in enumerate(DIAS_HABIL_NOMBRES):
-            d_obj = lunes + datetime.timedelta(days=i)
-            m_nom = MESES_2026[d_obj.month - 1] if d_obj.year == 2026 else ("Diciembre" if d_obj.year > 2026 else "Enero")
+            d_obj = curr + datetime.timedelta(days=i)
+            m_nom = MESES_2026[d_obj.month - 1]
+            es_cte = d_obj in FECHAS_CTE_OFICIALES
+            if es_cte:
+                tiene_cte = True
+                cte_nombre = FECHAS_CTE_OFICIALES[d_obj]
+
             dias_semana.append({
                 "nombre_dia": nom,
                 "date": d_obj,
                 "dia_num": d_obj.day,
                 "mes_num": d_obj.month,
                 "mes_nombre": m_nom,
+                "año": d_obj.year,
+                "es_cte": es_cte,
+                "cte_nombre": FECHAS_CTE_OFICIALES.get(d_obj, ""),
                 "fecha_corta": f"{nom} {d_obj.day}/{m_nom[:3]}",
                 "fecha_completa": f"{nom} {d_obj.day} de {m_nom} de {d_obj.year}"
             })
-            if d_obj.year == 2026:
-                catalogo_por_fecha[(d_obj.month, d_obj.day)] = s_num
+            catalogo_por_fecha[(d_obj.month, d_obj.day)] = s_num
 
-        m_rep = MESES_2026[lunes.month - 1] if lunes.year == 2026 else "Diciembre"
+        m_rep = MESES_2026[curr.month - 1]
         catalogo_por_semana[s_num] = {
             "semana": s_num,
-            "lunes": lunes,
+            "lunes": curr,
             "viernes": viernes,
-            "mes_idx": lunes.month if lunes.year == 2026 else 12,
+            "mes_idx": curr.month,
             "mes_nombre": m_rep,
-            "rango_str": f"{lunes.day} {MESES_2026[lunes.month-1][:3]} al {viernes.day} {MESES_2026[viernes.month-1][:3]}",
+            "año": curr.year,
+            "tiene_cte": tiene_cte,
+            "cte_nombre": cte_nombre,
+            "rango_str": f"{curr.day} {MESES_2026[curr.month-1][:3]} al {viernes.day} {MESES_2026[viernes.month-1][:3]}",
             "dias_habil": dias_semana
         }
+
+        s_num += 1
+        curr += datetime.timedelta(weeks=1)
 
     return catalogo_por_semana, catalogo_por_fecha
 
@@ -2260,6 +2433,9 @@ if "cal_semana_escolar" not in st.session_state:
 if "cal_sem_idx" not in st.session_state:
     st.session_state.cal_sem_idx = 3
 
+if "semana_activa_previa" not in st.session_state:
+    st.session_state.semana_activa_previa = 20
+
 if "dias_seleccionados" not in st.session_state or not st.session_state.dias_seleccionados:
     st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 
@@ -2272,71 +2448,153 @@ if "dias_fechas" not in st.session_state or not st.session_state.dias_fechas:
         "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
     }
 
-def limpiar_todo_callback():
-    """Reinicia todas las variables de estado y rota las llaves dinámicas para empezar desde cero."""
-    st.session_state.widget_key += 1
-
-    # Variables principales de generación y prompts
+def limpiar_estado_planeacion(nueva_semana=None, reset_completo=False):
+    """
+    Limpia por completo el estado de generación, actividades previas y textos de la sesión
+    para evitar el arrastre de datos entre semanas o al iniciar una nueva planeación.
+    Garantiza que la nueva ejecución tome exclusivamente los datos institucionales oficiales
+    (Escuela Revolución Social de 1910, 6° 'A', problematizaciones y los 4 Campos Formativos).
+    """
+    # 1. Limpieza de actividades generadas y prompts previos
     st.session_state.planeacion_generada = None
     st.session_state.prompt_enviado = None
+
+    # 2. Limpieza de archivos procesados, referencias web y búsquedas
     st.session_state.archivos_procesados = {}
     st.session_state.programa_sintetico_texto = ""
     st.session_state["programa_sintetico_subido"] = False
+    st.session_state["nombre_archivo_programa"] = ""
     st.session_state["es_programa_oficial_fase5"] = False
+    st.session_state["pda_extraidos_programa"] = []
     st.session_state.query_busqueda = ""
     st.session_state.resultados_busqueda_gratis = []
     st.session_state.query_busqueda_gratis = ""
     st.session_state.query_busqueda_enriquecida = ""
     st.session_state.contexto_url = ""
-    st.session_state.cal_mes_nombre = "Octubre"
-    st.session_state.cal_semana_escolar = 20
-    st.session_state.cal_sem_idx = 3
-    st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
-    st.session_state.dias_fechas = {
-        "Lunes": "LUNES 19 DE OCTUBRE DE 2026",
-        "Martes": "MARTES 20 DE OCTUBRE DE 2026",
-        "Miércoles": "MIÉRCOLES 21 DE OCTUBRE DE 2026",
-        "Jueves": "JUEVES 22 DE OCTUBRE DE 2026",
-        "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
-    }
 
-    # Limpieza explícita de variables de selectores curriculares (listas vacías [])
-    st.session_state["dias"] = []
-    st.session_state["dias_seleccionados"] = []
-    st.session_state["campos"] = []
-    st.session_state["campos_formativos"] = []
-    st.session_state["campos_sel"] = []
-    st.session_state["ejes"] = []
-    st.session_state["ejes_articuladores"] = []
-    st.session_state["ejes_sel"] = []
-    st.session_state["libros"] = []
-    st.session_state["libros_sel"] = []
-    st.session_state["libros_seleccionados"] = []
-    st.session_state["pda"] = []
-    st.session_state["pda_seleccionados"] = []
-
-    # Limpieza explícita de variables de texto relacionadas (cadenas vacías "")
+    # 3. Limpieza de redacciones manuales y borradores
     st.session_state["contenidos"] = ""
     st.session_state["contenido_custom"] = ""
     st.session_state["custom_pda"] = ""
     st.session_state["directrices"] = ""
     st.session_state["url_referencia"] = ""
 
-    # Limpiar cualquier clave existente en session_state vinculada con widgets dinámicos
+    if reset_completo:
+        st.session_state.widget_key += 1
+        # Limpiar cualquier clave existente en session_state vinculada con widgets dinámicos
+        for k in list(st.session_state.keys()):
+            for prefix in [
+                "dias_", "campos_", "ejes_", "libros_", "pda_",
+                "contenidos_", "custom_contenido_", "custom_pda_",
+                "directrices_", "url_referencia_", "uploader_",
+                "semana_", "periodo_", "chk_dia_", "chk_pda_manual_"
+            ]:
+                if k.startswith(prefix) and k != "semana_activa_previa":
+                    del st.session_state[k]
+        st.session_state.cal_mes_nombre = "Octubre"
+        st.session_state.cal_semana_escolar = 20
+        st.session_state.cal_sem_idx = 3
+        st.session_state.semana_activa_previa = 20
+        st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+        st.session_state.dias_fechas = {
+            "Lunes": "LUNES 19 DE OCTUBRE DE 2026",
+            "Martes": "MARTES 20 DE OCTUBRE DE 2026",
+            "Miércoles": "MIÉRCOLES 21 DE OCTUBRE DE 2026",
+            "Jueves": "JUEVES 22 DE OCTUBRE DE 2026",
+            "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
+        }
+        st.session_state["aviso_nueva_planeacion"] = True
+    elif nueva_semana is not None:
+        st.session_state.cal_semana_escolar = nueva_semana
+        st.session_state.semana_activa_previa = nueva_semana
+        st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+        # Limpiar claves de widgets que guardan redacciones manuales, selecciones o archivos
+        for k in list(st.session_state.keys()):
+            for prefix in [
+                "contenidos_", "custom_contenido_", "custom_pda_",
+                "url_referencia_", "uploader_", "chk_pda_manual_",
+                "directrices_", "pda_", "chk_dia_"
+            ]:
+                if k.startswith(prefix):
+                    del st.session_state[k]
+
+def limpiar_todo_callback():
+    """Reinicia todas las variables de estado y rota las llaves dinámicas para empezar desde cero."""
+    limpiar_estado_planeacion(reset_completo=True)
+
+def cargar_planeacion_guardada(planeacion_id: int) -> bool:
+    """
+    Restaura por completo una planeación previamente guardada en SQLite,
+    recuperando la semana escolar, días, campos formativos, metodología,
+    ejes articuladores, PDA, libros de texto, directrices del programa analítico
+    y la redacción de secuencias didácticas generadas sin pérdida de datos.
+    """
+    plan = obtener_planeacion_por_id(planeacion_id)
+    if not plan:
+        return False
+    
+    # 1. Limpiar claves de widgets dinámicos anteriores antes de asignar los nuevos
     for k in list(st.session_state.keys()):
         for prefix in [
             "dias_", "campos_", "ejes_", "libros_", "pda_",
             "contenidos_", "custom_contenido_", "custom_pda_",
             "directrices_", "url_referencia_", "uploader_",
-            "semana_", "periodo_"
+            "semana_", "periodo_", "chk_dia_", "chk_pda_manual_"
         ]:
-            if k.startswith(prefix):
-                if isinstance(st.session_state[k], list):
-                    st.session_state[k] = []
-                elif isinstance(st.session_state[k], str):
-                    st.session_state[k] = ""
-                elif isinstance(st.session_state[k], dict):
-                    st.session_state[k] = {}
+            if k.startswith(prefix) and k != "semana_activa_previa":
+                del st.session_state[k]
+
+    # 2. Incrementar la llave de widgets para forzar regeneración limpia de la UI
+    st.session_state.widget_key += 1
+    wk = st.session_state.widget_key
+
+    # 3. Restaurar semana y calendario oficial
+    sem = int(plan["semana"])
+    st.session_state.cal_semana_escolar = sem
+    st.session_state.semana_activa_previa = sem
+    info_sem = CATALOGO_SEMANAS_SEP.get(sem, {})
+    if info_sem:
+        st.session_state.cal_mes_nombre = info_sem.get("mes_nombre", "Octubre")
+    
+    # 4. Restaurar días y fechas
+    dias_rest = plan.get("dias_seleccionados") or ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+    st.session_state.dias_seleccionados = dias_rest
+    st.session_state.dias_fechas = plan.get("dias_fechas") or {}
+
+    # 5. Restaurar planeación generada y prompt
+    st.session_state.planeacion_generada = plan.get("planeacion_generada") or None
+    st.session_state.prompt_enviado = plan.get("prompt_enviado") or None
+
+    # 6. Restaurar textos de referencia y directrices
+    st.session_state["directrices"] = plan.get("directrices") or ""
+    st.session_state["url_referencia"] = plan.get("url_referencia") or ""
+    st.session_state.archivos_procesados = {}
+    if plan.get("contenidos_pda"):
+        st.session_state["pda_cargados"] = plan["contenidos_pda"]
+
+    # 7. Asignar valores cargados a los widgets con la nueva widget_key
+    st.session_state[f"modo_cal_sel_{wk}"] = "Semana SEP (1 a 37)"
+    st.session_state[f"sel_semana_sep_{wk}"] = sem
+    st.session_state[f"directrices_{wk}"] = plan.get("directrices") or ""
+    st.session_state[f"metodologia_{wk}"] = plan.get("metodologia") or "Aprendizaje Basado en Proyectos Comunitarios"
+    st.session_state[f"num_sesiones_{wk}"] = int(plan.get("num_sesiones", len(dias_rest)))
+    st.session_state[f"libros_{wk}"] = plan.get("libros_seleccionados") or []
+    st.session_state[f"campos_{wk}"] = plan.get("campos_formativos") or CAMPOS_FORMATIVOS
+    st.session_state[f"ejes_{wk}"] = plan.get("ejes_articuladores") or ["Pensamiento crítico", "Apropiación de las culturas a través de la lectura y la escritura", "Vida saludable"]
+    for nom_d in DIAS_HABIL_NOMBRES:
+        st.session_state[f"chk_dia_{nom_d}_{wk}"] = (nom_d in dias_rest)
+
+    if plan.get("contenidos_pda") and len(plan["contenidos_pda"]) == 1:
+        first_pda = plan["contenidos_pda"][0]
+        if first_pda.get("contenido"):
+            st.session_state[f"contenidos_{wk}"] = first_pda.get("contenido", "")
+        if first_pda.get("pda"):
+            st.session_state[f"custom_pda_{wk}"] = first_pda.get("pda", "")
+
+    # 8. Sincronizar hash para evitar re-escritura inmediata
+    st.session_state["ultimo_hash_guardado"] = plan.get("hash_contenido")
+    st.session_state["aviso_planeacion_cargada"] = f"Semana {sem} ({plan.get('periodo', f'Semana {sem} de 37')})"
+    return True
 
 # ==========================================
 # ==========================================
@@ -2460,9 +2718,65 @@ if authentication_status:
             type="primary",
             help="Reinicia todos los campos, documentos cargados, búsquedas y selecciones para comenzar una nueva planeación desde cero."
         )
+
+        # Estado de Autoguardado en tiempo real (SQLite)
+        user_actual_sb = st.session_state.get("username", "docente")
+        stats_cubiertas_sb = obtener_resumen_semanas_cubiertas(user_actual_sb)
+        hora_auto_sb = st.session_state.get("ultimo_autoguardado_hora")
+        sem_auto_sb = st.session_state.get("ultimo_autoguardado_semana", st.session_state.get("cal_semana_escolar", 20))
+        if hora_auto_sb:
+            st.markdown(
+                f"<div style='background: #ECFDF5; border: 1px solid #10B981; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #065F46; margin: 6px 0;'>"
+                f"🟢 <b>Autoguardado:</b> {hora_auto_sb} (Sem. {sem_auto_sb})<br>"
+                f"<span style='font-size: 0.71rem; color: #047857;'>Cambios asegurados en SQLite en tiempo real.</span>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"<div style='background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #475569; margin: 6px 0;'>"
+                f"💾 <b>Autoguardado activo:</b> Registra en tiempo real en SQLite."
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
+        # Gestor de Archivos / Historial en la barra lateral
+        with st.expander("📂 Historial de Planeaciones", expanded=False):
+            st.markdown(
+                f"<div style='font-size: 0.78rem; margin-bottom: 6px; color: #3730A3;'>"
+                f"📊 <b>Cobertura:</b> {stats_cubiertas_sb['semanas_completas']} de 37 semanas ({stats_cubiertas_sb['porcentaje_avance']}%)"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+            lista_historial_sb = listar_planeaciones(user_actual_sb)
+            if not lista_historial_sb:
+                st.caption("No hay planeaciones guardadas aún. Se guardarán automáticamente al configurar o generar.")
+            else:
+                for p_item in lista_historial_sb:
+                    p_id = p_item["id"]
+                    tag_estado = "🟢 Lista" if p_item["tiene_plan"] else "📝 Borrador"
+                    ver_tag = f" [{p_item['version_nombre']}]" if not p_item["es_autoguardado"] else ""
+                    st.markdown(
+                        f"<div style='font-size:0.8rem; font-weight:600; margin-top:4px;'>"
+                        f"Semana {p_item['semana']}{ver_tag} <span style='font-size:0.72rem; font-weight:normal; color:#059669;'>({tag_estado})</span>"
+                        f"</div>"
+                        f"<div style='font-size:0.7rem; color:#6B7280;'>{p_item['fecha_guardado']}</div>",
+                        unsafe_allow_html=True
+                    )
+                    col_h1, col_h2 = st.columns([2.2, 1])
+                    with col_h1:
+                        if st.button("📂 Abrir", key=f"btn_sb_load_{p_id}_{st.session_state.widget_key}", use_container_width=True, help=f"Cargar y editar Semana {p_item['semana']}"):
+                            cargar_planeacion_guardada(p_id)
+                            st.rerun()
+                    with col_h2:
+                        if st.button("🗑️", key=f"btn_sb_del_{p_id}_{st.session_state.widget_key}", use_container_width=True, help="Eliminar planeación"):
+                            eliminar_planeacion_por_id(p_id)
+                            st.rerun()
+                    st.markdown("<hr style='margin: 4px 0; border: none; border-top: 1px dashed #E2E8F0;'>", unsafe_allow_html=True)
+
         st.markdown("---")
-        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Datos de la Escuela', unsafe_allow_html=True)
-        st.caption("Configuración oficial predeterminada de la Primaria Revolución Social 1910.")
+        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Datos de la Escuela y Docente', unsafe_allow_html=True)
+        st.caption("Configuración oficial predeterminada de la Escuela Primaria Revolución Social de 1910 (Durango - Ciclo 2026-2027).")
     
         escuela_nombre = st.text_input(
             "Nombre de la Escuela:",
@@ -2476,6 +2790,18 @@ if authentication_status:
             cct = st.text_input("C.C.T.:", value=DATOS_PREDETERMINADOS["cct"], key=f"cct_{st.session_state.widget_key}")
         with col_turno:
             turno = st.text_input("Turno:", value=DATOS_PREDETERMINADOS["turno"], key=f"turno_{st.session_state.widget_key}")
+
+        col_zona, col_sector = st.columns(2)
+        with col_zona:
+            zona_escolar = st.text_input("Zona Escolar:", value=DATOS_PREDETERMINADOS["zona_escolar"], key=f"zona_{st.session_state.widget_key}")
+        with col_sector:
+            sector = st.text_input("Sector:", value=DATOS_PREDETERMINADOS["sector"], key=f"sector_{st.session_state.widget_key}")
+
+        entidad = st.text_input(
+            "Entidad / Estado:",
+            value=DATOS_PREDETERMINADOS.get("entidad", "Durango"),
+            key=f"entidad_{st.session_state.widget_key}"
+        )
     
         docente = st.text_input(
             "Docente Titular:",
@@ -2496,7 +2822,7 @@ if authentication_status:
             grado_sel = st.selectbox(
                 "Grado Escolar:",
                 options=["1° de Primaria", "2° de Primaria", "3° de Primaria", "4° de Primaria", "5° de Primaria", "6° de Primaria"],
-                index=4 if st.session_state.widget_key == 0 else 0,
+                index=5,
                 key=f"grado_{st.session_state.widget_key}"
             )
         with col_gr:
@@ -2516,15 +2842,18 @@ if authentication_status:
             ciclo_sel = st.text_input("Ciclo Escolar:", value=DATOS_PREDETERMINADOS["ciclo_escolar"], key=f"ciclo_{st.session_state.widget_key}")
 
         semana_seleccionada = int(st.session_state.get("cal_semana_escolar", 20))
-        periodo_sel = f"Semana {semana_seleccionada}"
+        if semana_seleccionada > 37:
+            semana_seleccionada = 20
+            st.session_state.cal_semana_escolar = 20
+        periodo_sel = f"Semana {semana_seleccionada} de 37"
         dias_seleccionados = st.session_state.get("dias_seleccionados", ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"])
 
-        # Píldora de estado unificado del Calendario Oficial SEP 2026
+        # Píldora de estado unificado del Calendario Oficial SEP (Ciclo Escolar 185 Días / 37 Semanas)
         st.markdown(
             f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.65rem 0.85rem; margin: 0.6rem 0; font-size: 0.86rem; color: #4C1D95;'>"
-            f"📅 <b>Dosificación Calendario SEP 2026:</b><br>"
+            f"📅 <b>Dosificación Calendario SEP (1 a 37):</b><br>"
             f"<b>{periodo_sel}</b> ({len(dias_seleccionados)} días activos)<br>"
-            f"<span style='font-size: 0.78rem; color: #6D28D9;'>La semana escolar (1 a 56) y los días hábiles se definen directamente en el Calendario Oficial interactivo unificado del panel central.</span>"
+            f"<span style='font-size: 0.78rem; color: #6D28D9;'>La semana escolar (1 a 37) y los días lectivos se definen en el Calendario Oficial interactivo central.</span>"
             f"</div>",
             unsafe_allow_html=True
         )
@@ -2597,7 +2926,7 @@ if authentication_status:
         libros_sel = st.multiselect(
             "Libros de Texto SEP:",
             options=libros_disponibles,
-            default=libros_disponibles[:min(3, len(libros_disponibles))] if st.session_state.widget_key == 0 else [],
+            default=libros_disponibles[:min(3, len(libros_disponibles))],
             help=f"Libros oficiales de la SEP extraídos para {grado_sel}. Se actualizan dinámicamente desde CONALITEG al cambiar de grado.",
             key=f"libros_{st.session_state.widget_key}"
         )
@@ -2678,11 +3007,19 @@ if authentication_status:
     datos_escuela_actual = {
         "nombre_escuela": escuela_nombre,
         "cct": cct,
+        "zona_escolar": zona_escolar,
+        "sector": sector,
+        "entidad": entidad,
         "docente": docente,
         "director": director,
         "grado": grado_sel,
         "fase": fase_auto,
         "grupo": grupo_sel,
+        "matricula": 26,
+        "estilos_aprendizaje": "Kinestésico y Visual",
+        "contexto_escolar": CONTEXTO_ESCOLAR_PREDETERMINADO,
+        "contexto_grupal": CONTEXTO_GRUPAL_PREDETERMINADO,
+        "problematizaciones": PROBLEMATIZACIONES_PREDETERMINADAS,
         "periodo": periodo_sel,
         "semana": semana_seleccionada,
         "semana_seleccionada": semana_seleccionada,
@@ -2703,13 +3040,34 @@ if authentication_status:
     with cols_meta[0]:
         st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> {escuela_nombre}</div>", unsafe_allow_html=True)
     with cols_meta[1]:
-        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> C.C.T. {cct}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> C.C.T. {cct} | {zona_escolar} | {sector} ({entidad})</div>", unsafe_allow_html=True)
     with cols_meta[2]:
-        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> Docente: {docente}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> Docente: {docente} | Dir: {director}</div>", unsafe_allow_html=True)
     with cols_meta[3]:
-        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> {grado_sel} ({fase_auto}) • {periodo_sel}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='badge-sep'><span style='color: #7C3AED; font-size: 1.1rem;'>•</span> {grado_sel} “{grupo_sel}” ({fase_auto}) • {periodo_sel} • Ciclo {ciclo_sel}</div>", unsafe_allow_html=True)
     
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+    
+    # Notificaciones de reinicio de estado y cambio de semana
+    if st.session_state.get("aviso_nueva_planeacion"):
+        st.success("✨ **Nueva Planeación iniciada:** Se ha limpiado el estado de la sesión por completo. Los datos institucionales oficiales de la Escuela Primaria Revolución Social de 1910 (6° 'A') y el Ciclo 2026-2027 están listos para generar desde cero.")
+        if hasattr(st, "toast"):
+            st.toast("✨ Nueva Planeación iniciada: Sistema listo desde cero con datos institucionales.", icon="📋")
+        del st.session_state["aviso_nueva_planeacion"]
+
+    if st.session_state.get("aviso_cambio_semana"):
+        sem_aviso = st.session_state.get("aviso_cambio_semana")
+        st.info(f"🔄 **Cambio a {sem_aviso}:** Se reiniciaron las actividades generadas, archivos y borradores para evitar arrastre de datos. La planeación se generará desde cero.")
+        if hasattr(st, "toast"):
+            st.toast(f"🔄 Cambio a {sem_aviso}: Estado previo reiniciado.", icon="🧹")
+        del st.session_state["aviso_cambio_semana"]
+
+    if st.session_state.get("aviso_planeacion_cargada"):
+        plan_aviso = st.session_state.get("aviso_planeacion_cargada")
+        st.success(f"📂 **Planeación cargada con éxito:** Se restauraron todos los datos, campos y actividades de **{plan_aviso}** para continuar con su edición.")
+        if hasattr(st, "toast"):
+            st.toast(f"📂 Planeación cargada: {plan_aviso}", icon="✅")
+        del st.session_state["aviso_planeacion_cargada"]
     
     # ==========================================
     # SECCIÓN 1: CARGA DE ARCHIVOS Y TEXTOS DE REFERENCIA
@@ -2832,7 +3190,7 @@ if authentication_status:
                         st.session_state["es_programa_oficial_fase5"] = True
                         programa_sintetico = texto_ej
                         st.session_state["pda_extraidos_programa"] = extraer_contenidos_pda_fase5(texto_ej)
-                    st.success(f"🟢 Base de Datos Principal y Oficial Reconocida: 'Programa_Sintetico_Fase_5.pdf'. Configurado como la fuente oficial para extraer Contenidos, PDA (5° Grado), Campos Formativos y Ejes Articuladores.")
+                    st.success(f"🟢 Base de Datos Principal y Oficial Reconocida: 'Programa_Sintetico_Fase_5.pdf'. Configurado como la fuente oficial para extraer Contenidos, PDA ({grado_seleccionado}), Campos Formativos y Ejes Articuladores.")
                 except Exception as e:
                     st.error(f"Error al cargar ejemplo: {e}")
     
@@ -2846,28 +3204,246 @@ if authentication_status:
                     st.error(f"Error al cargar ejemplo: {e}")
     
     with col_texto:
-        st.markdown("**Problemática Comunitaria del Plan Analítico o Directrices Docentes:**")
-        directrices_input = st.text_area(
-            "Directrices del docente / acuerdos de Consejo Técnico Escolar (CTE):",
-            value=EJEMPLO_PROBLEMICA_ANALITICO if st.session_state.widget_key == 0 else "",
-            height=190,
-            help="Pega aquí la problemática comunitaria detectada en el diagnóstico escolar, los intereses de tus alumnos o acuerdos pedagógicos.",
-            key=f"directrices_{st.session_state.widget_key}"
+        st.markdown('#### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Programa Analítico y Diagnóstico (Ciclo 2026-2027)', unsafe_allow_html=True)
+        st.caption("Precarga oficial: Contexto comunitario (Durango), diagnóstico del grupo (26 alumnos, estilos kinestésico y visual) y ejes de trabajo priorizados.")
+
+        # Píldora de estado del Programa Analítico Oficial
+        st.markdown(
+            f"<div style='background: #EDE9FE; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 0.75rem; font-size: 0.84rem; color: #3730A3;'>"
+            f"🏛️ <b>Institución:</b> {escuela_nombre} (C.C.T. {cct}) — {zona_escolar}, {sector}, {entidad}.<br>"
+            f"👤 <b>Titular:</b> {docente} | <b>Dirección:</b> {director} | <b>{grado_sel} “{grupo_sel}”</b> ({fase_auto})<br>"
+            f"👥 <b>Matrícula:</b> 26 alumnos (Estilos Kinestésico y Visual predominantes)<br>"
+            f"🎯 <b>Ejes de Trabajo:</b> Comprensión lectora, velocidad lectora, ortografía, fomento a la lectura y acceso/uso reflexivo de tecnologías."
+            f"</div>",
+            unsafe_allow_html=True
         )
+
+        tab_analitico_prompt, tab_contexto_det, tab_problemas_det = st.tabs([
+            "📋 Programa Analítico (Prompt IA)",
+            "🏘️ Contexto Escolar y Grupal",
+            "🎯 Problematizaciones Priorizadas"
+        ])
+
+        with tab_analitico_prompt:
+            directrices_input = st.text_area(
+                "Directrices oficiales del Programa Analítico y acuerdos de CTE para Gemini:",
+                value=EJEMPLO_PROBLEMICA_ANALITICO,
+                height=210,
+                help="Texto precargado oficial del Programa Analítico (Ciclo 2026-2027). La IA utilizará estos datos para diseñar y fundamentar las secuencias didácticas, rutinas de inicio y evaluación formativa.",
+                key=f"directrices_{st.session_state.widget_key}"
+            )
+
+        with tab_contexto_det:
+            st.markdown(
+                f"""
+                <div style="background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 12px; font-size: 0.84rem; color: #1E293B; line-height: 1.5;">
+                    <b style="color: #4338CA;">🏛️ Contexto Escolar y Comunitario (Durango):</b><br>
+                    {CONTEXTO_ESCOLAR_PREDETERMINADO}<br><br>
+                    <b style="color: #4338CA;">👥 Diagnóstico del Grupo (6° "A" - 26 Alumnos):</b><br>
+                    {CONTEXTO_GRUPAL_PREDETERMINADO}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        with tab_problemas_det:
+            st.markdown(
+                f"""
+                <div style="background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 12px; font-size: 0.84rem; color: #1E293B; line-height: 1.5;">
+                    <b style="color: #4338CA;">🎯 Problemáticas Identificadas y Ejes de Trabajo del Programa Analítico:</b><br>
+                    {PROBLEMATIZACIONES_PREDETERMINADAS}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
     
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
     
     # ==========================================
-    # CALENDARIO INTERACTIVO OFICIAL SEP 2026 Y SELECCIÓN UNIFICADA (REDISEÑO MINIMALISTA)
+    # GESTOR DE ARCHIVOS E HISTORIAL DE PLANEACIONES (37 SEMANAS)
+    # ==========================================
+    docente_usuario_main = st.session_state.get("username", "docente")
+    stats_cubiertas_main = obtener_resumen_semanas_cubiertas(docente_usuario_main)
+    lista_guardadas_main = listar_planeaciones(docente_usuario_main)
+
+    with st.expander(f"🗂️ Gestor de Archivos y Planeaciones Guardadas ({len(lista_guardadas_main)} registradas • {stats_cubiertas_main['semanas_completas']} de 37 semanas completas)", expanded=False):
+        c_m1, c_m2, c_m3, c_m4 = st.columns(4)
+        with c_m1:
+            st.metric("Total Guardadas", len(lista_guardadas_main))
+        with c_m2:
+            st.metric("Semanas con Plan", f"{stats_cubiertas_main['semanas_completas']} / 37")
+        with c_m3:
+            st.metric("Avance del Ciclo", f"{stats_cubiertas_main['porcentaje_avance']}%")
+        with c_m4:
+            hora_act = st.session_state.get("ultimo_autoguardado_hora", "En vivo")
+            st.metric("Autoguardado", hora_act)
+
+        tab_g_sem, tab_g_fecha, tab_g_campo, tab_g_backup = st.tabs([
+            "📅 Por Semana (1 a 37)",
+            "🕒 Por Fecha de Guardado",
+            "🎨 Por Campo Formativo / Asignatura",
+            "💾 Respaldos y Versiones"
+        ])
+
+        with tab_g_sem:
+            dict_guardadas_por_sem = {p["semana"]: p for p in lista_guardadas_main if p["es_autoguardado"]}
+            st.markdown("<div style='font-size:0.83rem; color:#475569; margin-bottom: 8px;'>Selecciona cualquier semana para restaurar todos sus campos, actividades y continuar su edición sin perder datos:</div>", unsafe_allow_html=True)
+            
+            semanas_con_datos = sorted(list(set(p["semana"] for p in lista_guardadas_main)))
+            filtro_sem_main = st.multiselect(
+                "Filtrar por semanas específicas (o dejar vacío para ver todas):",
+                options=list(range(1, 38)),
+                default=semanas_con_datos if semanas_con_datos else [st.session_state.get("cal_semana_escolar", 20)],
+                format_func=lambda s: f"Semana {s} ({CATALOGO_SEMANAS_SEP[s]['mes_nombre'][:3]} {CATALOGO_SEMANAS_SEP[s]['año']})" if s in CATALOGO_SEMANAS_SEP else f"Semana {s}",
+                key=f"flt_sem_gestor_{st.session_state.widget_key}"
+            )
+            semanas_a_mostrar = filtro_sem_main if filtro_sem_main else list(range(1, 38))
+
+            for s_num in semanas_a_mostrar:
+                p_s = dict_guardadas_por_sem.get(s_num)
+                inf_s = CATALOGO_SEMANAS_SEP.get(s_num, {})
+                rango_s = inf_s.get("rango_str", "")
+                mes_s = inf_s.get("mes_nombre", "")
+                cte_tag = " [📌 CTE]" if inf_s.get("tiene_cte") else ""
+                
+                col_c1, col_c2, col_c3, col_c4 = st.columns([1.2, 1.8, 1.2, 1.3])
+                with col_c1:
+                    st.markdown(f"**Semana {s_num} de 37**{cte_tag}<br><span style='font-size:0.75rem; color:#6B7280;'>{rango_s} ({mes_s})</span>", unsafe_allow_html=True)
+                with col_c2:
+                    if p_s:
+                        campos_txt = ", ".join(p_s["campos_formativos"][:2]) + ("..." if len(p_s["campos_formativos"]) > 2 else "")
+                        st.markdown(f"<span style='font-size:0.8rem; color:#1E293B;'>{campos_txt}</span><br><span style='font-size:0.72rem; color:#64748B;'>{p_s['num_sesiones']} sesiones • {p_s['metodologia'][:28]}...</span>", unsafe_allow_html=True)
+                    else:
+                        st.markdown("<span style='font-size:0.78rem; color:#94A3B8;'>Sin planeación guardada</span>", unsafe_allow_html=True)
+                with col_c3:
+                    if p_s and p_s["tiene_plan"]:
+                        st.markdown("<span style='background:#DCFCE7; color:#15803D; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;'>🟢 Lista (Word/PDF)</span>", unsafe_allow_html=True)
+                    elif p_s:
+                        st.markdown("<span style='background:#FEF3C7; color:#B45309; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;'>📝 Borrador Configurado</span>", unsafe_allow_html=True)
+                    else:
+                        st.markdown("<span style='background:#F1F5F9; color:#64748B; padding:2px 8px; border-radius:6px; font-size:0.75rem;'>⚪ Pendiente</span>", unsafe_allow_html=True)
+                with col_c4:
+                    if p_s:
+                        if st.button("📂 Abrir y Cargar", key=f"btn_gest_open_{p_s['id']}_{st.session_state.widget_key}", use_container_width=True):
+                            cargar_planeacion_guardada(p_s["id"])
+                            st.rerun()
+                    else:
+                        if st.button("➕ Iniciar Semana", key=f"btn_gest_init_{s_num}_{st.session_state.widget_key}", use_container_width=True):
+                            limpiar_estado_planeacion(nueva_semana=s_num, reset_completo=False)
+                            st.rerun()
+                st.markdown("<hr style='margin: 3px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
+
+        with tab_g_fecha:
+            if not lista_guardadas_main:
+                st.info("Aún no se han guardado planeaciones en el sistema.")
+            else:
+                for p_rec in sorted(lista_guardadas_main, key=lambda x: x["timestamp"], reverse=True):
+                    col_f1, col_f2, col_f3 = st.columns([2.5, 1.2, 1.3])
+                    with col_f1:
+                        v_lbl = f" — *{p_rec['version_nombre']}*" if not p_rec["es_autoguardado"] else ""
+                        st.markdown(f"**Semana {p_rec['semana']}** ({p_rec['periodo']}){v_lbl}<br><span style='font-size:0.75rem; color:#6B7280;'>Guardado: {p_rec['fecha_guardado']} • {', '.join(p_rec['campos_formativos'])}</span>", unsafe_allow_html=True)
+                    with col_f2:
+                        st.markdown("🟢 **Completa**" if p_rec["tiene_plan"] else "📝 **Borrador**")
+                    with col_f3:
+                        c_sub1, c_sub2 = st.columns([2, 1])
+                        with c_sub1:
+                            if st.button("📂 Abrir", key=f"btn_f_open_{p_rec['id']}_{st.session_state.widget_key}", use_container_width=True):
+                                cargar_planeacion_guardada(p_rec["id"])
+                                st.rerun()
+                        with c_sub2:
+                            if st.button("🗑️", key=f"btn_f_del_{p_rec['id']}_{st.session_state.widget_key}", use_container_width=True):
+                                eliminar_planeacion_por_id(p_rec["id"])
+                                st.rerun()
+                    st.markdown("<hr style='margin: 3px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
+
+        with tab_g_campo:
+            campo_filtro = st.selectbox(
+                "Filtrar por Campo Formativo / Asignatura:",
+                options=CAMPOS_FORMATIVOS,
+                key=f"sel_campo_filtro_{st.session_state.widget_key}"
+            )
+            planes_por_campo = [p for p in lista_guardadas_main if campo_filtro in p["campos_formativos"]]
+            if not planes_por_campo:
+                st.info(f"No hay planeaciones registradas que incluyan el campo formativo '{campo_filtro}'.")
+            else:
+                for p_c in planes_por_campo:
+                    col_cp1, col_cp2, col_cp3 = st.columns([2.5, 1, 1.2])
+                    with col_cp1:
+                        st.markdown(f"**Semana {p_c['semana']}** ({p_c['periodo']})<br><span style='font-size:0.75rem; color:#6B7280;'>Metodología: {p_c['metodologia']} • Fecha: {p_c['fecha_guardado']}</span>", unsafe_allow_html=True)
+                    with col_cp2:
+                        st.markdown("🟢 **Lista**" if p_c["tiene_plan"] else "📝 **Borrador**")
+                    with col_cp3:
+                        if st.button("📂 Cargar", key=f"btn_cp_open_{p_c['id']}_{st.session_state.widget_key}", use_container_width=True):
+                            cargar_planeacion_guardada(p_c["id"])
+                            st.rerun()
+                    st.markdown("<hr style='margin: 3px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
+
+        with tab_g_backup:
+            st.markdown("#### 💾 Respaldos de Planeaciones y Versiones")
+            st.caption("Crea una copia etiquetada de la planeación actual o descarga el historial completo del ciclo en formato JSON.")
+            c_v1, c_v2 = st.columns([2, 1])
+            with c_v1:
+                ver_nombre_custom = st.text_input(
+                    "Nombre de versión o etiqueta:",
+                    value=f"Semana {semana_seleccionada} - Versión Especial",
+                    key=f"inp_custom_ver_{st.session_state.widget_key}"
+                )
+            with c_v2:
+                st.markdown("<div style='height: 1.7rem;'></div>", unsafe_allow_html=True)
+                if st.button("💾 Guardar como Versión", key=f"btn_save_custom_ver_{st.session_state.widget_key}", use_container_width=True):
+                    data_version_save = {
+                        "semana": semana_seleccionada,
+                        "periodo": periodo_sel,
+                        "titulo": f"Semana {semana_seleccionada} — {ver_nombre_custom}",
+                        "grado": grado_sel,
+                        "grupo": grupo_sel,
+                        "campos_formativos": CAMPOS_FORMATIVOS,
+                        "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                        "ejes_articuladores": ["Pensamiento crítico", "Apropiación de las culturas a través de la lectura y la escritura", "Vida saludable"],
+                        "contenidos_pda": [],
+                        "libros_seleccionados": [],
+                        "guia_cte": "",
+                        "dias_seleccionados": dias_seleccionados,
+                        "dias_fechas": st.session_state.get("dias_fechas", {}),
+                        "directrices": st.session_state.get("directrices", ""),
+                        "num_sesiones": len(dias_seleccionados),
+                        "planeacion_generada": st.session_state.get("planeacion_generada") or "",
+                        "prompt_enviado": st.session_state.get("prompt_enviado") or "",
+                        "url_referencia": st.session_state.get("url_referencia", "")
+                    }
+                    guardar_planeacion(
+                        username=docente_usuario_main,
+                        data=data_version_save,
+                        es_autoguardado=False,
+                        version_nombre=ver_nombre_custom
+                    )
+                    st.success(f"✓ ¡Versión '{ver_nombre_custom}' guardada exitosamente!")
+                    st.rerun()
+
+            if lista_guardadas_main:
+                all_records_full = [obtener_planeacion_por_id(p["id"]) for p in lista_guardadas_main]
+                json_backup = json.dumps(all_records_full, ensure_ascii=False, indent=2)
+                st.download_button(
+                    label="📥 Exportar Todo el Historial a JSON",
+                    data=json_backup,
+                    file_name=f"Historial_Planeaciones_{docente_usuario_main}_2026_2027.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
+
+    st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
+    
+    # ==========================================
+    # CALENDARIO INTERACTIVO OFICIAL SEP (37 SEMANAS / 185 DÍAS LECTIVOS)
     # ==========================================
     st.markdown("""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #E2E8F0;">
         <div style="display: flex; align-items: center; gap: 8px;">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #7C3AED;"></span>
             <span style="font-weight: 700; font-size: 1.02rem; color: #1E1B4B; letter-spacing: -0.2px;">Calendario Oficial SEP 2026 y Dosificación Temporal</span>
-            <span style="font-size: 0.72rem; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 9999px; font-weight: 700; border: 1px solid #C4B5FD;">Semanas 1 a 56 SEP</span>
+            <span style="font-size: 0.72rem; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 9999px; font-weight: 700; border: 1px solid #C4B5FD;">Semanas 1 a 37 SEP (185 Días Lectivos)</span>
         </div>
-        <span style="font-size: 0.78rem; color: #6B7280;">Sincronizado con secuencias didácticas</span>
+        <span style="font-size: 0.78rem; color: #6B7280;">Sincronizado con secuencias didácticas y CTE</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2884,32 +3460,39 @@ if authentication_status:
         with c_modo:
             modo_navegacion = st.selectbox(
                 "Dosificar por:",
-                options=["Semana SEP (1 a 56)", "Mes del Año 2026"],
+                options=["Semana SEP (1 a 37)", "Mes del Año 2026"],
                 key=f"modo_cal_sel_{st.session_state.widget_key}",
-                help="Elige si prefieres dosificar buscando directamente el número de semana SEP (1 a 56) o navegando por los meses del año 2026."
+                help="Elige si prefieres dosificar buscando directamente el número de semana SEP (1 a 37) o navegando por los meses del año 2026."
             )
 
         with c_sel:
-            if modo_navegacion == "Semana SEP (1 a 56)":
+            if modo_navegacion == "Semana SEP (1 a 37)":
+                def format_sem_sep_label(s: int) -> str:
+                    inf = CATALOGO_SEMANAS_SEP[s]
+                    cte_tag = f" [📌 CTE]" if inf["tiene_cte"] else ""
+                    return f"Semana {s} de 37 — {inf['rango_str']} ({inf['mes_nombre'][:3]} {inf['año']}){cte_tag}"
+
                 semana_sep_sel = st.selectbox(
-                    "🏫 Semana Escolar SEP:",
-                    options=list(range(1, 57)),
+                    "🏫 Semana Escolar SEP (1 a 37):",
+                    options=list(range(1, 38)),
                     index=semana_actual_init - 1,
-                    format_func=lambda s: f"Sem. {s} — {CATALOGO_SEMANAS_SEP[s]['rango_str']} ({CATALOGO_SEMANAS_SEP[s]['mes_nombre'][:3]})",
+                    format_func=format_sem_sep_label,
                     key=f"sel_semana_sep_{st.session_state.widget_key}",
-                    help="Semana del ciclo escolar 2026 oficial de la SEP."
+                    help="Semana oficial del ciclo escolar SEP (185 días efectivos de clase)."
                 )
                 info_semana = CATALOGO_SEMANAS_SEP[semana_sep_sel]
                 cal_mes_actual = info_semana["mes_nombre"]
                 m_idx = info_semana["mes_idx"]
+                cal_año_actual = info_semana["año"]
                 rango_fechas_str = info_semana["rango_str"]
                 active_week_dates = [d["date"] for d in info_semana["dias_habil"]]
                 st.session_state.cal_semana_escolar = semana_sep_sel
                 st.session_state.cal_mes_nombre = cal_mes_actual
                 semana_seleccionada = semana_sep_sel
-                periodo_sel = f"Semana {semana_seleccionada}"
+                periodo_sel = f"Semana {semana_seleccionada} de 37"
             else:
-                idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
+                cal_año_actual = 2026
+                idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Febrero"))
                 cal_mes_actual = st.selectbox(
                     "📅 Mes 2026:",
                     options=MESES_2026,
@@ -2921,16 +3504,39 @@ if authentication_status:
                 cal_obj = calendar.Calendar(firstweekday=0)
                 month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
 
+                # Filtrar semanas con presencia en este mes
+                valid_week_indices = []
+                for idx_w, w_d in enumerate(month_weeks):
+                    if sum(1 for d in w_d[:5] if d.month == m_idx) >= 3:
+                        valid_week_indices.append(idx_w)
+                if not valid_week_indices:
+                    valid_week_indices = list(range(len(month_weeks)))
+
                 def format_sem_label(idx_w: int) -> str:
                     w_d = month_weeks[idx_w]
-                    m_fin = MESES_2026[w_d[4].month - 1]
-                    return f"Bloque {idx_w + 1} ({w_d[0].day}-{w_d[4].day} {m_fin[:3]})"
+                    lun = w_d[0]
+                    vie = w_d[4]
+                    vac_info = es_fecha_vacaciones(lun) and es_fecha_vacaciones(vie)
+                    sem_num = CATALOGO_FECHAS_SEP.get((lun.month, lun.day)) or CATALOGO_FECHAS_SEP.get((vie.month, vie.day))
+                    tiene_cte = any(d in FECHAS_CTE_OFICIALES for d in w_d[:5])
+                    cte_tag = " [📌 CTE]" if tiene_cte else ""
+                    if vac_info:
+                        vac = es_fecha_vacaciones(lun)
+                        return f"🏖️ {vac['nombre']} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]})"
+                    elif sem_num:
+                        return f"Semana {sem_num} de 37 ({lun.day} al {vie.day} {MESES_2026[lun.month-1][:3]}){cte_tag}"
+                    else:
+                        return f"Bloque {idx_w + 1} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]}){cte_tag}"
+
+                current_sem_idx = st.session_state.get("cal_sem_idx", valid_week_indices[0])
+                if current_sem_idx not in valid_week_indices:
+                    current_sem_idx = valid_week_indices[0]
 
                 cal_sem_idx = st.selectbox(
-                    "📆 Bloque Semanal:",
-                    options=range(len(month_weeks)),
+                    "📆 Bloque Semanal en el Mes:",
+                    options=valid_week_indices,
                     format_func=format_sem_label,
-                    index=min(st.session_state.get("cal_sem_idx", 3), len(month_weeks) - 1),
+                    index=valid_week_indices.index(current_sem_idx),
                     key=f"sel_sem_mes_{st.session_state.widget_key}"
                 )
                 st.session_state.cal_sem_idx = cal_sem_idx
@@ -2940,10 +3546,20 @@ if authentication_status:
                 vie_d = active_week_dates[4]
                 sem_detectada = CATALOGO_FECHAS_SEP.get((lun_d.month, lun_d.day)) or CATALOGO_FECHAS_SEP.get((vie_d.month, vie_d.day)) or 20
                 semana_sep_sel = sem_detectada
+                info_semana = CATALOGO_SEMANAS_SEP[semana_sep_sel]
                 st.session_state.cal_semana_escolar = semana_sep_sel
                 semana_seleccionada = semana_sep_sel
-                periodo_sel = f"Semana {semana_seleccionada}"
+                periodo_sel = f"Semana {semana_seleccionada} de 37"
                 rango_fechas_str = f"{lun_d.day} {MESES_2026[lun_d.month-1][:3]} al {vie_d.day} {MESES_2026[vie_d.month-1][:3]}"
+
+        # Detección de cambio de semana o bloque escolar para evitar arrastre de estados previos
+        semana_previa = st.session_state.get("semana_activa_previa")
+        if semana_previa is not None and semana_previa != semana_sep_sel:
+            limpiar_estado_planeacion(nueva_semana=semana_sep_sel, reset_completo=False)
+            st.session_state["aviso_cambio_semana"] = f"Semana {semana_sep_sel} de 37"
+            st.rerun()
+        else:
+            st.session_state["semana_activa_previa"] = semana_sep_sel
 
         fechas_bloque = {
             nom: active_week_dates[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
@@ -3010,7 +3626,8 @@ if authentication_status:
     # Visualización gráfica compacta del mes actual en col_visual
     with col_visual:
         cal_obj_vis = calendar.Calendar(firstweekday=0)
-        month_weeks_vis = cal_obj_vis.monthdatescalendar(2026, m_idx)
+        vis_year = cal_año_actual if 'cal_año_actual' in locals() else 2026
+        month_weeks_vis = cal_obj_vis.monthdatescalendar(vis_year, m_idx)
         fechas_activas_set = set(fechas_bloque[d] for d in dias_seleccionados)
         cal_html_rows = []
         for w in month_weeks_vis:
@@ -3020,6 +3637,13 @@ if authentication_status:
                     cells.append(f'<td class="cal-mini-empty">{d.day}</td>')
                 elif d in fechas_activas_set:
                     cells.append(f'<td class="cal-mini-active" title="Día seleccionado: {d.day} de {cal_mes_actual}"><strong>{d.day}</strong></td>')
+                elif d in FECHAS_CTE_OFICIALES:
+                    cte_desc = FECHAS_CTE_OFICIALES[d]
+                    cells.append(f'<td class="cal-mini-cte" title="{cte_desc}">📌{d.day}</td>')
+                elif es_fecha_vacaciones(d):
+                    vac = es_fecha_vacaciones(d)
+                    vac_nom = vac["nombre"]
+                    cells.append(f'<td class="cal-mini-vac" title="{vac_nom}">{d.day}</td>')
                 elif d.weekday() >= 5:
                     cells.append(f'<td class="cal-mini-wend">{d.day}</td>')
                 else:
@@ -3029,8 +3653,8 @@ if authentication_status:
         cal_tabla_html = f"""
         <div class="cal-mini-wrap">
             <div class="cal-mini-title">
-                <span>{cal_mes_actual.upper()} 2026</span>
-                <span class="cal-mini-badge">Semana {semana_seleccionada} SEP</span>
+                <span>{cal_mes_actual.upper()} {vis_year}</span>
+                <span class="cal-mini-badge">Semana {semana_seleccionada} de 37</span>
             </div>
             <table class="cal-mini-table">
                 <thead><tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th>S</th><th>D</th></tr></thead>
@@ -3039,6 +3663,8 @@ if authentication_status:
             <div class="cal-mini-legend">
                 <span><span class="cal-mini-legend-dot" style="background: #7C3AED;"></span>Activo</span>
                 <span><span class="cal-mini-legend-dot" style="background: #FFFFFF; border: 1px solid #CBD5E1;"></span>Hábil</span>
+                <span><span class="cal-mini-legend-dot" style="background: #FEF3C7; border: 1px solid #F59E0B;"></span>Vacaciones</span>
+                <span><span class="cal-mini-legend-dot" style="background: #FCE7F3; border: 1px solid #F472B6;"></span>CTE</span>
                 <span><span class="cal-mini-legend-dot" style="background: #94A3B8;"></span>Fin sem</span>
             </div>
         </div>
@@ -3046,11 +3672,15 @@ if authentication_status:
         st.markdown(cal_tabla_html, unsafe_allow_html=True)
 
     # Resumen inferior con contraste reforzado y texto oscuro #111111 en la píldora de sesiones
+    cte_aviso_html = ""
+    if info_semana.get("tiene_cte"):
+        cte_aviso_html = f"<span style='background: #FCE7F3; color: #9D174D; border: 1px solid #F472B6; padding: 2px 8px; border-radius: 9999px; font-size: 0.76rem; font-weight: 700; margin-left: 6px;'>📌 {info_semana['cte_nombre']}</span>"
+
     st.markdown(
         f"""
         <div style="background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 10px; padding: 0.55rem 0.9rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 0.6rem;">
             <div style="font-size: 0.86rem; color: #4C1D95; font-weight: 600;">
-                🗓️ <b>Semana {semana_seleccionada} de 56 SEP</b> ({rango_fechas_str} 2026) <span style="color: #6D28D9; font-weight: normal; margin-left: 6px;">| Días activos: {', '.join(dias_seleccionados)}</span>
+                🗓️ <b>Semana {semana_seleccionada} de 37 SEP</b> ({rango_fechas_str} {info_semana.get('año', 2026)}) {cte_aviso_html} <span style="color: #6D28D9; font-weight: normal; margin-left: 6px;">| Días activos: {', '.join(dias_seleccionados)}</span>
             </div>
             <div>
                 <span class="badge-sesiones-count" style="background-color: #DDD6FE !important; color: #111111 !important; -webkit-text-fill-color: #111111 !important; font-weight: 800 !important; font-size: 0.82rem !important; padding: 3px 12px !important; border-radius: 9999px !important; border: 1px solid #7C3AED !important; display: inline-block !important;">
@@ -3081,8 +3711,8 @@ if authentication_status:
         campos_sel = st.multiselect(
             "Selecciona uno o más Campos Formativos:",
             options=CAMPOS_FORMATIVOS,
-            default=["Lenguajes", "Saberes y Pensamiento Científico"] if st.session_state.widget_key == 0 else [],
-            help="La NEM promueve la interdisciplinariedad articulando varios campos formativos en un mismo proyecto.",
+            default=CAMPOS_FORMATIVOS,
+            help="La NEM promueve la interdisciplinariedad articulando los 4 Campos Formativos en un proyecto integrador.",
             key=f"campos_{st.session_state.widget_key}"
         )
     
@@ -3090,7 +3720,7 @@ if authentication_status:
         ejes_sel = st.multiselect(
             "Selecciona los Ejes Articuladores que guían el proyecto:",
             options=EJES_ARTICULADORES,
-            default=["Pensamiento crítico", "Vida saludable", "Apropiación de las culturas a través de la lectura y la escritura"] if st.session_state.widget_key == 0 else [],
+            default=["Pensamiento crítico", "Vida saludable", "Apropiación de las culturas a través de la lectura y la escritura"],
             help="Los ejes articuladores conectan los contenidos con la realidad cotidiana de los alumnos y la comunidad.",
             key=f"ejes_{st.session_state.widget_key}"
         )
@@ -3130,17 +3760,25 @@ if authentication_status:
     # Pre-poblar según los campos formativos elegidos para el grado activo
     sugerencias_pda = []
 
-    # 1. Integración de Contenidos y PDA del Programa Sintético Subido (Base de Datos Oficial Fase 5 - 5° Grado)
+    # Función auxiliar para normalizar nombres de campos formativos
+    def normalizar_campo_nombre(c_str: str) -> str:
+        c_low = (c_str or "").strip().lower()
+        for cf in CAMPOS_FORMATIVOS:
+            if cf.lower() in c_low or c_low in cf.lower():
+                return cf
+        return c_str
+
+    # 1. Integración de Contenidos y PDA del Programa Sintético Subido (Base de Datos Oficial Fase 5 - 5° y 6° Grado)
     pda_doc_subido = st.session_state.get("pda_extraidos_programa", [])
     if pda_doc_subido:
         for item in pda_doc_subido:
-            c_item = item.get("campo", "Lenguajes")
+            c_item = normalizar_campo_nombre(item.get("campo", "Lenguajes"))
             if not campos_sel or c_item in campos_sel:
                 sugerencias_pda.append({
                     "campo": c_item,
                     "contenido": item.get("contenido", ""),
                     "pda": item.get("pda", ""),
-                    "grado": "5° de Primaria",
+                    "grado": item.get("grado", grado_seleccionado),
                     "origen": "Programa Sintético Fase 5 (Oficial Subido)"
                 })
 
@@ -3160,7 +3798,7 @@ if authentication_status:
         nom_db = st.session_state.get("nombre_archivo_programa") or "Programa_Sintetico_Fase_5.pdf"
         st.markdown(
             f"<div style='background-color: #ECFDF5; border: 1.5px solid #10B981; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.8rem; color: #065F46; font-weight: 600; font-size: 0.95rem;'>"
-            f"🟢 <b>Base de Datos Principal y Oficial Activa:</b> <code>{nom_db}</code>. Contenidos y PDA de 5° de Primaria vinculados prioritariamente."
+            f"🟢 <b>Base de Datos Principal y Oficial Activa:</b> <code>{nom_db}</code>. Contenidos y PDA de {grado_seleccionado} vinculados prioritariamente."
             f"</div>",
             unsafe_allow_html=True
         )
@@ -3168,16 +3806,46 @@ if authentication_status:
     if sugerencias_pda:
         opciones_display = []
         for item in sugerencias_pda:
-            if item.get("origen") == "Programa Sintético Fase 5 (Oficial Subido)":
-                opciones_display.append(f"⭐ [Oficial 5° - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
+            if "Programa Sintético Fase 5" in item.get("origen", ""):
+                opciones_display.append(f"⭐ [Oficial {grado_seleccionado[:2]} - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
             else:
                 opciones_display.append(f"[{item['campo']}] {item['contenido'][:60]}... — PDA: {item['pda'][:70]}...")
+
+        # Predeterminar un PDA representativo de cada uno de los Campos Formativos seleccionados para transversalidad plena
+        default_indices_pda = []
+        pda_guardados = st.session_state.get("pda_cargados")
+        if pda_guardados:
+            matched_indices = []
+            for item_p in pda_guardados:
+                c_nom = (item_p.get("contenido") or "").strip().lower()
+                p_nom = (item_p.get("pda") or "").strip().lower()
+                for idx_s, sug in enumerate(sugerencias_pda):
+                    s_c = sug.get("contenido", "").strip().lower()
+                    s_p = sug.get("pda", "").strip().lower()
+                    if (c_nom and (c_nom[:30] in s_c or s_c[:30] in c_nom)) or (p_nom and (p_nom[:30] in s_p or s_p[:30] in p_nom)):
+                        if idx_s not in matched_indices:
+                            matched_indices.append(idx_s)
+                        break
+            if matched_indices:
+                default_indices_pda = matched_indices
+
+        if not default_indices_pda:
+            campos_vistos = set()
+            for idx_sug, sug_item in enumerate(sugerencias_pda):
+                c_sug = sug_item.get("campo")
+                if c_sug not in campos_vistos:
+                    campos_vistos.add(c_sug)
+                    default_indices_pda.append(idx_sug)
+                if len(default_indices_pda) >= (len(campos_sel) if campos_sel else 4):
+                    break
+        if not default_indices_pda and sugerencias_pda:
+            default_indices_pda = list(range(min(4, len(sugerencias_pda))))
 
         pda_seleccionados_indices = st.multiselect(
             f"Contenidos y PDA oficiales disponibles para {grado_seleccionado}:",
             options=range(len(sugerencias_pda)),
             format_func=lambda x: opciones_display[x],
-            default=[0, 1] if (st.session_state.widget_key == 0 and len(sugerencias_pda) >= 2) else ([0] if (st.session_state.widget_key == 0 and len(sugerencias_pda) == 1) else []),
+            default=default_indices_pda,
             key=f"pda_{st.session_state.widget_key}",
             help=f"Mostrando los Contenidos y PDA oficiales del programa sintético para {grado_seleccionado} ({fase_correspondiente})."
         )
@@ -3187,26 +3855,42 @@ if authentication_status:
         st.info(f"No hay Contenidos y PDA precargados para los campos formativos seleccionados en {grado_seleccionado}. Puedes redactarlos abajo.")
     
     # Área para agregar o editar Contenido y PDA manuales
-    with st.expander(f"Personalizar o escribir Contenidos y PDA manualmente para {grado_seleccionado}", expanded=(len(items_pda_final) == 0)):
+    tiene_pda_custom_cargado = bool(st.session_state.get(f"contenidos_{st.session_state.widget_key}"))
+    with st.expander(f"Personalizar o escribir Contenidos y PDA manualmente para {grado_seleccionado}", expanded=(len(items_pda_final) == 0 or tiene_pda_custom_cargado)):
         val_cont_def = items_pda_final[0]["contenido"] if items_pda_final else (sugerencias_pda[0]["contenido"] if sugerencias_pda else f"Contenido sintético para {grado_seleccionado}.")
         val_pda_def = items_pda_final[0]["pda"] if items_pda_final else (sugerencias_pda[0]["pda"] if sugerencias_pda else f"Procesos de Desarrollo de Aprendizaje para {grado_seleccionado}.")
+        activar_pda_manual = st.checkbox(
+            "✍️ Reemplazar Contenidos y PDA oficiales por redacción manual personalizada",
+            value=(len(items_pda_final) == 0 or tiene_pda_custom_cargado),
+            key=f"chk_pda_manual_{st.session_state.widget_key}",
+            help="Marca esta casilla si deseas ignorar los Contenidos y PDA oficiales seleccionados arriba y redactar tus propios contenidos específicos."
+        )
         contenido_custom = st.text_area(
             f"Contenido Sintético personalizado ({grado_seleccionado}):",
-            value=val_cont_def if st.session_state.widget_key == 0 else "",
+            value="",
+            placeholder=val_cont_def,
             height=80,
             key=f"contenidos_{st.session_state.widget_key}"
         )
         pda_custom = st.text_area(
             f"Procesos de Desarrollo de Aprendizaje (PDA) personalizados ({grado_seleccionado}):",
-            value=val_pda_def if st.session_state.widget_key == 0 else "",
+            value="",
+            placeholder=val_pda_def,
             height=100,
             key=f"custom_pda_{st.session_state.widget_key}"
         )
-        items_pda_final = [{
-            "campo": campos_sel[0] if campos_sel else "Lenguajes",
-            "contenido": contenido_custom,
-            "pda": pda_custom
-        }]
+        if activar_pda_manual and (contenido_custom.strip() or pda_custom.strip()):
+            items_pda_final = [{
+                "campo": campos_sel[0] if campos_sel else "Lenguajes",
+                "contenido": contenido_custom.strip() if contenido_custom.strip() else val_cont_def,
+                "pda": pda_custom.strip() if pda_custom.strip() else val_pda_def
+            }]
+        elif len(items_pda_final) == 0:
+            items_pda_final = [{
+                "campo": campos_sel[0] if campos_sel else "Lenguajes",
+                "contenido": contenido_custom.strip() if contenido_custom.strip() else val_cont_def,
+                "pda": pda_custom.strip() if pda_custom.strip() else val_pda_def
+            }]
     
     col_sesiones, col_espacio = st.columns([1, 2])
     with col_sesiones:
@@ -3221,6 +3905,37 @@ if authentication_status:
         )
     
     st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+    
+    # ==========================================
+    # AUTOGUARDADO EN TIEMPO REAL (SQLITE)
+    # ==========================================
+    docente_usuario_act = st.session_state.get("username", "docente")
+    data_actual_para_guardar = {
+        "semana": semana_seleccionada,
+        "periodo": periodo_sel,
+        "titulo": f"Semana {semana_seleccionada} ({periodo_sel}) — {', '.join(campos_sel[:2]) if campos_sel else 'NEM'}",
+        "grado": grado_sel,
+        "grupo": grupo_sel,
+        "campos_formativos": campos_sel,
+        "metodologia": metodologia_sel,
+        "ejes_articuladores": ejes_sel,
+        "contenidos_pda": items_pda_final,
+        "libros_seleccionados": libros_sel,
+        "guia_cte": guia_cte_sel,
+        "dias_seleccionados": dias_seleccionados,
+        "dias_fechas": st.session_state.get("dias_fechas", {}),
+        "directrices": directrices_input,
+        "num_sesiones": num_sesiones,
+        "planeacion_generada": st.session_state.get("planeacion_generada") or "",
+        "prompt_enviado": st.session_state.get("prompt_enviado") or "",
+        "url_referencia": url_referencia if 'url_referencia' in locals() else ""
+    }
+    hash_actual_form = calcular_hash_planeacion(data_actual_para_guardar)
+    if hash_actual_form != st.session_state.get("ultimo_hash_guardado"):
+        guardar_planeacion(username=docente_usuario_act, data=data_actual_para_guardar, es_autoguardado=True)
+        st.session_state["ultimo_hash_guardado"] = hash_actual_form
+        st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+        st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
     
     # ==========================================
     # FUNCIÓN DE MODO DE RESPALDO: PLANTILLA BASE SIN IA
@@ -3242,15 +3957,15 @@ if authentication_status:
         y colocando marcadores de posición explícitos para la redacción docente,
         estructurada estrictamente para los días seleccionados.
         """
-        escuela = datos_escuela.get('nombre_escuela', 'Primaria Revolución Social 1910')
+        escuela = datos_escuela.get('nombre_escuela', 'Escuela Primaria “Revolución Social de 1910”')
         cct = datos_escuela.get('cct', '10EPR0361N')
-        docente = datos_escuela.get('docente', 'Aday Domínguez Domínguez')
-        director = datos_escuela.get('director', 'José Guillermo Borjas Díaz')
-        grado = datos_escuela.get('grado', '5° de Primaria')
+        docente = datos_escuela.get('docente', 'Maestra Aday Domínguez Domínguez')
+        director = datos_escuela.get('director', 'Guillermo Gerardo Borjas Díaz')
+        grado = datos_escuela.get('grado', '6° de Primaria')
         fase = datos_escuela.get('fase', 'Fase 5')
         grupo = datos_escuela.get('grupo', 'A')
-        periodo = datos_escuela.get('periodo', 'Semana 20')
-        ciclo = datos_escuela.get('ciclo_escolar', '2025-2026')
+        periodo = datos_escuela.get('periodo', 'Semana 20 de 37')
+        ciclo = datos_escuela.get('ciclo_escolar', '2026-2027')
         turno = datos_escuela.get('turno', 'Matutino')
     
         if dias_seleccionados is None:
@@ -3264,7 +3979,7 @@ if authentication_status:
         libros_txt = ", ".join(str(libro) for libro in libros_seleccionados) if libros_seleccionados else "Libros de Texto Gratuitos (SEP - CONALITEG)"
         campos_txt = ", ".join(campos_formativos) if campos_formativos else "Campos Formativos por definir"
         ejes_txt = ", ".join(ejes) if ejes else "Ejes articuladores por definir"
-        problemica_txt = directrices.strip() if directrices and directrices.strip() else "[Redactar aquí la problemática identificada en el diagnóstico escolar o contexto comunitario]"
+        problemica_txt = directrices.strip() if directrices and directrices.strip() else EJEMPLO_PROBLEMICA_ANALITICO
     
         # Preparar texto de contenidos y pda sintetizados para la tabla inicial
         if contenidos_pda:
@@ -3281,9 +3996,9 @@ if authentication_status:
                 c_campo = item.get("campo", campos_formativos[0] if campos_formativos else "Lenguajes")
                 c_cont = item.get("contenido", "[Redactar contenido sintético]")
                 c_pda = item.get("pda", "[Redactar PDA]")
-                filas_curricular.append(f"| **{c_campo}** | {c_cont} | {c_pda} | {libros_txt} |")
+                filas_curricular.append(f"| **{c_campo}** | {c_cont} | {c_pda} | {libros_txt} | Comprensión lectora, velocidad, ortografía y comunidad |")
         else:
-            filas_curricular.append(f"| **{campos_txt}** | [Redactar Contenido Sintético aquí] | [Redactar PDA aquí] | {libros_txt} |")
+            filas_curricular.append(f"| **{campos_txt}** | [Redactar Contenido Sintético aquí] | [Redactar PDA aquí] | {libros_txt} | [Articular problemáticas del Programa Analítico] |")
         
         tabla_curricular_md = "\n".join(filas_curricular)
     
@@ -3329,10 +4044,10 @@ if authentication_status:
     
     ---
     
-    # II. ARTICULACIÓN CURRICULAR (TABLA NEM)
+    # II. ARTICULACIÓN CURRICULAR TRANSVERSAL (TABLA NEM - 4 CAMPOS FORMATIVOS)
     
-    | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) |
-    | :--- | :--- | :--- | :--- |
+    | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
+    | :--- | :--- | :--- | :--- | :--- |
     {tabla_curricular_md}
     
     ---
@@ -3554,6 +4269,13 @@ if authentication_status:
                     )
                     st.session_state.planeacion_generada = plan_generado
                     st.session_state.prompt_enviado = prompt_utilizado
+                    data_gen_save = dict(data_actual_para_guardar)
+                    data_gen_save["planeacion_generada"] = plan_generado
+                    data_gen_save["prompt_enviado"] = prompt_utilizado
+                    guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+                    st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
+                    st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+                    st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
                     st.success("🎉 ¡Planeación didáctica generada exitosamente con Gemini 3.8 Flash!")
                 except (
                     ConnectionError,
@@ -3657,6 +4379,13 @@ if authentication_status:
                     )
                     st.session_state.planeacion_generada = plan_generado
                     st.session_state.prompt_enviado = prompt_utilizado
+                    data_gen_save = dict(data_actual_para_guardar)
+                    data_gen_save["planeacion_generada"] = plan_generado
+                    data_gen_save["prompt_enviado"] = prompt_utilizado
+                    guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+                    st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
+                    st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+                    st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
                     st.success("🎉 ¡Planeación didáctica enriquecida con búsqueda web en vivo generada exitosamente con Gemini!")
                 except (
                     ConnectionError,
@@ -3700,18 +4429,32 @@ if authentication_status:
             )
             st.session_state.planeacion_generada = plantilla_base_text
             st.session_state.prompt_enviado = "Modo de Respaldo: Plantilla Oficial Base generada sin llamadas a la API de Gemini."
+            data_gen_save = dict(data_actual_para_guardar)
+            data_gen_save["planeacion_generada"] = plantilla_base_text
+            data_gen_save["prompt_enviado"] = st.session_state.prompt_enviado
+            guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+            st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
+            st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+            st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
             st.success("📄 ¡Plantilla base generada con éxito! Puedes descargar tu archivo en Word (.docx) o PDF inmediatamente en los botones de abajo.")
     
     if btn_demo:
         with st.spinner(f"Cargando plantilla pedagógica institucional de {grado_sel}..."):
             demo_plan = generate_sample_fallback(
                 datos_escuela=datos_escuela_actual,
-                campos_formativos=campos_sel if campos_sel else ["Lenguajes", "Saberes y Pensamiento Científico"],
+                campos_formativos=campos_sel if campos_sel else CAMPOS_FORMATIVOS,
                 metodologia=metodologia_sel,
-                ejes=ejes_sel if ejes_sel else ["Pensamiento crítico", "Vida saludable"],
-                dias_seleccionados=dias_seleccionados
+                ejes=ejes_sel if ejes_sel else ["Pensamiento crítico", "Apropiación de las culturas a través de la lectura y la escritura", "Vida saludable"],
+                dias_seleccionados=dias_seleccionados,
+                directrices=directrices_input
             )
             st.session_state.planeacion_generada = demo_plan
+            data_gen_save = dict(data_actual_para_guardar)
+            data_gen_save["planeacion_generada"] = demo_plan
+            guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+            st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
+            st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+            st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
             st.info(f"Plantilla de demostración completa ({fase_auto} - {grado_sel}) cargada.")
     
     # ==========================================

@@ -5,18 +5,21 @@ y un banco curricular de referencia para Primaria (con énfasis en Fase 5 / 5° 
 """
 
 DATOS_PREDETERMINADOS = {
-    "nombre_escuela": "Primaria Revolucion Social 1910",
+    "nombre_escuela": "Escuela Primaria “Revolución Social de 1910”",
     "cct": "10EPR0361N",
-    "docente": "Aday Domínguez Domínguez",
-    "director": "José Guillermo Borjas Díaz",
-    "grado": "5° de Primaria",
+    "zona_escolar": "Zona 49",
+    "sector": "Sector 02",
+    "entidad": "Durango",
+    "docente": "Maestra Aday Domínguez Domínguez",
+    "director": "Guillermo Gerardo Borjas Díaz",
+    "grado": "6° de Primaria",
     "fase": "Fase 5",
     "grupo": "A",
-    "periodo": "Semana 20",
-    "ciclo_escolar": "2025-2026",
-    "turno": "Matutino",
-    "zona_escolar": "014",
-    "sector": "03"
+    "matricula": 26,
+    "estilos_aprendizaje": "Kinestésico y Visual",
+    "periodo": "Semana 20 de 37",
+    "ciclo_escolar": "2026-2027",
+    "turno": "Matutino"
 }
 
 FASES_GRADOS = {
@@ -487,6 +490,10 @@ CONTENIDOS_PDA_POR_GRADO = {
             {
                 "contenido": "Cultura de paz: derechos humanos, justicia social y resolución pacífica de controversias.",
                 "pda": "Analiza el papel de las instituciones garantes de los derechos humanos y propone acciones para erradicar cualquier tipo de violencia."
+            },
+            {
+                "contenido": "Movimientos sociales en el México de los siglos XIX y XX: la Independencia y la Revolución Social de 1910.",
+                "pda": "Analiza críticamente las causas y consecuencias de la Revolución Social de 1910 y los ideales de justicia social, reconociendo su vigencia en la transformación democrática de su entorno escolar y comunitario."
             }
         ],
         "De lo Humano y lo Comunitario": [
@@ -497,12 +504,54 @@ CONTENIDOS_PDA_POR_GRADO = {
             {
                 "contenido": "Estilos de vida activos y saludables para la prevención de enfermedades crónicas.",
                 "pda": "Diseña y evalúa un plan semanal de actividad física y alimentación balanceada para su comunidad escolar."
+            },
+            {
+                "contenido": "La comunidad como el espacio para el aprendizaje y el bienestar común.",
+                "pda": "Diseña, organiza y participa en acciones colectivas y círculos comunitarios para promover el acceso equitativo a tecnologías y la lectura compartida en el entorno familiar."
             }
         ]
     }
 }
 
-CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["5° de Primaria"]
+CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["6° de Primaria"]
 
-EJEMPLO_PROBLEMICA_ANALITICO = """Problemática comunitaria identificada en el Consejo Técnico Escolar (CTE):
-En el diagnóstico integral de la Escuela Primaria Revolución Social 1910, se detectó una necesidad apremiante de fortalecer la comprensión lectora, la redacción propia y la resolución de problemas multiplicativos y fraccionarios contextualizados. Además, se observa en la convivencia escolar la necesidad de reforzar la empatía, el cuidado del entorno escolar y la resolución pacífica de conflictos mediante el diálogo."""
+CONTEXTO_ESCOLAR_PREDETERMINADO = """Entorno Escolar y Comunitario (Durango):
+La Escuela Primaria “Revolución Social de 1910” (CCT: 10EPR0361N, Zona 49, Sector 02) está ubicada en una zona urbana consolidada de Durango. El entorno escolar y comunitario se caracteriza por familias trabajadoras con una presencia notable de profesionistas, empleados y jubilados con fuerte arraigo social. En general, las familias muestran interés y respaldo hacia la formación escolar de sus hijos; no obstante, se detecta la conveniencia de vincular aún más las actividades escolares con la vida práctica y fortalecer el acompañamiento lector continuo en el hogar."""
+
+CONTEXTO_GRUPAL_PREDETERMINADO = """Diagnóstico del Grupo (6° Grado Grupo “A” - Fase 5):
+Matrícula oficial de 26 alumnos (niñas y niños activos, curiosos, con disposición al trabajo en equipo y alta sensibilidad social).
+- Canales y Estilos de Aprendizaje Predominantes:
+  * Estilo Kinestésico (predominante): El grupo aprende significativamente a través de la acción vivencial, la experimentación práctica, la manipulación de materiales concretos, la dramatización, juegos de roles y dinámicas por estaciones o proyectos activos.
+  * Estilo Visual (ampliamente desarrollado): Manifiestan una excelente asimilación de conceptos mediante el empleo de organizadores gráficos (mapas mentales, mapas conceptuales, cuadros sinópticos), infografías, colores de jerarquización, esquemas interactivos y recursos audiovisuales.
+- Enfoque DUA y Atención a la Diversidad: Ritmos de aprendizaje heterogéneos que demandan diversificación didáctica mediante el Diseño Universal para el Aprendizaje, trabajo en parejas pedagógicas y tutoría entre pares solidaria."""
+
+PROBLEMATIZACIONES_PREDETERMINADAS = """Ejes de Trabajo y Problemáticas Priorizadas (Programa Analítico Ciclo Escolar 2026-2027):
+1. Comprensión Lectora:
+   Dificultad detectada en un porcentaje significativo de alumnos para recuperar ideas centrales, realizar inferencias complejas, deducir vocabulario contextual y estructurar posturas críticas fundadas al analizar textos informativos, literarios y científicos.
+2. Velocidad y Fluidez Lectora:
+   Necesidad de incrementar la precisión, dicción, modulación y velocidad en la lectura en voz alta para favorecer la seguridad personal, la expresión oral elocuente y la asimilación ágil de contenidos extensos.
+3. Ortografía y Producción de Textos Escritos:
+   Rezago en la aplicación sistemática de reglas de acentuación (agudas, graves, esdrújulas), manejo de grafías de uso dudoso (b/v, c/s/z, g/j, h), uso riguroso de signos de puntuación y estructuración lógica de párrafos en la redacción autónoma de textos argumentativos e informativos.
+4. Asuntos Comunitarios (Promoción de la Lectura, Acceso a Tecnologías y Recursos):
+   Poco hábito de lectura compartida en el contexto familiar y comunitario. Necesidad de reducir brechas de acceso a recursos de información y guiar a las y los alumnos en el uso crítico, ético y pedagógico de tecnologías digitales para la indagación, la divulgación y la resolución colaborativa de problemas del entorno."""
+
+EJEMPLO_PROBLEMICA_ANALITICO = f"""PROGRAMA ANALÍTICO OFICIAL (CICLO ESCOLAR 2026-2027)
+Escuela Primaria “Revolución Social de 1910” (CCT: 10EPR0361N) - Zona 49, Sector 02, Durango.
+Docente Titular: Maestra Aday Domínguez Domínguez | Director: Guillermo Gerardo Borjas Díaz | 6° Grado Grupo “A” (Fase 5, 26 alumnos).
+
+I. CONTEXTO ESCOLAR Y COMUNITARIO (DURANGO):
+{CONTEXTO_ESCOLAR_PREDETERMINADO}
+
+II. CONTEXTO GRUPAL Y ESTILOS DE APRENDIZAJE:
+{CONTEXTO_GRUPAL_PREDETERMINADO}
+
+III. PROBLEMATIZACIONES IDENTIFICADAS (EJES DE TRABAJO PRIORITARIOS):
+{PROBLEMATIZACIONES_PREDETERMINADAS}
+
+IV. FUNDAMENTACIÓN Y DIRECTRICES PARA EL MOTOR DE IA:
+- Cruzar de manera transversal e interdisciplinaria las 4 problemáticas (comprensión lectora, velocidad lectora, ortografía y promoción comunitaria de la lectura con uso reflexivo de tecnologías) a través de los 4 Campos Formativos: Lenguajes, Saberes y Pensamiento Científico, Ética Naturaleza y Sociedades, y De lo Humano y lo Comunitario.
+- Dosificar el avance pedagógico y nivel de exigencia a lo largo de las 37 semanas oficiales del Calendario Escolar SEP (Ciclo 2026-2027).
+- En las rutinas matutinas de inicio, integrar dictados con retos ortográficos específicos (acentuación, grafías dudosas), cálculo mental contextualizado, lectura cronometrada de fluidez (1 minuto) y problemas matemáticos razonados vinculados a la comunidad.
+- En la secuencia didáctica diaria (Inicio, Desarrollo y Cierre), incorporar obligatoriamente dinámicas kinestésicas vivenciales (manipulación, dramatización, estaciones de trabajo activas) y recursos visuales estructurados (organizadores gráficos, infografías, diagramas) para potenciar el aprendizaje de los 26 alumnos de 6° "A".
+- Aplicar el enfoque DUA (Diseño Universal para el Aprendizaje) con ajustes razonables para eliminar barreras de aprendizaje y garantizar la inclusión plena.
+- Diseñar productos formativos y rúbricas analíticas orientadas a la acción comunitaria en Durango y al uso pedagógico, crítico y ético de herramientas digitales."""
