@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Catálogo curricular oficial de la Nueva Escuela Mexicana (NEM) - SEP México.
 Contiene Fases, Metodologías sociocríticas, Ejes articuladores,

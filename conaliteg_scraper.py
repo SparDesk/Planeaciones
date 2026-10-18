@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Módulo de conexión y extracción web en tiempo real con el catálogo oficial
 de la Comisión Nacional de Libros de Texto Gratuitos (CONALITEG - SEP).

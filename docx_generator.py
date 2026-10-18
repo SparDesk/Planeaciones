@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Generador de documentos oficiales en formato Microsoft Word (.docx)
 para las planeaciones escolares de la Primaria Revolución Social 1910.

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Planeaciones Escolares Educación Primaria
 Aplicación web interactiva profesional para la generación automatizada de
@@ -6,6 +8,7 @@ Planeaciones Escolares de Primaria basadas en el modelo de la Nueva Escuela Mexi
 
 import os
 import json
+from typing import Any, Dict, List, Optional, Union, Tuple, Callable
 import streamlit as st
 import streamlit_authenticator as stauth
 from dotenv import load_dotenv
@@ -670,16 +673,37 @@ IV. FUNDAMENTACIÓN Y DIRECTRICES PARA EL MOTOR DE IA:
 - Diseñar productos formativos y rúbricas analíticas orientadas a la acción comunitaria en Durango y al uso pedagógico, crítico y ético de herramientas digitales."""
 import calendar
 import datetime
-from file_processor import (
-    process_uploaded_files,
-    format_context_for_prompt,
-    extract_text_from_pdf,
-    extract_text_from_docx,
-    extract_text_from_txt,
-    extraer_texto_url,
-    extraer_contenidos_pda_fase5,
-    busqueda_cruzada_archivos_plataforma
-)
+try:
+    from file_processor import (
+        process_uploaded_files,
+        format_context_for_prompt,
+        extract_text_from_pdf,
+        extract_text_from_docx,
+        extract_text_from_txt,
+        extraer_texto_url,
+        extraer_contenidos_pda_fase5,
+        busqueda_cruzada_archivos_plataforma
+    )
+except Exception:
+    try:
+        import file_processor as _fp
+        process_uploaded_files = getattr(_fp, "process_uploaded_files", lambda files: {})
+        format_context_for_prompt = getattr(_fp, "format_context_for_prompt", lambda files: "")
+        extract_text_from_pdf = getattr(_fp, "extract_text_from_pdf", lambda b: "")
+        extract_text_from_docx = getattr(_fp, "extract_text_from_docx", lambda b: "")
+        extract_text_from_txt = getattr(_fp, "extract_text_from_txt", lambda b: "")
+        extraer_texto_url = getattr(_fp, "extraer_texto_url", lambda u: "")
+        extraer_contenidos_pda_fase5 = getattr(_fp, "extraer_contenidos_pda_fase5", lambda t: [])
+        busqueda_cruzada_archivos_plataforma = getattr(_fp, "busqueda_cruzada_archivos_plataforma", lambda **kw: {})
+    except Exception:
+        process_uploaded_files = lambda files: {}
+        format_context_for_prompt = lambda files: ""
+        extract_text_from_pdf = lambda b: ""
+        extract_text_from_docx = lambda b: ""
+        extract_text_from_txt = lambda b: ""
+        extraer_texto_url = lambda u: ""
+        extraer_contenidos_pda_fase5 = lambda t: []
+        busqueda_cruzada_archivos_plataforma = lambda **kw: {}
 import socket
 import requests
 try:

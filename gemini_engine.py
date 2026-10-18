@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Módulo de integración con la SDK oficial de Google GenAI (Gemini)
 para la generación automatizada de planeaciones didácticas bajo el modelo NEM (SEP).

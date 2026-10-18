@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Módulo de Persistencia, Historial, Autoguardado y Gestión Personalizada de Archivos (NEM)
 Utiliza SQLite para almacenamiento relacional atómico y archivos físicos JSON organizados por carpetas/categorías.

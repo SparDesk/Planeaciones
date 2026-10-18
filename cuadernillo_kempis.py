@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Módulo de Integración Curricular y Didáctica:
 Catálogo Oficial de Proyectos, Recursos y Cuadernillos Didácticos (37 Semanas SEP - Ciclo 2026-2027).

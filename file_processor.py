@@ -1,20 +1,40 @@
+from __future__ import annotations
+
 """
 Módulo de procesamiento y extracción de texto de documentos de referencia
 (PDF, DOCX, TXT) para incorporar al contexto pedagógico de la planeación.
 """
 
 import io
-from typing import Any, Dict, List
-from bs4 import BeautifulSoup
-import docx
+from typing import Any, Dict, List, Optional, Union, Tuple, Callable
+
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
+
+try:
+    import docx
+except ImportError:
+    docx = None
+
 try:
     import PyPDF2 as pdf_lib
 except ImportError:
-    import pypdf as pdf_lib
-import requests
+    try:
+        import pypdf as pdf_lib
+    except ImportError:
+        pdf_lib = None
+
+try:
+    import requests
+except ImportError:
+    requests = None
 
 def extract_text_from_pdf(file_bytes: bytes, max_pages: int = 200) -> str:
     """Extrae texto de un archivo PDF subido en Streamlit usando PyPDF2 / pypdf."""
+    if pdf_lib is None:
+        return "[Aviso: PyPDF2 o pypdf no se encuentran disponibles para procesar archivos PDF.]"
     try:
         reader = pdf_lib.PdfReader(io.BytesIO(file_bytes))
         total_pages = len(reader.pages)
@@ -80,6 +100,8 @@ def extraer_contenidos_pda_fase5(texto: str) -> List[Dict[str, str]]:
 
 def extract_text_from_docx(file_bytes: bytes, max_paragraphs: int = 150) -> str:
     """Extrae texto de un archivo Word (.docx) subido."""
+    if docx is None:
+        return "[Aviso: python-docx no se encuentra disponible en este entorno para procesar archivos .docx.]"
     try:
         doc = docx.Document(io.BytesIO(file_bytes))
         paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
@@ -158,6 +180,8 @@ def extraer_texto_url(url: str) -> str:
     devolviendo un string vacío en caso de error.
     """
     if not url or not isinstance(url, str) or not url.strip():
+        return ""
+    if requests is None or BeautifulSoup is None:
         return ""
     try:
         headers = {
