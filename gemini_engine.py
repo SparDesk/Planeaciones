@@ -16,9 +16,13 @@ try:
 except ImportError:
     httpx = None
 try:
-    from nem_data import METODOLOGIAS_SOCIOCRITICAS
+    from nem_data import METODOLOGIAS_SOCIOCRITICAS, parsear_metodologia_lista, formatear_metodologia_str
 except ImportError:
     METODOLOGIAS_SOCIOCRITICAS = {}
+    def parsear_metodologia_lista(m):
+        return [str(m)] if m else ["Aprendizaje Basado en Proyectos Comunitarios"]
+    def formatear_metodologia_str(m):
+        return str(m or "Aprendizaje Basado en Proyectos Comunitarios")
 
 try:
     from cuadernillo_kempis import (
@@ -133,7 +137,7 @@ REGLAS PEDAGÓGICAS INQUEBRANTABLES:
 def generate_planeacion(
     datos_escuela: Dict[str, Any],
     campos_formativos: list,
-    metodologia: str,
+    metodologia: Union[str, list],
     ejes_articuladores: list,
     contenidos_pda: list,
     directrices_docente: str,
@@ -284,9 +288,22 @@ PROHIBICIÓN ESTRICTA: Queda terminantemente prohibido inventar, distorsionar o 
         if lineas_f:
             fechas_txt = "\n- Fechas exactas del Calendario 2026 asignadas a cada día:\n" + "\n".join(lineas_f)
 
-    # Detalle de la metodología seleccionada
-    metodologia_info = METODOLOGIAS_SOCIOCRITICAS.get(metodologia, {})
-    fases_metodologicas = "\n".join(metodologia_info.get("fases_oficiales", []))
+    # Detalle y fases de la(s) metodología(s) seleccionada(s)
+    metodologias_lista = parsear_metodologia_lista(metodologia)
+    metodologia_str = formatear_metodologia_str(metodologia)
+
+    fases_metodologicas_items = []
+    for m in metodologias_lista:
+        info_m = METODOLOGIAS_SOCIOCRITICAS.get(m, {})
+        desc_m = info_m.get("descripcion", "")
+        fases_m = info_m.get("fases_oficiales", [])
+        bloque = f"- **Metodología: {m}**"
+        if desc_m:
+            bloque += f"\n  *Enfoque:* {desc_m}"
+        if fases_m:
+            bloque += "\n  *Fases y Momentos Oficiales SEP:*\n" + "\n".join(f"    • {f}" for f in fases_m)
+        fases_metodologicas_items.append(bloque)
+    fases_metodologicas = "\n\n".join(fases_metodologicas_items)
 
     # Formateo de Contenidos y PDA
     articulacion_txt = ""
@@ -408,12 +425,15 @@ REGLA ESTRICTA ADICIONAL: TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o in
 
 === CONFIGURACIÓN CURRICULAR (SEP - NEM) ===
 - Campos Formativos seleccionados: {', '.join(campos_formativos)}
-- Metodología Sociocrítica: {metodologia}
-  Fases/Momentos metodológicos a seguir estrictamente:
+- Metodología(s) Sociocrítica(s) Oficial(es): {metodologia_str}
+  Fases y momentos metodológicos a articular y seguir estrictamente:
 {fases_metodologicas}
 - Ejes Articuladores: {', '.join(ejes_articuladores)}
 
 === RECURSOS SEP Y ARTICULACIÓN METODOLÓGICA (NEM) ===
+- Metodología(s) y Enfoque Pedagógico:
+  * Metodología(s) activas: {metodologia_str}
+  * REQUISITO DE ARTICULACIÓN METODOLÓGICA (NEM): Cuando se seleccionen una o varias metodologías sociocríticas ({metodologia_str}), debes integrarlas coherentemente a lo largo de las sesiones del plano didáctico. Asigna cada metodología al campo formativo o momento correspondiente (por ejemplo: Indagación STEAM para el pensamiento científico y matemático; Aprendizaje Basado en Proyectos Comunitarios para la indagación comunicativa y social; Aprendizaje Basado en Problemas para dilemas éticos y comunitarios; Aprendizaje Servicio para acciones solidarias y comunitarias). Cita explícitamente en el desarrollo de cada sesión las fases o momentos metodológicos específicos puestos en práctica.
 - Libros a utilizar: {libros_seleccionados}
   * Títulos de los libros de texto seleccionados: {libros_txt}
   * REQUISITO PEDAGÓGICO: En la secuencia didáctica, cita expresamente sugerencias de páginas y dinámicas concretas de estos libros para consulta y trabajo de los alumnos.
@@ -442,7 +462,7 @@ ESTRUCTURA DE RESPUESTA EXIGIDA (Usa Markdown profesional, encabezados claros y 
 - Nombre sugerido para el Proyecto Integrador (atractivo y motivante para las y los alumnos).
 - Propósito general del proyecto (articulando transversalmente las problemáticas del Programa Analítico).
 - Escenario (Aula, Escolar o Comunitario).
-- Metodología sociocrítica y justificación pedagógica.
+- Metodología(s) sociocrítica(s) articulada(s) y justificación pedagógica integradora.
 - Ejes articuladores en acción.
 - Temporalidad: Semana {semana_seleccionada} de 37 del calendario escolar oficial de la SEP ({num_sesiones} sesiones didácticas).
 
@@ -564,7 +584,7 @@ Reflexiones docentes para el diario de clase y vinculación con los compromisos 
 def generate_sample_fallback(
     datos_escuela: Dict[str, Any],
     campos_formativos: list,
-    metodologia: str,
+    metodologia: Union[str, list],
     ejes: list,
     dias_seleccionados: list = None,
     contexto_url: str = "",
@@ -791,6 +811,7 @@ def generate_sample_fallback(
         sesiones_str += f"### Sesión {idx}: {dia_header} - {s_txt}\n\n"
 
     dias_str = ", ".join(dias_seleccionados)
+    metodologia_fallback_str = formatear_metodologia_str(metodologia)
 
     return f"""# I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
 
@@ -800,7 +821,7 @@ def generate_sample_fallback(
 - **Fase y Grado:** {fase_correspondiente} — {grado_seleccionado} Grupo '{grupo}' (Matrícula: 26 alumnos)
 - **Temporalidad:** {periodo} ({num_sesiones} sesiones: {dias_str}) | **Ciclo Escolar:** {ciclo}
 - **Escenario:** Comunitario, Escolar y de Aula
-- **Metodología Sociocrítica:** {metodologia}
+- **Metodología Sociocrítica:** {metodologia_fallback_str}
 - **Ejes Articuladores:** {', '.join(ejes)}
 - **Propósito:** {proposito_fallback}
 

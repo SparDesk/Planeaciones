@@ -12,6 +12,7 @@ Adopta estrictamente el diseño, tipografía y la paleta de colores estilo Gemin
 
 import io
 import re
+import json
 from typing import Dict, Any, List
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
@@ -164,7 +165,7 @@ def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
     if m_prop:
         data["proposito"] = m_prop.group(1).replace('*', '').strip()
 
-    m_met = re.search(r'Metodología(?: Sociocrítica)?[:\s\*]+([^\n]+)', plan_text, re.IGNORECASE)
+    m_met = re.search(r'Metodología(?:s)?(?: Sociocrítica(?:s)?)?[:\s\*]+([^\n]+)', plan_text, re.IGNORECASE)
     if m_met:
         data["metodologia"] = m_met.group(1).replace('*', '').strip()
 
@@ -486,6 +487,24 @@ def add_project_metadata_table(doc, parsed_info: Dict[str, Any], datos_escuela: 
     grado = datos_escuela.get('grado', '6° de Primaria') if datos_escuela else '6° de Primaria'
     grupo = datos_escuela.get('grupo', 'A') if datos_escuela else 'A'
 
+    metodologia_doc = parsed_info.get('metodologia')
+    if (not metodologia_doc or metodologia_doc == "Aprendizaje Basado en Proyectos Comunitarios (ABPC)") and datos_escuela and "metodologia" in datos_escuela:
+        metodologia_doc = datos_escuela["metodologia"]
+    
+    if isinstance(metodologia_doc, (list, tuple, set)):
+        metodologia_display = ", ".join(str(m).strip() for m in metodologia_doc if str(m).strip())
+    elif isinstance(metodologia_doc, str) and metodologia_doc.strip().startswith("[") and metodologia_doc.strip().endswith("]"):
+        try:
+            parsed_m = json.loads(metodologia_doc)
+            if isinstance(parsed_m, list):
+                metodologia_display = ", ".join(str(m).strip() for m in parsed_m if str(m).strip())
+            else:
+                metodologia_display = metodologia_doc
+        except Exception:
+            metodologia_display = metodologia_doc
+    else:
+        metodologia_display = str(metodologia_doc or "Aprendizaje Basado en Proyectos Comunitarios")
+
     t_meta = doc.add_table(rows=7, cols=2)
     t_meta.alignment = WD_TABLE_ALIGNMENT.CENTER
     t_meta.autofit = False
@@ -493,7 +512,7 @@ def add_project_metadata_table(doc, parsed_info: Dict[str, Any], datos_escuela: 
 
     meta_cells = [
         (("Nombre del Proyecto Integrador:", parsed_info['nombre_proyecto']), ("Campos Formativos Articulados:", campo_formativo)),
-        (("Duración / Temporalidad:", duracion), ("Metodología Sociocrítica:", parsed_info['metodologia'])),
+        (("Duración / Temporalidad:", duracion), ("Metodología(s) Sociocrítica(s):", metodologia_display)),
         (("Escenarios del Proyecto:", parsed_info['escenario']), ("Libros de Texto SEP (LTG 6°):", parsed_info['libros_texto'])),
         (("Problemática Priorizada (P.A.):", parsed_info['problematica']), ("Ejes Articuladores:", parsed_info['ejes'])),
         (("Propósito General del Proyecto:", parsed_info['proposito']), ("Fase y Grado Escolar:", f"{fase} — {grado} '{grupo}' (26 Alumnos)")),

@@ -4,6 +4,9 @@ Contiene Fases, Metodologías sociocríticas, Ejes articuladores,
 y un banco curricular de referencia para Primaria (con énfasis en Fase 5 / 6° Grado).
 """
 
+import json
+from typing import List, Union, Any
+
 DATOS_PREDETERMINADOS = {
     "nombre_escuela": "Escuela Primaria “Revolución Social de 1910”",
     "cct": "10EPR0361N",
@@ -97,6 +100,37 @@ METODOLOGIAS_SOCIOCRITICAS = {
         ]
     }
 }
+
+def parsear_metodologia_lista(metodologia: Any) -> List[str]:
+    """Convierte cualquier formato de metodología (str, list, json) en una lista limpia de metodologías oficiales."""
+    if not metodologia:
+        return ["Aprendizaje Basado en Proyectos Comunitarios"]
+    if isinstance(metodologia, list):
+        items = [str(m).strip() for m in metodologia if str(m).strip()]
+        return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+    if isinstance(metodologia, (tuple, set)):
+        items = [str(m).strip() for m in metodologia if str(m).strip()]
+        return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+    if isinstance(metodologia, str):
+        val = metodologia.strip()
+        if val.startswith("[") and val.endswith("]"):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    items = [str(m).strip() for m in parsed if str(m).strip()]
+                    return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+            except Exception:
+                pass
+        if "," in val:
+            items = [m.strip() for m in val.split(",") if m.strip()]
+            return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        return [val] if val else ["Aprendizaje Basado en Proyectos Comunitarios"]
+    return [str(metodologia)]
+
+def formatear_metodologia_str(metodologia: Any) -> str:
+    """Convierte cualquier representación de metodología a un string legible delimitado por comas."""
+    lista = parsear_metodologia_lista(metodologia)
+    return ", ".join(lista)
 
 EJES_ARTICULADORES = [
     "Inclusión",

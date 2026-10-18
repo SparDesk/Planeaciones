@@ -137,6 +137,38 @@ METODOLOGIAS_SOCIOCRITICAS = {
     }
 }
 
+try:
+    from nem_data import parsear_metodologia_lista, formatear_metodologia_str
+except ImportError:
+    def parsear_metodologia_lista(metodologia) -> list:
+        if not metodologia:
+            return ["Aprendizaje Basado en Proyectos Comunitarios"]
+        if isinstance(metodologia, list):
+            items = [str(m).strip() for m in metodologia if str(m).strip()]
+            return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        if isinstance(metodologia, (tuple, set)):
+            items = [str(m).strip() for m in metodologia if str(m).strip()]
+            return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        if isinstance(metodologia, str):
+            val = metodologia.strip()
+            if val.startswith("[") and val.endswith("]"):
+                try:
+                    parsed = json.loads(val)
+                    if isinstance(parsed, list):
+                        items = [str(m).strip() for m in parsed if str(m).strip()]
+                        return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+                except Exception:
+                    pass
+            if "," in val:
+                items = [m.strip() for m in val.split(",") if m.strip()]
+                return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+            return [val] if val else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        return [str(metodologia)]
+
+    def formatear_metodologia_str(metodologia) -> str:
+        lista = parsear_metodologia_lista(metodologia)
+        return ", ".join(lista)
+
 EJES_ARTICULADORES = [
     "Inclusión",
     "Pensamiento crítico",
@@ -2910,7 +2942,8 @@ def limpiar_estado_planeacion(nueva_semana=None, reset_completo=False):
                 "dias_", "campos_", "ejes_", "libros_", "pda_",
                 "contenidos_", "custom_contenido_", "custom_pda_",
                 "directrices_", "url_referencia_", "uploader_",
-                "semana_", "periodo_", "chk_dia_", "chk_pda_manual_"
+                "semana_", "periodo_", "chk_dia_", "chk_pda_manual_",
+                "metodologia_"
             ]:
                 if k.startswith(prefix) and k != "semana_activa_previa":
                     del st.session_state[k]
@@ -2968,7 +3001,7 @@ def cargar_planeacion_guardada(planeacion_id: int) -> bool:
             "contenidos_", "custom_contenido_", "custom_pda_",
             "directrices_", "url_referencia_", "uploader_",
             "semana_", "periodo_", "chk_dia_", "chk_pda_manual_",
-            "inp_nombre_archivo_", "sel_categoria_ruta_"
+            "inp_nombre_archivo_", "sel_categoria_ruta_", "metodologia_"
         ]:
             if k.startswith(prefix) and k != "semana_activa_previa":
                 del st.session_state[k]
@@ -3012,7 +3045,7 @@ def cargar_planeacion_guardada(planeacion_id: int) -> bool:
     st.session_state[f"inp_nombre_archivo_{wk}"] = nom_arch
     st.session_state[f"sel_categoria_ruta_{wk}"] = cat_arch
     st.session_state[f"directrices_{wk}"] = plan.get("directrices") or ""
-    st.session_state[f"metodologia_{wk}"] = plan.get("metodologia") or "Aprendizaje Basado en Proyectos Comunitarios"
+    st.session_state[f"metodologia_{wk}"] = parsear_metodologia_lista(plan.get("metodologia"))
     st.session_state[f"num_sesiones_{wk}"] = int(plan.get("num_sesiones", len(dias_rest)))
     st.session_state[f"libros_{wk}"] = plan.get("libros_seleccionados") or []
     st.session_state[f"campos_{wk}"] = plan.get("campos_formativos") or CAMPOS_FORMATIVOS
@@ -3888,7 +3921,8 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                 with col_c2:
                     if p_s:
                         campos_txt = ", ".join(p_s["campos_formativos"][:2]) + ("..." if len(p_s["campos_formativos"]) > 2 else "")
-                        st.markdown(f"<span style='font-size:0.8rem; color:#1E293B;'>{campos_txt}</span><br><span style='font-size:0.72rem; color:#64748B;'>{p_s['num_sesiones']} sesiones • {p_s['metodologia'][:28]}...</span>", unsafe_allow_html=True)
+                        met_txt = formatear_metodologia_str(p_s.get("metodologia"))
+                        st.markdown(f"<span style='font-size:0.8rem; color:#1E293B;'>{campos_txt}</span><br><span style='font-size:0.72rem; color:#64748B;'>{p_s['num_sesiones']} sesiones • {met_txt[:28]}...</span>", unsafe_allow_html=True)
                     else:
                         st.markdown("<span style='font-size:0.78rem; color:#94A3B8;'>Sin planeación guardada</span>", unsafe_allow_html=True)
                 with col_c3:
@@ -3955,7 +3989,8 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                 for p_c in planes_por_campo:
                     col_cp1, col_cp2, col_cp3 = st.columns([2.5, 1, 1.2])
                     with col_cp1:
-                        st.markdown(f"**Semana {p_c['semana']}** ({p_c['periodo']})<br><span style='font-size:0.75rem; color:#6B7280;'>Metodología: {p_c['metodologia']} • Fecha: {p_c['fecha_guardado']}</span>", unsafe_allow_html=True)
+                        met_txt = formatear_metodologia_str(p_c.get("metodologia"))
+                        st.markdown(f"**Semana {p_c['semana']}** ({p_c['periodo']})<br><span style='font-size:0.75rem; color:#6B7280;'>Metodología: {met_txt} • Fecha: {p_c['fecha_guardado']}</span>", unsafe_allow_html=True)
                     with col_cp2:
                         st.markdown("🟢 **Lista**" if p_c["tiene_plan"] else "📝 **Borrador**")
                     with col_cp3:
@@ -3984,7 +4019,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         "grado": grado_sel,
                         "grupo": grupo_sel,
                         "campos_formativos": CAMPOS_FORMATIVOS,
-                        "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                        "metodologia": ["Aprendizaje Basado en Proyectos Comunitarios"],
                         "ejes_articuladores": ["Pensamiento crítico", "Apropiación de las culturas a través de la lectura y la escritura", "Vida saludable"],
                         "contenidos_pda": [],
                         "libros_seleccionados": [],
@@ -4393,22 +4428,41 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         )
     
     with col_metodo:
-        st.markdown("**Metodología Sociocrítica Oficial:**")
-        metodologia_sel = st.selectbox(
-            "Selecciona la metodología de trabajo pedagógico:",
+        st.markdown("**Metodologías de Trabajo Pedagógico (NEM):**")
+        metodologia_widget_k = f"metodologia_{st.session_state.widget_key}"
+        if metodologia_widget_k in st.session_state:
+            val_existente = st.session_state[metodologia_widget_k]
+            if not isinstance(val_existente, list):
+                st.session_state[metodologia_widget_k] = parsear_metodologia_lista(val_existente)
+
+        metodologia_sel = st.multiselect(
+            "Selecciona una o más metodologías de trabajo pedagógico:",
             options=list(METODOLOGIAS_SOCIOCRITICAS.keys()),
-            index=0,
-            help="Metodologías oficiales propuestas por la SEP para cada campo formativo.",
-            key=f"metodologia_{st.session_state.widget_key}"
+            default=["Aprendizaje Basado en Proyectos Comunitarios"],
+            help="Metodologías sociocríticas oficiales de la SEP. Puedes seleccionar una o varias según los campos formativos articulados (ej. STEAM para indagación científica y Proyectos Comunitarios para Lenguajes).",
+            key=metodologia_widget_k
         )
-    
-        # Mostrar información didáctica de la metodología elegida
-        metodo_info = METODOLOGIAS_SOCIOCRITICAS.get(metodologia_sel, {})
-        with st.expander("Ver descripción y fases metodológicas de esta metodología", expanded=True):
-            st.markdown(f"*{metodo_info.get('descripcion', '')}*")
-            st.markdown("**Fases y Momentos oficiales:**")
-            for f in metodo_info.get("fases_oficiales", []):
-                st.markdown(f"- {f}")
+
+        if not metodologia_sel:
+            st.warning("⚠️ Debes seleccionar al menos una metodología de trabajo pedagógico. Se asignará 'Aprendizaje Basado en Proyectos Comunitarios' por defecto.")
+            metodologia_sel = ["Aprendizaje Basado en Proyectos Comunitarios"]
+
+        # Mostrar información didáctica de la(s) metodología(s) elegida(s)
+        cant_m = len(metodologia_sel)
+        titulo_expander = f"Ver descripción y fases metodológicas ({cant_m} seleccionada{'s' if cant_m > 1 else ''})"
+        with st.expander(titulo_expander, expanded=True):
+            for idx_m, m_item in enumerate(metodologia_sel):
+                metodo_info = METODOLOGIAS_SOCIOCRITICAS.get(m_item, {})
+                st.markdown(f"**📌 {m_item}**")
+                if metodo_info.get("descripcion"):
+                    st.markdown(f"*{metodo_info['descripcion']}*")
+                fases_m = metodo_info.get("fases_oficiales", [])
+                if fases_m:
+                    st.markdown("**Fases y Momentos oficiales:**")
+                    for f in fases_m:
+                        st.markdown(f"- {f}")
+                if idx_m < cant_m - 1:
+                    st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px dashed #CBD5E1;'>", unsafe_allow_html=True)
     
     # ==========================================
     # CUADERNILLO DE ACTIVIDADES: SEMANAS 6 Y 7 (PROFA KEMPIS)
@@ -4817,6 +4871,8 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         "vincular_cuadernillo_kempis": vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
     }
     datos_escuela_actual["vincular_cuadernillo_kempis"] = data_actual_para_guardar["vincular_cuadernillo_kempis"]
+    datos_escuela_actual["metodologia"] = metodologia_sel
+    datos_escuela_actual["campos_formativos"] = campos_sel
     hash_actual_form = calcular_hash_planeacion(data_actual_para_guardar)
     if hash_actual_form != st.session_state.get("ultimo_hash_guardado"):
         guardar_planeacion(
@@ -4836,7 +4892,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
     def generar_plantilla_base_sin_ia(
         datos_escuela: dict,
         campos_formativos: list,
-        metodologia: str,
+        metodologia: Union[str, list],
         ejes: list,
         contenidos_pda: list,
         libros_seleccionados: list,
@@ -4948,7 +5004,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
 - **Fase y Grado:** {fase} — {grado} Grupo '{grupo}'
 - **Temporalidad:** {periodo} ({num_sesiones} sesiones: {dias_str}) | **Ciclo Escolar:** {ciclo}
 - **Escenario:** Aula / Escolar / Comunitario
-- **Metodología Sociocrítica:** {metodologia}
+- **Metodología Sociocrítica:** {formatear_metodologia_str(metodologia)}
 - **Ejes Articuladores:** {ejes_txt}
 - **Libros de Texto Gratuitos (LTG):** {libros_txt}
 - **Problemática del Plan Analítico:** {problemica_txt}

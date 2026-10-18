@@ -11,6 +11,7 @@ import re
 import hashlib
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+from nem_data import parsear_metodologia_lista, formatear_metodologia_str
 
 DB_FILENAME = "planeaciones_storage.db"
 DIR_GUARDADOS_DEFAULT = "guardados"
@@ -172,7 +173,9 @@ def guardar_planeacion(
     campos_str_display = ", ".join(str(c) for c in campos_list[:2]) + ("..." if len(campos_list) > 2 else "")
     titulo = data.get("titulo") or f"Semana {semana} ({periodo}) — {campos_str_display}"
     campos_json = json.dumps(campos_list, ensure_ascii=False)
-    metodologia = str(data.get("metodologia", "Aprendizaje Basado en Proyectos Comunitarios"))
+    metodologia_raw = data.get("metodologia")
+    metodologia_lista = parsear_metodologia_lista(metodologia_raw)
+    metodologia = json.dumps(metodologia_lista, ensure_ascii=False)
 
     def safe_dump_list(val, default):
         if val is None:
@@ -371,7 +374,7 @@ def listar_planeaciones(username: str, db_path: Optional[str] = None) -> List[Di
                 "fecha_guardado": r["fecha_guardado"],
                 "timestamp": r["timestamp"],
                 "campos_formativos": campos_list,
-                "metodologia": r["metodologia"],
+                "metodologia": formatear_metodologia_str(r["metodologia"]),
                 "num_sesiones": r["num_sesiones"],
                 "es_autoguardado": bool(r["es_autoguardado"]),
                 "version_nombre": r["version_nombre"],
@@ -418,7 +421,7 @@ def obtener_planeacion_por_id(planeacion_id: int, db_path: Optional[str] = None)
             "fecha_guardado": row["fecha_guardado"],
             "timestamp": row["timestamp"],
             "campos_formativos": safe_json(row["campos_formativos"], []),
-            "metodologia": row["metodologia"],
+            "metodologia": parsear_metodologia_lista(row["metodologia"]),
             "ejes_articuladores": safe_json(row["ejes_articuladores"], []),
             "contenidos_pda": safe_json(row["contenidos_pda"], []),
             "libros_seleccionados": safe_json(row["libros_seleccionados"], []),
