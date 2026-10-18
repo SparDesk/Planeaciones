@@ -109,7 +109,7 @@ def build_pdf_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.By
     pdf.set_fill_color(*RGB_SEP_GUINDA)
     pdf.set_text_color(*RGB_BLANCO)
     fase = datos_escuela.get('fase', 'Fase 5')
-    grado = datos_escuela.get('grado', '5° de Primaria')
+    grado = datos_escuela.get('grado', '6° de Primaria')
     pdf.cell(186, 6, sanitize_latin1(f"HORARIO ESCOLAR SEMANAL ({fase.upper()} — {grado.upper()})"), border=1, new_x='LMARGIN', new_y='NEXT', align='C', fill=True)
 
     dias_sel = datos_escuela.get('dias_seleccionados') or datos_escuela.get('dias_planeados') or ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]

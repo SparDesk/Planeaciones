@@ -1,7 +1,7 @@
 """
 Catálogo curricular oficial de la Nueva Escuela Mexicana (NEM) - SEP México.
 Contiene Fases, Metodologías sociocríticas, Ejes articuladores,
-y un banco curricular de referencia para Primaria (con énfasis en Fase 5 / 5° Grado).
+y un banco curricular de referencia para Primaria (con énfasis en Fase 5 / 6° Grado).
 """
 
 DATOS_PREDETERMINADOS = {
@@ -196,7 +196,7 @@ GUIAS_CTE_CATALOGO = {
     }
 }
 
-LIBROS_SEP_RECOMENDADOS = LIBROS_SEP_POR_GRADO["5° de Primaria"]
+LIBROS_SEP_RECOMENDADOS = LIBROS_SEP_POR_GRADO["6° de Primaria"]
 
 CONTENIDOS_PDA_POR_GRADO = {
     "1° de Primaria": {

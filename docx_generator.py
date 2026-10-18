@@ -119,28 +119,29 @@ def set_cell_margins(cell, top=80, bottom=80, left=100, right=100):
 
 
 def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
-    """Extrae las secciones pedagógicas del texto en Markdown para rellenar tablas."""
+    """Extrae las secciones pedagógicas del texto en Markdown para rellenar tablas (Machote 6° Grado - Estilo Profa. Kempis)."""
     data = {
-        "nombre_proyecto": "Guardianes de la Memoria y la Salud Comunitaria",
-        "campo_formativo": "Lenguajes, Saberes y Pensamiento Científico",
-        "duracion": "2 semanas (10 sesiones)",
-        "proposito": "Investigar los hábitos de alimentación e historia comunitaria mediante proyectos para fortalecer la lectura, redacción y pensamiento matemático.",
-        "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
-        "escenario": "Comunitario y de Aula",
-        "libros_texto": "Proyectos Comunitarios (págs. 20-33), Nuestros Saberes (págs. 68-75)",
-        "problematica": "Dificultades en la redacción autónoma de textos informativos, comprensión lectora y resolución de problemas fraccionarios.",
-        "ejes": "Pensamiento crítico, Vida saludable, Apropiación de las culturas a través de la lectura y la escritura",
-        "contenidos": "Comprensión y producción de textos informativos sobre temas colectivos.",
-        "pda": "Selecciona y lee textos informativos; elabora resúmenes y trípticos para difundir en la comunidad.",
+        "nombre_proyecto": "Voces Comunitarias en Acción: Lectura, Ortografía y Tecnologías para el Bienestar",
+        "campo_formativo": "Lenguajes, Saberes y Pensamiento Científico, Ética, Naturaleza y Sociedades, De lo Humano y lo Comunitario",
+        "duracion": "Semanas 6 y 7 (del 5 al 16 de octubre del ciclo 2026-2027)",
+        "proposito": "Que las y los 26 alumnos de 6° Grado Grupo “A” investiguen y elaboren textos literarios y argumentativos, analicen sellos de advertencia NOM-051 y conversiones de múltiplos del gramo, y apliquen mecanismos pacíficos de convivencia, fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios.",
+        "metodologia": "Aprendizaje Basado en Proyectos Comunitarios (ABPC)",
+        "escenario": "Proyectos Comunitarios (págs. 20-35), Proyectos de Aula (págs. 82-95) y Proyectos Escolares (págs. 80-92)",
+        "libros_texto": "Proyectos Comunitarios (6° grado), Nuestros Saberes (6° grado), Proyectos de Aula (6° grado), Múltiples Lenguajes (6° grado)",
+        "problematica": "Dificultades en comprensión lectora inferencial, fluidez y velocidad lectora, ortografía en redacción autónoma y cálculo mental contextualizado.",
+        "ejes": "Inclusión, Pensamiento Crítico, Vida Saludable, Apropiación de las Culturas a través de la Lectura y la Escritura",
+        "contenidos": "Análisis de textos literarios; alimentación saludable y sellos NOM-051; múltiplos del gramo; servicios públicos e IVA; cultura de paz.",
+        "pda": "Lee y recrea cuentos y textos informativos; interpreta sellos en ultraprocesados; resuelve conversiones de gramos y porcentajes; aplica mediación dialógica.",
         "rutinas": [],
         "sesiones": [],
         "rutinas_por_dia": {},
         "sesiones_por_dia": {},
-        "adecuaciones": "Uso de apoyos visuales y tutoría entre pares. Graduación de problemas con material concreto.",
-        "observaciones": "Seguimiento puntual a estudiantes con rezago en el diario de campo del docente.",
+        "articulacion_filas": [],
+        "evaluacion_filas": [],
+        "adecuaciones": "Principio de Representación (Visual) con organizadores gráficos de alto contraste y Principio de Acción/Expresión (Kinestésico) con tarjetas ortográficas y material manipulativo para los 26 alumnos.",
+        "observaciones": "Seguimiento diario en el diario de campo a la velocidad lectora (ppm) y precisión ortográfica, en cumplimiento con el Programa Analítico 2026-2027.",
         "raw_text": plan_text or ""
     }
-
 
     # Extraer campos de identificación curricular
     m_proj = re.search(r'Nombre (?:sugerido para el |del )?Proyecto[:\s\*]+([^\n]+)', plan_text, re.IGNORECASE)
@@ -163,6 +164,10 @@ def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
     if m_met:
         data["metodologia"] = m_met.group(1).replace('*', '').strip()
 
+    m_esc = re.search(r'Escenario[:\s\*]+([^\n]+)', plan_text, re.IGNORECASE)
+    if m_esc:
+        data["escenario"] = m_esc.group(1).replace('*', '').strip()
+
     m_ejes = re.search(r'Ejes Articuladores[:\s\*]+([^\n]+)', plan_text, re.IGNORECASE)
     if m_ejes:
         data["ejes"] = m_ejes.group(1).replace('*', '').strip()
@@ -183,7 +188,20 @@ def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
     if m_pda:
         data["pda"] = m_pda.group(1).replace('*', '').strip()
 
-    # 1. Extraer actividades de inicio (rutina matutina) de la Sección III
+    # 1. Extraer filas de la Tabla de Articulación Curricular (Sección II)
+    sec_ii_match = re.search(r'# II\..*?(?=# III\.|\Z)', plan_text, re.DOTALL)
+    if sec_ii_match:
+        lineas_ii = sec_ii_match.group(0).split('\n')
+        for l in lineas_ii:
+            l_str = l.strip()
+            if l_str.startswith('|') and l_str.endswith('|'):
+                if set(l_str) <= {'|', '-', ' ', ':'}:
+                    continue
+                parts = [c.strip().replace('**', '') for c in l_str.strip('|').split('|')]
+                if len(parts) >= 4 and not parts[0].lower().startswith('campo'):
+                    data["articulacion_filas"].append(parts)
+
+    # 2. Extraer actividades de inicio (rutina matutina) de la Sección III
     sec_iii_match = re.search(r'# III\..*?(?=# IV\.|\Z)', plan_text, re.DOTALL)
     sec_iii_text = sec_iii_match.group(0) if sec_iii_match else plan_text
 
@@ -207,7 +225,7 @@ def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
         if day_detected:
             data["rutinas_por_dia"][day_detected] = r_item
 
-    # 2. Extraer secuencias didácticas de la Sección IV
+    # 3. Extraer secuencias didácticas de la Sección IV
     sec_iv_match = re.search(r'# IV\..*?(?=# V\.|\Z)', plan_text, re.DOTALL)
     sec_iv_text = sec_iv_match.group(0) if sec_iv_match else plan_text
 
@@ -241,6 +259,33 @@ def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
         data["sesiones"].append(s_item)
         if day_detected:
             data["sesiones_por_dia"][day_detected] = s_item
+
+    # 4. Extraer filas de Rúbrica / Instrumento de Evaluación Formativa (Sección V)
+    sec_v_match = re.search(r'# V\..*?(?=# VI\.|\Z)', plan_text, re.DOTALL)
+    if sec_v_match:
+        lineas_v = sec_v_match.group(0).split('\n')
+        for l in lineas_v:
+            l_str = l.strip()
+            if l_str.startswith('|') and l_str.endswith('|'):
+                if set(l_str) <= {'|', '-', ' ', ':'}:
+                    continue
+                parts = [c.strip().replace('**', '') for c in l_str.strip('|').split('|')]
+                if len(parts) >= 4 and not any(parts[0].lower().startswith(x) for x in ['criterio', 'indicador']):
+                    data["evaluacion_filas"].append(parts)
+
+    # 5. Extraer Adecuaciones / Ajustes Razonables (Sección VI)
+    sec_vi_match = re.search(r'# VI\..*?(?=# VII\.|\Z)', plan_text, re.DOTALL)
+    if sec_vi_match:
+        adecs = sec_vi_match.group(0).replace('# VI. AJUSTES RAZONABLES Y ATENCIÓN A LA DIVERSIDAD (BAP - DUA)', '').strip()
+        if adecs and len(adecs) > 20:
+            data["adecuaciones"] = adecs
+
+    # 6. Extraer Observaciones Generales (Sección VII)
+    sec_vii_match = re.search(r'# VII\..*?\Z', plan_text, re.DOTALL)
+    if sec_vii_match:
+        obs = sec_vii_match.group(0).replace('# VII. OBSERVACIONES GENERALES Y ESPACIO DE SEGUIMIENTO', '').strip()
+        if obs and len(obs) > 20:
+            data["observaciones"] = obs
 
     return data
 
@@ -339,7 +384,7 @@ def add_horario_escolar_table(doc, datos_escuela=None):
     - Bordes finos en morado tenue (#D8B4FE).
     """
     fase = datos_escuela.get('fase', 'Fase 5') if datos_escuela else 'Fase 5'
-    grado = datos_escuela.get('grado', '5° de Primaria') if datos_escuela else '5° de Primaria'
+    grado = datos_escuela.get('grado', '6° de Primaria') if datos_escuela else '6° de Primaria'
 
     p_h = doc.add_paragraph()
     p_h.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -422,6 +467,7 @@ def add_project_metadata_table(doc, parsed_info: Dict[str, Any], datos_escuela: 
     Distribución Inicial Paso 4:
     Crea la tabla de metadatos del proyecto con paleta estilo Gemini:
     Subencabezados en Morado Oscuro sobre fondo Lila Suave (#F3E8FF) / Blanco (#FFFFFF).
+    Incluye los campos de proyectos comunitarios, de aula y escolares de 6° grado.
     """
     campo_formativo = parsed_info.get("campo_formativo", "Lenguajes, Saberes y Pensamiento Científico")
     if datos_escuela and "campos_formativos" in datos_escuela and datos_escuela["campos_formativos"]:
@@ -430,24 +476,25 @@ def add_project_metadata_table(doc, parsed_info: Dict[str, Any], datos_escuela: 
         else:
             campo_formativo = str(datos_escuela["campos_formativos"])
 
-    periodo = datos_escuela.get('periodo', 'Semana 20 de 37') if datos_escuela else 'Semana 20'
+    periodo = datos_escuela.get('periodo', 'Semana 6 de 37') if datos_escuela else 'Semana 6 de 37'
     duracion = parsed_info.get("duracion", f"{periodo} (2 semanas)")
     fase = datos_escuela.get('fase', 'Fase 5') if datos_escuela else 'Fase 5'
-    grado = datos_escuela.get('grado', '5° de Primaria') if datos_escuela else '5° de Primaria'
+    grado = datos_escuela.get('grado', '6° de Primaria') if datos_escuela else '6° de Primaria'
     grupo = datos_escuela.get('grupo', 'A') if datos_escuela else 'A'
 
-    t_meta = doc.add_table(rows=6, cols=2)
+    t_meta = doc.add_table(rows=7, cols=2)
     t_meta.alignment = WD_TABLE_ALIGNMENT.CENTER
     t_meta.autofit = False
     set_table_borders(t_meta, color=HEX_BORDE_TENUE)
 
     meta_cells = [
-        (("Nombre del Proyecto:", parsed_info['nombre_proyecto']), ("Campo Formativo:", campo_formativo)),
-        (("Duración:", duracion), ("Metodología:", parsed_info['metodologia'])),
-        (("Escenario:", parsed_info['escenario']), ("Libro de Texto:", parsed_info['libros_texto'])),
-        (("Problemática:", parsed_info['problematica']), ("Ejes Articuladores:", parsed_info['ejes'])),
-        (("Propósito:", parsed_info['proposito']), ("Fase y Grado:", f"{fase} — {grado} '{grupo}'")),
-        (("Contenidos:", parsed_info['contenidos']), ("PDA:", parsed_info['pda']))
+        (("Nombre del Proyecto Integrador:", parsed_info['nombre_proyecto']), ("Campos Formativos Articulados:", campo_formativo)),
+        (("Duración / Temporalidad:", duracion), ("Metodología Sociocrítica:", parsed_info['metodologia'])),
+        (("Escenarios del Proyecto:", parsed_info['escenario']), ("Libros de Texto SEP (LTG 6°):", parsed_info['libros_texto'])),
+        (("Problemática Priorizada (P.A.):", parsed_info['problematica']), ("Ejes Articuladores:", parsed_info['ejes'])),
+        (("Propósito General del Proyecto:", parsed_info['proposito']), ("Fase y Grado Escolar:", f"{fase} — {grado} '{grupo}' (26 Alumnos)")),
+        (("Contenidos Sintéticos (Fase 5 - 6°):", parsed_info['contenidos']), ("Procesos de Desarrollo (PDA):", parsed_info['pda'])),
+        (("Proyectos de Aula y Escolares:", "Proyectos de Aula (6° grado) y Proyectos Escolares (6° grado)"), ("Proyectos Comunitarios:", "Proyectos Comunitarios (6° grado) y Cuadernillo Profa. Kempis"))
     ]
 
     for r_i, (c0_pair, c1_pair) in enumerate(meta_cells):
@@ -470,6 +517,301 @@ def add_project_metadata_table(doc, parsed_info: Dict[str, Any], datos_escuela: 
             r_val.font.name = 'Arial'
             r_val.font.size = Pt(8)
             r_val.font.color.rgb = COLOR_TEXTO_OSCURO
+
+    doc.add_paragraph()  # Espacio
+
+
+def add_articulacion_curricular_table(doc, parsed_info: Dict[str, Any], datos_escuela: Dict[str, Any]):
+    """
+    Tabla Oficial de Articulación Curricular de los 4 Campos Formativos (Estilo Profa. Kempis - 6° Grado).
+    Articula transversalmente los Contenidos y PDA de Lenguajes, Saberes, Ética y De lo Humano
+    con los escenarios (Comunitario, Aula, Escolar) y libros de texto de 6° grado.
+    """
+    p_h = doc.add_paragraph()
+    p_h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_h = p_h.add_run("TABLA DE ARTICULACIÓN CURRICULAR DE LOS 4 CAMPOS FORMATIVOS (FASE 5 — 6° DE PRIMARIA)")
+    r_h.font.name = 'Arial'
+    r_h.font.bold = True
+    r_h.font.size = Pt(10.5)
+    r_h.font.color.rgb = COLOR_MORADO_INTENSO
+
+    headers = [
+        "CAMPO FORMATIVO",
+        "PROYECTO Y ESCENARIO (LTG 6°)",
+        "CONTENIDO SINTÉTICO (6°)",
+        "PDA OFICIAL ESPECÍFICO",
+        "EJES Y VINCULACIÓN PEDAGÓGICA"
+    ]
+    col_widths = [Inches(1.2), Inches(1.3), Inches(1.7), Inches(1.8), Inches(1.5)]
+
+    filas_art = parsed_info.get("articulacion_filas", [])
+    if not filas_art or len(filas_art) < 4:
+        filas_art = [
+            [
+                "Lenguajes",
+                "Proyectos Comunitarios (págs. 20-35) y Múltiples Lenguajes (págs. 40-47).\nEscenario Comunitario.",
+                "Análisis y representación de textos literarios: el cuento y la lectura dramatizada.",
+                "Lee, analiza y recrea cuentos reconociendo planteamiento, nudo y desenlace; interpreta guiones teatrales empleando acotaciones, modulación de voz y expresión corporal.",
+                "Comprensión lectora inferencial, velocidad lectora, ortografía en redacción autónoma y Cuadernillo Profa. Kempis (Anexos 6.1 y 7.1)."
+            ],
+            [
+                "Saberes y Pensamiento Científico",
+                "Nuestros Saberes (págs. 68-76) y Proyectos de Aula (págs. 82-95).\nEscenario de Aula.",
+                "Alimentación saludable: alimentos procesados, sellos de advertencia NOM-051, Plato del Bien Comer y múltiplos y submúltiplos del gramo.",
+                "Analiza etiquetas y sellos de advertencia en alimentos ultraprocesados; diseña menús balanceados con el Plato del Bien Comer y resuelve problemas con múltiplos del gramo y cálculo de porcentajes e IVA del 16%.",
+                "Pensamiento crítico, cálculo mental contextualizado, vida saludable y Cuadernillo Profa. Kempis (Anexos 6.2 y 7.2)."
+            ],
+            [
+                "Ética, Naturaleza y Sociedades",
+                "Proyectos Escolares (págs. 80-92) y Nuestros Saberes (págs. 140-149).\nEscenario Escolar.",
+                "Servicios públicos, cultura contributiva (impuestos e IVA) y calidad de vida en la comunidad; efemérides del 12 de Octubre y Revolución de 1910.",
+                "Comprende la función de los servicios públicos en la satisfacción de necesidades básicas, la importancia del pago de impuestos y el IVA en su financiamiento; analiza críticamente la memoria histórica de México y Durango.",
+                "Comprensión crítica de fuentes, redacción cívica reflexiva y Cuadernillo Profa. Kempis (Anexos 6.3 y 7.3)."
+            ],
+            [
+                "De lo Humano y lo Comunitario",
+                "Proyectos Comunitarios (págs. 50-63) y Proyectos de Aula (págs. 110-125).\nEscenario Comunitario.",
+                "Cultura de paz: derechos humanos, resolución pacífica de controversias y la comunidad como espacio de bienestar común.",
+                "Aplica mecanismos de mediación dialógica, negociación y arbitraje para la resolución pacífica de controversias escolares, promoviendo el fomento a la lectura en familia y el acceso ético y reflexivo a tecnologías.",
+                "Dinámicas activas kinestésicas, asambleas de aula y Cuadernillo Profa. Kempis (Anexos 6.4 y 7.4)."
+            ]
+        ]
+
+    table_art = doc.add_table(rows=len(filas_art) + 1, cols=len(headers))
+    table_art.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table_art.autofit = False
+    set_table_borders(table_art, color=HEX_BORDE_TENUE)
+
+    for c_i, h_txt in enumerate(headers):
+        cell = table_art.rows[0].cells[c_i]
+        cell.text = h_txt
+        cell.width = col_widths[c_i]
+        set_cell_background(cell, HEX_MORADO_INTENSO)
+        set_cell_margins(cell, top=50, bottom=50, left=45, right=45)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if p.runs:
+            p.runs[0].font.name = 'Arial'
+            p.runs[0].font.bold = True
+            p.runs[0].font.size = Pt(8)
+            p.runs[0].font.color.rgb = COLOR_BLANCO
+
+    for r_idx, row_data in enumerate(filas_art, 1):
+        row = table_art.rows[r_idx]
+        for c_idx, val in enumerate(row_data[:len(headers)]):
+            cell = row.cells[c_idx]
+            cell.text = str(val).strip()
+            cell.width = col_widths[c_idx]
+            set_cell_margins(cell, top=45, bottom=45, left=45, right=45)
+            p = cell.paragraphs[0]
+            if c_idx == 0:
+                set_cell_background(cell, HEX_LILA_SUAVE)
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                if p.runs:
+                    p.runs[0].font.name = 'Arial'
+                    p.runs[0].font.size = Pt(7.5)
+                    p.runs[0].font.bold = True
+                    p.runs[0].font.color.rgb = COLOR_MORADO_OSCURO
+            else:
+                set_cell_background(cell, HEX_BLANCO)
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                if p.runs:
+                    p.runs[0].font.name = 'Arial'
+                    p.runs[0].font.size = Pt(7.5)
+                    p.runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+    doc.add_paragraph()  # Espacio
+
+
+def add_evaluacion_formativa_table(doc, parsed_info: Dict[str, Any], datos_escuela: Dict[str, Any]):
+    """
+    Tabla Oficial de Instrumentos de Evaluación Formativa y Criterios de Desempeño (Estilo Profa. Kempis - 6° Grado).
+    Establece los niveles de logro (Sobresaliente, Satisfactorio, Básico, Requiere Apoyo) e instrumentos
+    específicos para las problemáticas prioritarias y los aprendizajes de 6° grado.
+    """
+    p_h = doc.add_paragraph()
+    p_h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_h = p_h.add_run("INSTRUMENTOS DE EVALUACIÓN FORMATIVA Y CRITERIOS DE DESEMPEÑO (6° DE PRIMARIA)")
+    r_h.font.name = 'Arial'
+    r_h.font.bold = True
+    r_h.font.size = Pt(10.5)
+    r_h.font.color.rgb = COLOR_MORADO_INTENSO
+
+    headers = [
+        "CRITERIO / CAMPO FORMATIVO",
+        "SOBRESALIENTE (10)",
+        "SATISFACTORIO (8-9)",
+        "BÁSICO (6-7)",
+        "REQUIERE APOYO (5)",
+        "INSTRUMENTO Y EVIDENCIA"
+    ]
+    col_widths = [Inches(1.4), Inches(1.2), Inches(1.2), Inches(1.2), Inches(1.1), Inches(1.4)]
+
+    filas_eva = parsed_info.get("evaluacion_filas", [])
+    if not filas_eva or len(filas_eva) < 4:
+        filas_eva = [
+            [
+                "Comprensión Lectora e Inferencias (Lenguajes)",
+                "Identifica ideas clave y secundarias, infiere la intención del autor y recrea cuentos o guiones teatrales con acotaciones y modulación impecable.",
+                "Reconoce planteamiento, nudo y desenlace y responde preguntas inferenciales básicas con autonomía y coherencia.",
+                "Comprende el sentido global del texto pero requiere acompañamiento docente para rescatar ideas inferenciales secundarias.",
+                "Dificultad marcada para rescatar ideas principales y comprender el léxico del texto.",
+                "Rúbrica analítica, organizadores visuales y ficha del Cuadernillo Profa. Kempis."
+            ],
+            [
+                "Velocidad y Fluidez Lectora",
+                "Lee en voz alta con modulación precisa, dicción clara, entonación adecuada y respetando todos los signos de puntuación (>120 ppm).",
+                "Lee con fluidez adecuada y volumen audible cometiendo mínimas pausas innecesarias (100-119 ppm).",
+                "Ritmo pausado con silabeos ocasionales, requiriendo apoyo para respetar puntos y comas (80-99 ppm).",
+                "Lectura silábica o entrecortada que dificulta la comprensión personal y grupal (<80 ppm).",
+                "Registro de fluidez lectora, cronometrado de 1 minuto y lectura dramatizada en asamblea."
+            ],
+            [
+                "Ortografía y Redacción Autónoma",
+                "Redacta textos propios con acentuación rigurosa (agudas, graves, esdrújulas), grafías dudosas correctas y conectores variados.",
+                "Elabora textos con estructura clara y coherente; presenta errores ortográficos mínimos que no alteran el sentido.",
+                "Textos con ideas breves o errores recurrentes de acentuación, concordancia y signos de puntuación.",
+                "Producciones muy breves e incompletas con deficiencias ortográficas severas.",
+                "Lista de cotejo de producción escrita, dictados matutinos y borradores en el cuaderno."
+            ],
+            [
+                "Cálculo Mental y Problemas Contextualizados (Saberes)",
+                "Resuelve con agilidad mental y exactitud conversiones de múltiplos del gramo, cálculo de porcentajes y aplicación del IVA del 16%.",
+                "Aplica procedimientos matemáticos correctos en conversiones de unidades y situaciones problemáticas con apoyo mínimo.",
+                "Resuelve operaciones básicas pero comete equivocaciones en conversiones de unidades o cálculo de descuentos.",
+                "Confunde operaciones básicas y requiere mediación constante y material concreto para resolver problemas.",
+                "Escala estimativa, ejercicios de cálculo matutino y fichas prácticas del Cuadernillo Kempis."
+            ],
+            [
+                "Convivencia Pacífica y Mediación (Ética y De lo Humano)",
+                "Aplica activamente mecanismos de resolución pacífica de conflictos y colabora con entusiasmo en asambleas y proyectos comunitarios.",
+                "Participa de forma respetuosa en dinámicas grupales y respeta acuerdos colectivos de aula.",
+                "Requiere intervención docente para resolver desacuerdos con sus pares de forma pacífica.",
+                "Presenta actitudes de exclusión o resistencia al trabajo colaborativo en equipo.",
+                "Registro anecdótico, diario de campo docente y diana de autoevaluación/coevaluación."
+            ]
+        ]
+
+    table_eva = doc.add_table(rows=len(filas_eva) + 1, cols=len(headers))
+    table_eva.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table_eva.autofit = False
+    set_table_borders(table_eva, color=HEX_BORDE_TENUE)
+
+    for c_i, h_txt in enumerate(headers):
+        cell = table_eva.rows[0].cells[c_i]
+        cell.text = h_txt
+        cell.width = col_widths[c_i]
+        set_cell_background(cell, HEX_MORADO_INTENSO)
+        set_cell_margins(cell, top=50, bottom=50, left=45, right=45)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if p.runs:
+            p.runs[0].font.name = 'Arial'
+            p.runs[0].font.bold = True
+            p.runs[0].font.size = Pt(8)
+            p.runs[0].font.color.rgb = COLOR_BLANCO
+
+    for r_idx, row_data in enumerate(filas_eva, 1):
+        row = table_eva.rows[r_idx]
+        for c_idx, val in enumerate(row_data[:len(headers)]):
+            cell = row.cells[c_idx]
+            cell.text = str(val).strip()
+            cell.width = col_widths[c_idx]
+            set_cell_margins(cell, top=45, bottom=45, left=45, right=45)
+            p = cell.paragraphs[0]
+            if c_idx == 0:
+                set_cell_background(cell, HEX_LILA_SUAVE)
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                if p.runs:
+                    p.runs[0].font.name = 'Arial'
+                    p.runs[0].font.size = Pt(7.5)
+                    p.runs[0].font.bold = True
+                    p.runs[0].font.color.rgb = COLOR_MORADO_OSCURO
+            else:
+                set_cell_background(cell, HEX_BLANCO)
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                if p.runs:
+                    p.runs[0].font.name = 'Arial'
+                    p.runs[0].font.size = Pt(7.5)
+                    p.runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+    doc.add_paragraph()  # Espacio
+
+
+def add_ajustes_razonables_table(doc, parsed_info: Dict[str, Any], datos_escuela: Dict[str, Any]):
+    """
+    Agrega la tabla de Ajustes Razonables (DUA - BAP) y Seguimiento en Diario de Clase.
+    Atiende a los 26 alumnos del grupo de 6° 'A' con énfasis en estilos kinestésico y visual.
+    """
+    p_h = doc.add_paragraph()
+    p_h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_h = p_h.add_run("AJUSTES RAZONABLES (DUA) Y OBSERVACIONES DOCENTES (CICLO 2026-2027)")
+    r_h.font.name = 'Arial'
+    r_h.font.bold = True
+    r_h.font.size = Pt(10.5)
+    r_h.font.color.rgb = COLOR_MORADO_INTENSO
+
+    headers = [
+        "ATENCIÓN A LA DIVERSIDAD Y BAP (DISEÑO UNIVERSAL PARA EL APRENDIZAJE)",
+        "SEGUIMIENTO EN EL DIARIO DE CLASE Y COMPROMISOS INSTITUCIONALES"
+    ]
+    col_widths = [Inches(3.75), Inches(3.75)]
+
+    table_adj = doc.add_table(rows=2, cols=2)
+    table_adj.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table_adj.autofit = False
+    set_table_borders(table_adj, color=HEX_BORDE_TENUE)
+
+    for c_i, h_txt in enumerate(headers):
+        cell = table_adj.rows[0].cells[c_i]
+        cell.text = h_txt
+        cell.width = col_widths[c_i]
+        set_cell_background(cell, HEX_MORADO_INTENSO)
+        set_cell_margins(cell, top=50, bottom=50, left=50, right=50)
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if p.runs:
+            p.runs[0].font.name = 'Arial'
+            p.runs[0].font.bold = True
+            p.runs[0].font.size = Pt(8)
+            p.runs[0].font.color.rgb = COLOR_BLANCO
+
+    r1_c0 = table_adj.rows[1].cells[0]
+    adecs_txt = parsed_info.get("adecuaciones", "").strip()
+    if not adecs_txt or len(adecs_txt) < 30:
+        adecs_txt = (
+            "• Principio de Representación (Visual): Uso de organizadores gráficos de alto contraste, esquemas y tablas ilustradas para los 26 alumnos.\n"
+            "• Principio de Acción y Expresión (Kinestésico): Manipulación de tarjetas ortográficas móviles, material concreto para múltiplos del gramo y dramatizaciones teatrales.\n"
+            "• Tutoría entre pares y nivelación personalizada en velocidad lectora y ortografía.\n"
+            "• Acceso equitativo a dispositivos digitales y recursos en el aula."
+        )
+    r1_c0.text = adecs_txt
+    r1_c0.width = col_widths[0]
+    set_cell_background(r1_c0, HEX_BLANCO)
+    set_cell_margins(r1_c0, top=45, bottom=45, left=50, right=50)
+    for p in r1_c0.paragraphs:
+        if p.runs:
+            p.runs[0].font.name = 'Arial'
+            p.runs[0].font.size = Pt(7.5)
+            p.runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+    r1_c1 = table_adj.rows[1].cells[1]
+    obs_txt = parsed_info.get("observaciones", "").strip()
+    if not obs_txt or len(obs_txt) < 30:
+        obs_txt = (
+            "• Registro diario de avances en velocidad y fluidez lectora (palabras por minuto) y precisión ortográfica en el diario de campo.\n"
+            "• Cumplimiento de compromisos del Programa Analítico Oficial de la Primaria Revolución Social de 1910 (CCT: 10EPR0361N, Durango).\n"
+            "• Vinculación continua con familias para el fomento a la lectura compartida en el hogar."
+        )
+    r1_c1.text = obs_txt
+    r1_c1.width = col_widths[1]
+    set_cell_background(r1_c1, HEX_BLANCO)
+    set_cell_margins(r1_c1, top=45, bottom=45, left=50, right=50)
+    for p in r1_c1.paragraphs:
+        if p.runs:
+            p.runs[0].font.name = 'Arial'
+            p.runs[0].font.size = Pt(7.5)
+            p.runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
 
     doc.add_paragraph()  # Espacio
 
@@ -558,7 +900,7 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
     r_tit.font.size = Pt(12)
     r_tit.font.color.rgb = COLOR_MORADO_INTENSO
 
-    r_desc = p_hdr.add_run(f"{kempis_meta.get('descripcion', '')} Vinculado a los videos explicativos oficiales en YouTube.")
+    r_desc = p_hdr.add_run(f"{kempis_meta.get('descripcion', '')} Fichas didácticas organizadas por Campo Formativo listas para fotocopiar.")
     r_desc.font.name = 'Arial'
     r_desc.font.size = Pt(8.5)
     r_desc.font.italic = True
@@ -566,9 +908,9 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
 
     doc.add_paragraph()
 
-    # 3. Tabla Resumen de Anexos y Videos de Apoyo
+    # 3. Tabla Resumen de Anexos y Fichas Didácticas
     p_t_lbl = doc.add_paragraph()
-    r_tl = p_t_lbl.add_run("1. ÍNDICE DE ANEXOS Y VIDEOS PEDAGÓGICOS ENLAZADOS:")
+    r_tl = p_t_lbl.add_run("1. ÍNDICE DE ANEXOS Y FICHAS DIDÁCTICAS IMPRIMIBLES:")
     r_tl.font.name = 'Arial'
     r_tl.font.bold = True
     r_tl.font.size = Pt(9.5)
@@ -579,7 +921,7 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
     tbl_resumen.autofit = False
     set_table_borders(tbl_resumen, color=HEX_BORDE_TENUE)
 
-    headers_res = ["CAMPO FORMATIVO", "ANEXO IMPRIMIBLE", "ACTIVIDAD VIVENCIAL", "VIDEO DE APOYO"]
+    headers_res = ["CAMPO FORMATIVO", "ANEXO IMPRIMIBLE", "ACTIVIDAD VIVENCIAL", "PROPÓSITO Y PRODUCTO"]
     widths_res = [Inches(1.5), Inches(2.0), Inches(2.3), Inches(1.7)]
 
     for c_i, h_txt in enumerate(headers_res):
@@ -630,7 +972,7 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
             c2.paragraphs[0].runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
 
         c3 = row.cells[3]
-        c3.text = f"🎥 {anexo.get('video_titulo', '')}\n\n🔗 {anexo.get('video_url', '')}"
+        c3.text = f"🎯 Enfoque NEM:\n{anexo.get('tema', '')}\n\n📋 Producto:\nFicha de trabajo completada"
         set_cell_background(c3, HEX_BLANCO)
         set_cell_margins(c3, top=40, bottom=40, left=40, right=40)
         if c3.paragraphs and c3.paragraphs[0].runs:
@@ -693,7 +1035,8 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "• DESENLACE (¿Cómo se resuelve la situación y qué aprendieron?):\n"
                 "  _______________________________________________________________________________________________\n\n"
                 "• TIPO DE NARRADOR (Marca con una X):  (   ) Primera persona (Protagonista/Testigo)    (   ) Tercera persona (Omnisciente)\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "• Reflexión final: ¿Qué valores o enseñanzas comunitarias aporta este texto literario?\n"
+                "  _______________________________________________________________________________________________"
             )
         elif "6.2" in a_nom:
             c_body.text = (
@@ -706,7 +1049,8 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "  [  ] EXCESO CALORÍAS   [  ] EXCESO AZÚCARES   [  ] EXCESO GRASAS SATURADAS   [  ] EXCESO SODIO\n"
                 "• Si una porción de 100 g contiene 14 g de grasas, ¿cuántos gramos de grasa consumirá una persona en 350 g?\n"
                 "  Operaciones: ____________________________________________________  Resultado: _____________ g\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "• Decisión saludable: ¿Por qué es conveniente reducir el consumo de alimentos ultraprocesados con sellos negros?\n"
+                "  _______________________________________________________________________________________________"
             )
         elif "6.3" in a_nom:
             c_body.text = (
@@ -718,8 +1062,7 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "• Compra B: Balones y material deportivo -> Subtotal: $650.00 pesos.\n"
                 "  Cálculo del IVA (650 x 0.16) = $___________  |  Total a pagar (Subtotal + IVA) = $___________\n\n"
                 "• Pregunta de reflexión ciudadana: ¿Por qué es fundamental que todos contribuyamos con los impuestos?\n"
-                "  Respuesta: ___________________________________________________________________________________\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "  Respuesta: ___________________________________________________________________________________"
             )
         elif "6.4" in a_nom:
             c_body.text = (
@@ -729,7 +1072,8 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "• ¿Cuál es el origen o necesidad real de cada una de las partes? ____________________________________\n"
                 "• ¿Qué acuerdo pacífico propondrías tú como mediador(a) escolar? __________________________________\n"
                 "• Menciona los 3 valores indispensables para resolver desacuerdos sin violencia: ____________________\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "• Compromiso: Mi compromiso personal para mantener un aula libre de violencia es:\n"
+                "  _______________________________________________________________________________________________"
             )
         elif "7.1" in a_nom:
             c_body.text = (
@@ -740,7 +1084,8 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "PERSONAJE B (acercándose con paso rápido y voz entusiasta): —¡Son las verduras que sembramos hace dos meses!\n"
                 "PERSONAJE C (sonriendo y tomando nota en su bitácora): —Registremos el peso en gramos antes de cosechar.\n\n"
                 "• Evaluación del equipo: Fluidez lectora: [  ] Sobresaliente  [  ] Satisfactorio  [  ] Por mejorar\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "• Acotaciones identificadas: ¿Qué expresan las acotaciones sobre las emociones de los personajes?\n"
+                "  _______________________________________________________________________________________________"
             )
         elif "7.2" in a_nom:
             c_body.text = (
@@ -750,9 +1095,10 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "• Desayuno saludable:\n"
                 "  - Verduras y frutas (50% del plato): ____________________________ (Estimado: ________ g)\n"
                 "  - Granos y cereales integrales (30% del plato): _________________ (Estimado: ________ g)\n"
-                "  - Leguminosas y alimentos origen animal (20%): _________________ (Estimado: ________ g)\n"
-                "• Compromiso de hidratación: ¿Cuántos vasos de agua potable beberé hoy? (Meta: 6 a 8 vasos) -> [  ] Cumplido\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "  - Leguminosas y alimentos origen animal (20%): _________________ (Estimado: ________ g)\n\n"
+                "• Compromiso de hidratación: ¿Cuántos vasos de agua potable beberé hoy? (Meta: 6 a 8 vasos) -> [  ] Cumplido\n"
+                "• ¿Qué beneficio tiene para mi rendimiento escolar el consumo diario de agua simple potable?\n"
+                "  _______________________________________________________________________________________________"
             )
         elif "7.3" in a_nom:
             c_body.text = (
@@ -761,10 +1107,9 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "• Acceso a agua potable y drenaje seguro:  [ ★ ★ ★ ★ ★ ]\n"
                 "• Alumbrado y seguridad en las calles:     [ ★ ★ ★ ★ ★ ]\n"
                 "• Espacios verdes, parques y canchas:     [ ★ ★ ★ ★ ★ ]\n"
-                "• Servicios médicos y centros de salud:   [ ★ ★ ★ ★ ★ ]\n"
+                "• Servicios médicos y centros de salud:   [ ★ ★ ★ ★ ★ ]\n\n"
                 "• Propuesta comunitaria: ¿Qué acción colaborativa podemos realizar en la escuela para mejorar nuestro entorno?\n"
-                "  _______________________________________________________________________________________________\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "  _______________________________________________________________________________________________"
             )
         elif "7.4" in a_nom:
             c_body.text = (
@@ -774,7 +1119,8 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 "• Estación 2: Carrera de relevos en zigzag -> Tiempo cronometrado: ________ seg\n"
                 "• Estación 3: Ejercicios de equilibrio y estiramiento muscular -> [  ] Realizado con éxito\n"
                 "• Pulso cardíaco en reposo: ______ lpm  |  Pulso cardíaco después de la actividad: ______ lpm\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "• Reflexión de salud: ¿Cómo influye el ejercicio diario en mi bienestar físico y emocional?\n"
+                "  _______________________________________________________________________________________________"
             )
         else:
             c_body.text = (
@@ -784,8 +1130,7 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
                 f"• {anexo.get('actividad')}\n"
                 "• ¿Por qué es importante conmemorar esta fecha en nuestra comunidad escolar?\n"
                 "  _______________________________________________________________________________________________\n"
-                "• Lema o frase de acción comunitaria: ___________________________________________________________\n\n"
-                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+                "• Lema o frase de acción comunitaria: ___________________________________________________________"
             )
 
         set_cell_background(c_body, HEX_BLANCO)
@@ -860,6 +1205,9 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
 
     # 4. Tabla de metadatos del proyecto (Nombre, Campo, Duración, Metodología, Escenario, Libro, Problemática, Ejes, Propósito, Contenidos y PDA)
     add_project_metadata_table(doc, parsed_info, datos_escuela)
+
+    # 5. Tabla de articulación curricular de los 4 Campos Formativos (Estilo Profa. Kempis - 6° Grado)
+    add_articulacion_curricular_table(doc, parsed_info, datos_escuela)
 
     # =======================================================
     # DISTRIBUCIÓN DINÁMICA POR DÍA (for dia in dias_seleccionados:)
@@ -1049,7 +1397,7 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
         c_rec = table.rows[4].cells[2]
         rec_txt = str(sesion.get('recursos', 'Cuaderno del alumno, anexos y libros de texto SEP.'))
         if es_kempis_activo and "kempis" not in rec_txt.lower():
-            rec_txt += f"\n\n• Cuadernillo Profa Kempis (Semana {sem_kempis}) y videos de apoyo en YouTube."
+            rec_txt += f"\n\n• Cuadernillo Profa Kempis (Semana {sem_kempis}) y fichas imprimibles de trabajo."
         c_rec.text = rec_txt
         set_cell_background(c_rec, HEX_BLANCO)
         set_cell_margins(c_rec, top=45, bottom=45, left=45, right=45)
@@ -1070,7 +1418,13 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
 
         document.add_paragraph()
 
-    # Integración del Cuadernillo de Actividades y Anexos Imprimibles (Profa Kempis)
+    # 6. Tabla de Evaluación Formativa e Instrumentos con criterios específicos (Estilo Profa. Kempis - 6° Grado)
+    add_evaluacion_formativa_table(doc, parsed_info, datos_escuela)
+
+    # 7. Ajustes Razonables (DUA) y Observaciones Docentes
+    add_ajustes_razonables_table(doc, parsed_info, datos_escuela)
+
+    # 8. Integración del Cuadernillo de Actividades y Anexos Imprimibles (Profa Kempis)
     add_cuadernillo_kempis_section(doc, parsed_info, datos_escuela)
 
     add_document_credits(doc)

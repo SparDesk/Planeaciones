@@ -28,21 +28,18 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
         "semana": 6,
         "titulo_general": "Cuadernillo de Actividades Didácticas — Semana 6 (Profa Kempis)",
         "periodo_sugerido": "Semana 6 de 37 (Octubre - Ciclo 2026-2027)",
-        "descripcion": "Recursos didácticos, anexos imprimibles y videos explicativos para el desarrollo de proyectos en Lenguajes, Ciencias, Formación Ética y Convivencia.",
+        "descripcion": "Recursos didácticos, anexos imprimibles y fichas de trabajo para el desarrollo de proyectos en Lenguajes, Ciencias, Formación Ética y Convivencia.",
         "efemeride_principal": {
             "nombre": "Descubrimiento de América y Encuentro de Dos Mundos (12 de Octubre)",
             "fecha": "12 de Octubre",
-            "video_titulo": "12 de octubre: Descubrimiento de América — Profa Kempis",
-            "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
             "anexo_nombre": "Anexo 6.5: Línea del tiempo y análisis crítico del 12 de Octubre",
+            "anexo_descripcion": "Ficha de trabajo para el análisis reflexivo y contextualizado del intercambio cultural y respeto a los pueblos originarios.",
             "actividad": "Elaborar una línea del tiempo ilustrada sobre los viajes de Cristóbal Colón (La Niña, La Pinta y La Santa María) y reflexionar en asamblea sobre el intercambio cultural y el respeto a la diversidad de los pueblos originarios."
         },
         "campos": {
             "Lenguajes": {
                 "tema": "Textos literarios: El cuento y sus partes (planteamiento, nudo, desenlace y tipos de narrador)",
                 "pda_vinculado": "Lee y analiza textos literarios e identifica la estructura de la narración, las relaciones de causalidad y temporalidad, y describe personajes y escenarios.",
-                "video_titulo": "Los textos literarios y el cuento — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Presentar una caja sorpresa con títulos de cuentos clásicos y contemporáneos. Recuperar saberes previos: ¿Qué distingue a un cuento de una noticia o un texto informativo?",
                 "desarrollo": "Lectura guiada del cuento seleccionado. En equipos, completar el organizador gráfico del Anexo 6.1 clasificando inicio/planteamiento, nudo/conflicto y desenlace, identificando adjetivos calificativos y nexos temporales.",
                 "cierre": "Puesta en común en plenaria. Los alumnos comparten el esquema de su cuento y argumentan qué cambio le harían al final de la historia.",
@@ -53,10 +50,8 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             "Saberes y Pensamiento Científico": {
                 "tema": "Alimentos procesados, grasas, sellos de advertencia (NOM-051) y múltiplos y submúltiplos del gramo",
                 "pda_vinculado": "Analiza etiquetas de alimentos empaquetados e interpreta sellos de advertencia; resuelve situaciones problemáticas que implican conversiones con múltiplos y submúltiplos del gramo.",
-                "video_titulo": "Alimentos procesados, sellos de advertencia y múltiplos del gramo — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Exhibir 4 empaques reales de alimentos ultraprocesados (galletas, refresco, papas fritas). Preguntar: ¿Qué significan los octágonos negros en el empaque y por qué indican 'Exceso de grasas saturadas' o 'Exceso de calorías'?",
-                "desarrollo": "Observar el video explicativo de la Profa Kempis sobre sellos y grasas. En binas, analizar las tablas nutrimentales de los empaques traídos de casa. Registrar la cantidad de grasas y azúcares en gramos. Aplicar la tabla de conversión del Anexo 6.2 (método de la escalera) para convertir gramos (g) a miligramos (mg), kilogramos (kg) y decagramos (dag).",
+                "desarrollo": "En binas, analizar las tablas nutrimentales de los empaques traídos de casa. Registrar la cantidad de grasas y azúcares en gramos. Aplicar la tabla de conversión del Anexo 6.2 (método de la escalera) para convertir gramos (g) a miligramos (mg), kilogramos (kg) y decagramos (dag).",
                 "cierre": "Construir en el pizarrón el 'Semáforo de las Grasas' (saludables vs. no saludables/trans) y reflexionar sobre el impacto del consumo excesivo en la salud familiar.",
                 "recursos": "Cuadernillo Profa Kempis (Anexo 6.2: Múltiplos y Submúltiplos del Gramo y Sellos NOM-051), empaques vacíos y báscula del aula.",
                 "anexo_nombre": "Anexo 6.2: Laboratorio de Etiquetas y Conversión de Múltiplos del Gramo",
@@ -65,10 +60,8 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             "Ética, Naturaleza y Sociedades": {
                 "tema": "Servicios públicos, recaudación de impuestos y cálculo del IVA (16%)",
                 "pda_vinculado": "Comprende la función de los servicios públicos en la satisfacción de necesidades colectivas, la responsabilidad ciudadana en el pago de impuestos y el cálculo de porcentajes aplicados al IVA.",
-                "video_titulo": "Los servicios públicos y los impuestos (¿Qué es el IVA?) — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Lluvia de ideas guiada: ¿De dónde proviene el agua de nuestras llaves, la luz de las calles y quién limpia los parques públicos en Durango? ¿Quién paga esos servicios?",
-                "desarrollo": "Proyectar el video de Profa Kempis sobre impuestos e IVA. Explicar el concepto del Impuesto al Valor Agregado (16%). En equipos cooperativos, resolver los ejercicios del Anexo 6.3: analizar tickets de compra simulados, desglosar el subtotal, calcular el 16% de IVA y el total a pagar.",
+                "desarrollo": "Explicar el concepto del Impuesto al Valor Agregado (16%) y su función social en obras comunitarias. En equipos cooperativos, resolver los ejercicios del Anexo 6.3: analizar tickets de compra simulados, desglosar el subtotal, calcular el 16% de IVA y el total a pagar.",
                 "cierre": "Debate reflexivo: '¿Por qué pagar impuestos es un acto de corresponsabilidad ética y ciudadana para tener mejores escuelas y hospitales?'. Elaborar un decálogo de compromisos cívicos.",
                 "recursos": "Cuadernillo Profa Kempis (Anexo 6.3: Servicios Públicos, Impuestos y Cálculo del IVA), tickets simulados de compra.",
                 "anexo_nombre": "Anexo 6.3: Ficha de Servicios Públicos y Práctica Financiera del IVA",
@@ -77,8 +70,6 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             "De lo Humano y lo Comunitario": {
                 "tema": "Resolución pacífica de conflictos y convivencia escolar sana y pacífica",
                 "pda_vinculado": "Aplica estrategias de mediación, negociación y diálogo reflexivo para resolver desacuerdos en el aula y promover una cultura de paz.",
-                "video_titulo": "Resolución pacífica de conflictos en la escuela — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Dinámica kinestésica 'El nudo humano': los 26 alumnos se toman de las manos entrelazadas y deben desatarse sin soltarse utilizando únicamente la comunicación pacífica.",
                 "desarrollo": "Analizar en parejas los casos hipotéticos de conflicto del Anexo 6.4 (disputa de cancha deportiva, burla por error en lectura, desacuerdo en equipo). Identificar las 4 vías de solución pacífica: negociación, mediación, conciliación y arbitraje.",
                 "cierre": "Dramatización breve de los casos con mediación dialógica. Firma colectiva del 'Pacto de Convivencia Sana y Pacífica de 6° A'.",
@@ -116,19 +107,16 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
         "efemeride_principal": {
             "nombre": "Día Mundial de la Alimentación (16 de Octubre)",
             "fecha": "16 de Octubre",
-            "video_titulo": "16 de octubre: Día Mundial de la Alimentación — Profa Kempis",
-            "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
             "anexo_nombre": "Anexo 7.5: Campaña 'Cero Desperdicio de Alimentos' y Decálogo Saludable",
+            "anexo_descripcion": "Ficha y organizador para el diseño de carteles y compromisos sobre el derecho humano a la alimentación adecuada.",
             "actividad": "Elaborar un tríptico o cartel comunitario sobre el derecho humano a la alimentación adecuada, los riesgos del desperdicio de comida y propuestas prácticas para aprovechar sobras nutritivas en el hogar."
         },
         "campos": {
             "Lenguajes": {
                 "tema": "La lectura dramatizada y el guión teatral (acotaciones, parlamentos y modulación)",
                 "pda_vinculado": "Interpreta y representa lecturas dramatizadas empleando adecuadamente acotaciones, volumen, tono y modulación de la voz.",
-                "video_titulo": "La lectura dramatizada y el guión de teatro — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Juego de modulación de voz: leer la misma frase ('¡Ya llegaron los libros!') con distintas emociones (alegría, miedo, misterio, enojo). Analizar la importancia de las acotaciones teatrales.",
-                "desarrollo": "Revisar el video de Profa Kempis sobre lectura dramatizada. En equipos de 4 alumnos, leer el guión breve del Anexo 7.1. Identificar personajes, parlamentos y acotaciones entre paréntesis. Distribuir roles y ensayar la entonación y lenguaje no verbal.",
+                "desarrollo": "En equipos de 4 alumnos, leer el guión breve del Anexo 7.1. Identificar personajes, parlamentos y acotaciones entre paréntesis. Distribuir roles y ensayar la entonación y lenguaje no verbal.",
                 "cierre": "Representación en atril o escenario del aula frente al grupo. Los compañeros evalúan con una lista de cotejo la dicción, volumen y expresividad.",
                 "recursos": "Cuadernillo Profa Kempis (Anexo 7.1: Guión Teatral y Ficha de Acotaciones), atril o espacio de aula.",
                 "anexo_nombre": "Anexo 7.1: Guión Teatral Didáctico y Rúbrica de Lectura Dramatizada",
@@ -137,10 +125,8 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             "Saberes y Pensamiento Científico": {
                 "tema": "El Plato del Bien Comer actualizado, la Jarra del Buen Beber y balance calórico",
                 "pda_vinculado": "Diseña menús basados en el Plato del Bien Comer y la Jarra del Buen Beber, relacionando la masa en gramos de las porciones con los requerimientos energéticos saludables.",
-                "video_titulo": "El Plato del Bien Comer actualizado y la Jarra del Buen Beber — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Presentar una silueta del nuevo Plato del Bien Comer. Preguntar: ¿Cuáles son los 3 grupos principales y por qué las verduras y frutas deben ocupar la mitad del plato?",
-                "desarrollo": "Ver el video explicativo de Profa Kempis. Utilizando el Anexo 7.2, los alumnos recortan y clasifican alimentos en: 1) Verduras y frutas, 2) Granos y cereales, 3) Leguminosas y alimentos de origen animal. Calcular la masa aproximada en gramos de cada porción para un almuerzo escolar balanceado.",
+                "desarrollo": "Utilizando el Anexo 7.2, los alumnos recortan y clasifican alimentos en: 1) Verduras y frutas, 2) Granos y cereales, 3) Leguminosas y alimentos de origen animal. Calcular la masa aproximada en gramos de cada porción para un almuerzo escolar balanceado.",
                 "cierre": "Exposición de los menús saludables creados por los alumnos. Diseñar el compromiso personal de hidratación: tomar de 6 a 8 vasos de agua simple potable al día.",
                 "recursos": "Cuadernillo Profa Kempis (Anexo 7.2: Plato del Bien Comer recortable y registro de gramos), tijeras, pegamento y colores.",
                 "anexo_nombre": "Anexo 7.2: Taller Interactivo del Plato del Bien Comer y Menú Semanal",
@@ -149,8 +135,6 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             "Ética, Naturaleza y Sociedades": {
                 "tema": "Calidad de vida: Factores determinantes, justicia social y desigualdades en la comunidad",
                 "pda_vinculado": "Analiza los factores que influyen en la calidad de vida de las familias en su comunidad y entidad (Durango), reconociendo brechas de equidad y propuestas de mejora.",
-                "video_titulo": "¿Qué es la calidad de vida y cómo se mide? — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "¿Qué necesita una familia para vivir bien? Lluvia de respuestas: salud, casa, trabajo, seguridad, áreas verdes, agua potable.",
                 "desarrollo": "Analizar la infografía del Anexo 7.3 sobre las dimensiones de la calidad de vida (ambiental, económica, educativa, salud y recreativa). En equipos, responder una encuesta diagnóstica sobre las fortalezas y carencias de su colonia en Durango.",
                 "cierre": "Construir en una cartulina el 'Mural Comunitario de la Calidad de Vida' con propuestas ciudadanas para mejorar los espacios públicos de su entorno.",
@@ -161,8 +145,6 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             "De lo Humano y lo Comunitario": {
                 "tema": "Estilos de vida activos, prevención de enfermedades crónicas y bienestar compartido",
                 "pda_vinculado": "Organiza y participa en circuitos motrices y dinámicas de actividad física para valorar el impacto del ejercicio continuo en el bienestar integral.",
-                "video_titulo": "Hábitos de vida saludable y actividad física — Profa Kempis",
-                "video_url": "https://www.youtube.com/watch?v=0kFvFz4g_5Y",
                 "inicio": "Toma de pulso cardíaco en reposo. Breve calentamiento motriz en el aula para activar la oxigenación cerebral y el entusiasmo kinestésico.",
                 "desarrollo": "En el patio cívico, organizar 4 estaciones del circuito saludable del Anexo 7.4: 1) Salto de cuerda, 2) Desplazamiento en zigzag, 3) Lanzamiento y recepción, 4) Ejercicios de equilibrio y estiramiento. Tomar el pulso después de la actividad.",
                 "cierre": "Reflexión en asamblea sobre la importancia de combinar al menos 60 minutos diarios de juego activo con la alimentación balanceada.",
@@ -249,7 +231,7 @@ def formatear_kempis_para_prompt(semana: int, campos_formativos: Optional[List[s
     """
     Genera un bloque de texto estructurado para inyectar como directriz obligatoria
     en el prompt de Gemini, garantizando que la IA vincule e integre las actividades,
-    anexos y videos de Profa Kempis en Inicio, Desarrollo y Cierre.
+    fichas vivenciales y anexos imprimibles de Profa Kempis en Inicio, Desarrollo y Cierre.
     """
     if semana not in [6, 7]:
         semana = 6  # Fallback a Semana 6 si no es 6 ni 7
@@ -262,7 +244,6 @@ def formatear_kempis_para_prompt(semana: int, campos_formativos: Optional[List[s
         f"La planeación DEBE incorporar, sugerir y citar expresamente los contenidos del Cuadernillo de la Profa Kempis para la Semana {semana}:",
         f"- Título del recurso: {data['titulo_general']}",
         f"- Efeméride vinculada: {data['efemeride_principal']['nombre']} -> {data['efemeride_principal']['actividad']}",
-        f"  * Video de apoyo Profa Kempis: '{data['efemeride_principal']['video_titulo']}' ({data['efemeride_principal']['video_url']})",
         "",
         "DIRECTRICES DE INCORPORACIÓN EN LAS SECUENCIAS DIDÁCTICAS (INICIO, DESARROLLO Y CIERRE):"
     ]
@@ -277,7 +258,6 @@ def formatear_kempis_para_prompt(semana: int, campos_formativos: Optional[List[s
             lineas.append(f"  - Actividad de Desarrollo kinestésica/visual: {c_info['desarrollo']}")
             lineas.append(f"  - Actividad de Cierre y evaluación: {c_info['cierre']}")
             lineas.append(f"  - Anexo Imprimible del Cuadernillo: {c_info['anexo_nombre']} ({c_info['anexo_descripcion']})")
-            lineas.append(f"  - Video de apoyo Profa Kempis: '{c_info['video_titulo']}' ({c_info['video_url']})")
             lineas.append("")
 
     lineas.append("RUTINAS MATUTINAS SUGERIDAS DEL CUADERNILLO:")
@@ -285,7 +265,7 @@ def formatear_kempis_para_prompt(semana: int, campos_formativos: Optional[List[s
     lineas.append(f"- Cálculo Mental: {', '.join(data['rutinas_matutinas_sugeridas']['calculo_mental'][:2])}")
     lineas.append(f"- Problema Razonado: {data['rutinas_matutinas_sugeridas']['problemas_razonados'][0]}")
     lineas.append("")
-    lineas.append("REGLA MANDATORIA DE CITA: En la columna de 'Recursos didácticos y materiales' de cada sesión, cita obligatoriamente: 'Cuadernillo Profa Kempis (Semana X - Anexo Y) y video de apoyo en YouTube'.")
+    lineas.append("REGLA MANDATORIA DE CITA: En la columna de 'Recursos didácticos y materiales' de cada sesión, cita obligatoriamente: 'Cuadernillo Profa Kempis (Semana X - Anexo Y) y fichas de trabajo vivenciales'.")
     lineas.append("================================================================================")
 
     return "\n".join(lineas)
@@ -308,8 +288,6 @@ def obtener_anexos_kempis_para_docx(semana: int) -> List[Dict[str, Any]]:
             "nombre": c_data["anexo_nombre"],
             "descripcion": c_data["anexo_descripcion"],
             "tema": c_data["tema"],
-            "video_titulo": c_data["video_titulo"],
-            "video_url": c_data["video_url"],
             "actividad": c_data["desarrollo"]
         })
 
@@ -320,8 +298,6 @@ def obtener_anexos_kempis_para_docx(semana: int) -> List[Dict[str, Any]]:
         "nombre": ef["anexo_nombre"],
         "descripcion": f"Ficha de trabajo para el análisis reflexivo y contextualizado del {ef['nombre']}.",
         "tema": ef["nombre"],
-        "video_titulo": ef["video_titulo"],
-        "video_url": ef["video_url"],
         "actividad": ef["actividad"]
     })
 

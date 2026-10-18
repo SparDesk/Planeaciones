@@ -2539,6 +2539,118 @@ st.markdown("""
         color: #F3E8FF !important;
         -webkit-text-fill-color: #F3E8FF !important;
     }
+
+    /* =======================================================
+       TARJETAS Y JERARQUÍA VISUAL: CUADERNILLO PROFA KEMPIS
+       Textos en #1F2937 con alto contraste y soporte modo oscuro
+       ======================================================= */
+    .kempis-header-card {
+        background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%) !important;
+        border: 1.5px solid #DDD6FE !important;
+        border-left: 5px solid #7C3AED !important;
+        border-radius: 12px !important;
+        padding: 16px 20px !important;
+        margin-bottom: 16px !important;
+        box-shadow: 0 2px 10px rgba(124, 58, 237, 0.05) !important;
+    }
+
+    .kempis-act-card {
+        background: #FFFFFF !important;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 12px !important;
+        padding: 16px 18px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .kempis-act-card:hover {
+        border-color: #C4B5FD !important;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.1) !important;
+    }
+
+    .kempis-anexo-box {
+        background: #F8FAFC !important;
+        border: 1px solid #E2E8F0 !important;
+        border-left: 3.5px solid #7C3AED !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        margin: 10px 0 !important;
+    }
+
+    .kempis-efemeride-card {
+        background: #FFFBEB !important;
+        border: 1.5px solid #FDE68A !important;
+        border-left: 5px solid #D97706 !important;
+        border-radius: 12px !important;
+        padding: 16px 18px !important;
+        margin-top: 10px !important;
+        margin-bottom: 14px !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .kempis-header-card {
+            background: linear-gradient(135deg, #2E1065 0%, #1E1B4B 100%) !important;
+            border-color: #7C3AED !important;
+        }
+        .kempis-act-card {
+            background: #1E1B4B !important;
+            border-color: #4C1D95 !important;
+        }
+        .kempis-act-card * {
+            color: #F9FAFB !important;
+            -webkit-text-fill-color: #F9FAFB !important;
+        }
+        .kempis-anexo-box {
+            background: #2D1B4E !important;
+            border-color: #6D28D9 !important;
+            border-left-color: #C084FC !important;
+        }
+        .kempis-anexo-box * {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
+        .kempis-efemeride-card {
+            background: #3B2A10 !important;
+            border-color: #B45309 !important;
+            border-left-color: #F59E0B !important;
+        }
+        .kempis-efemeride-card * {
+            color: #FEF3C7 !important;
+            -webkit-text-fill-color: #FEF3C7 !important;
+        }
+    }
+
+    [data-theme="dark"] .kempis-header-card {
+        background: linear-gradient(135deg, #2E1065 0%, #1E1B4B 100%) !important;
+        border-color: #7C3AED !important;
+    }
+    [data-theme="dark"] .kempis-act-card {
+        background: #1E1B4B !important;
+        border-color: #4C1D95 !important;
+    }
+    [data-theme="dark"] .kempis-act-card * {
+        color: #F9FAFB !important;
+        -webkit-text-fill-color: #F9FAFB !important;
+    }
+    [data-theme="dark"] .kempis-anexo-box {
+        background: #2D1B4E !important;
+        border-color: #6D28D9 !important;
+        border-left-color: #C084FC !important;
+    }
+    [data-theme="dark"] .kempis-anexo-box * {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+    }
+    [data-theme="dark"] .kempis-efemeride-card {
+        background: #3B2A10 !important;
+        border-color: #B45309 !important;
+        border-left-color: #F59E0B !important;
+    }
+    [data-theme="dark"] .kempis-efemeride-card * {
+        color: #FEF3C7 !important;
+        -webkit-text-fill-color: #FEF3C7 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -3196,7 +3308,7 @@ if authentication_status:
             st.markdown('<span class="key-status-ok">✓ API Key Configurada</span>', unsafe_allow_html=True)
         else:
             st.markdown('<span class="key-status-warn">⚠️ API Key no detectada</span>', unsafe_allow_html=True)
-            st.caption("👉 Puedes obtener una gratuita en [Google AI Studio](https://aistudio.google.com/). También puedes probar la app con la plantilla precargada de 5° grado.")
+            st.caption("👉 Puedes obtener una gratuita en [Google AI Studio](https://aistudio.google.com/). También puedes probar la app con la plantilla precargada de 6° grado.")
     
         modelo_sel = st.selectbox(
             "Modelo de Gemini:",
@@ -3215,7 +3327,7 @@ if authentication_status:
         if catalogo_conaliteg and isinstance(catalogo_conaliteg, dict) and catalogo_conaliteg.get(grado_sel):
             libros_raw = catalogo_conaliteg[grado_sel]
         else:
-            libros_raw = LIBROS_SEP_POR_GRADO.get(grado_sel, LIBROS_SEP_POR_GRADO.get("5° de Primaria", []))
+            libros_raw = LIBROS_SEP_POR_GRADO.get(grado_sel, LIBROS_SEP_POR_GRADO.get("6° de Primaria", []))
     
         # Sanitizar y normalizar ortografía estrictamente a 'Múltiples lenguajes'
         libros_disponibles = []
@@ -3419,7 +3531,7 @@ if authentication_status:
             st.session_state["pda_extraidos_programa"] = pda_extraidos
             st.success(
                 f"🟢 Base de Datos Principal y Oficial Reconocida: '{uploaded_prog.name}'. "
-                f"Configurado como la fuente oficial para extraer Contenidos, PDA (5° Grado), "
+                f"Configurado como la fuente oficial para extraer Contenidos, PDA (6° Grado), "
                 f"Campos Formativos y Ejes Articuladores ({len(texto_extraido):,} caracteres extraídos)."
             )
         else:
@@ -3504,7 +3616,7 @@ if authentication_status:
                     st.error(f"Error al cargar ejemplo: {e}")
     
         with col_btn_ej2:
-            if st.button("Cargar Guía CTE 5° (.docx)", help="Carga la guía escolar de ejemplo en Word"):
+            if st.button("Cargar Guía CTE 6° (.docx)", help="Carga la guía escolar de ejemplo en Word"):
                 try:
                     with open("sample_data/guia_5to_grado_ejemplo.docx", "rb") as f:
                         st.session_state.archivos_procesados["Guia_Escolar_5to.docx"] = extract_text_from_docx(f.read())
@@ -4241,12 +4353,12 @@ if authentication_status:
     ):
         st.markdown(
             f"""
-            <div style="background-color: #F5F3FF; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px;">
+            <div style="background-color: #F5F3FF; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span style="font-size: 1.3rem;">🌟</span>
                     <span style="font-weight: 700; font-size: 1rem; color: #4C1D95;">Cuadernillo Didáctico Oficial: {kempis_data_sug['titulo_general']}</span>
                 </div>
-                <div style="font-size: 0.86rem; color: #374151; line-height: 1.45;">
+                <div style="font-size: 0.86rem; color: #1F2937; line-height: 1.45;">
                     Contenidos y temas integrados: <b>Textos literarios, cuentos, lectura dramatizada, alimentos procesados, grasas, sellos NOM-051, múltiplos y submúltiplos del gramo, Plato del Bien Comer, servicios públicos, impuestos, IVA (16%), calidad de vida, resolución pacífica de conflictos, convivencia sana, Descubrimiento de América y Día Mundial de la Alimentación</b>.
                 </div>
             </div>
@@ -4255,20 +4367,34 @@ if authentication_status:
         )
 
         col_k1, col_k2 = st.columns(2)
+        campos_sug_items = list(kempis_data_sug["campos"].items())
         with col_k1:
-            st.markdown(f"**📚 Actividades y Anexos Imprimibles ({kempis_data_sug['periodo_sugerido']}):**")
-            for c_nom, c_val in kempis_data_sug["campos"].items():
-                st.markdown(f"- **{c_nom}:** {c_val['tema']}\n  *Anexo:* `{c_val['anexo_nombre']}`")
-            ef_info = kempis_data_sug.get("efemeride_principal", {})
-            if ef_info:
-                st.markdown(f"- **Conmemoración:** {ef_info.get('nombre', '')}\n  *Actividad:* {ef_info.get('actividad', '')}")
+            st.markdown(f"**📚 Actividades y Fichas Imprimibles (Bloque A):**")
+            for c_nom, c_val in campos_sug_items[:2]:
+                st.markdown(f"""
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #7C3AED; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="font-weight: 700; font-size: 0.88rem; color: #1F2937;">{c_nom}: <span style="font-weight: 600; color: #374151;">{c_val['tema']}</span></div>
+                    <div style="font-size: 0.80rem; color: #1F2937; margin-top: 4px;"><b>Ficha:</b> <code style="color: #6D28D9; background: #EDE9FE; padding: 2px 6px; border-radius: 4px;">{c_val['anexo_nombre']}</code></div>
+                </div>
+                """, unsafe_allow_html=True)
 
         with col_k2:
-            st.markdown("**🎥 Videos de Apoyo Profa Kempis (YouTube):**")
-            for c_nom, c_val in kempis_data_sug["campos"].items():
-                st.markdown(f"- [{c_val['video_titulo']}]({c_val['video_url']})")
-            if ef_info and ef_info.get("video_titulo"):
-                st.markdown(f"- [{ef_info.get('video_titulo')}]({ef_info.get('video_url')})")
+            st.markdown(f"**📚 Actividades y Fichas Imprimibles (Bloque B):**")
+            for c_nom, c_val in campos_sug_items[2:]:
+                st.markdown(f"""
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #059669; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="font-weight: 700; font-size: 0.88rem; color: #1F2937;">{c_nom}: <span style="font-weight: 600; color: #374151;">{c_val['tema']}</span></div>
+                    <div style="font-size: 0.80rem; color: #1F2937; margin-top: 4px;"><b>Ficha:</b> <code style="color: #047857; background: #D1FAE5; padding: 2px 6px; border-radius: 4px;">{c_val['anexo_nombre']}</code></div>
+                </div>
+                """, unsafe_allow_html=True)
+            ef_info = kempis_data_sug.get("efemeride_principal", {})
+            if ef_info:
+                st.markdown(f"""
+                <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-left: 4px solid #D97706; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+                    <div style="font-weight: 700; font-size: 0.88rem; color: #1F2937;">🇲🇽 {ef_info.get('nombre', '')}</div>
+                    <div style="font-size: 0.80rem; color: #92400E; margin-top: 2px;">Ficha: <code>{ef_info.get('anexo_nombre', '')}</code></div>
+                </div>
+                """, unsafe_allow_html=True)
 
         vincular_kempis_sel = st.checkbox(
             f"✅ Vincular e integrar automáticamente el Cuadernillo Profa Kempis (Semana {sem_kempis_sug}) en las secuencias didácticas (Inicio, Desarrollo, Cierre), Recursos y descargable en Word",
@@ -4288,7 +4414,7 @@ if authentication_status:
     # Extraer el banco de contenidos y PDA correspondiente exclusivamente al grado activo
     banco_grado_activo = CONTENIDOS_PDA_POR_GRADO.get(
         grado_seleccionado,
-        CONTENIDOS_PDA_POR_GRADO.get("5° de Primaria", {})
+        CONTENIDOS_PDA_POR_GRADO.get("6° de Primaria", {})
     )
     
     # Pre-poblar según los campos formativos elegidos para el grado activo
@@ -4512,7 +4638,7 @@ if authentication_status:
                     ini_val = cf_info_k['inicio']
                     des_val = f"{cf_info_k['desarrollo']} (Anexo: {cf_info_k['anexo_nombre']})"
                     cie_val = cf_info_k['cierre']
-                    rec_val = f"Libro SEP, Cuadernillo Kempis ({cf_info_k['anexo_nombre']}) y video: {cf_info_k['video_titulo']}"
+                    rec_val = f"Libros de Texto Gratuitos (LTG), Cuadernillo Profa Kempis ({cf_info_k['anexo_nombre']}) y libreta del alumno."
                 else:
                     ini_val = f"Activación de conocimientos previos y planteamiento de pregunta detonadora para {nom_dia}."
                     des_val = f"Actividades de indagación colaborativa y resolución práctica con Libros de Texto Gratuitos."
@@ -4731,7 +4857,7 @@ if authentication_status:
                     inicio_txt = cf_info['inicio']
                     desarrollo_txt = f"{cf_info['desarrollo']} (Anexo imprimible: `{cf_info['anexo_nombre']}`)."
                     cierre_txt = cf_info['cierre']
-                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({cf_info['anexo_nombre']}) y video en YouTube: '{cf_info['video_titulo']}' ({cf_info['video_url']})."
+                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({cf_info['anexo_nombre']}) y libreta de notas."
                     evidencia_s = f"Ficha de trabajo completada: {cf_info['anexo_nombre']}."
                 else:
                     ef_info = kempis_data.get("efemeride_principal", {})
@@ -4739,7 +4865,7 @@ if authentication_status:
                     inicio_txt = "Recuperación de aprendizajes de la semana mediante preguntas detonadoras en asamblea."
                     desarrollo_txt = ef_info.get("actividad", "Elaboración de cartel colaborativo y síntesis de saberes.")
                     cierre_txt = "Exposición de trabajos, autoevaluación grupal y acuerdos para la vida diaria."
-                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}) y video: '{ef_info.get('video_titulo', '')}' ({ef_info.get('video_url', '')})."
+                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}) y cartulina para cartel."
                     evidencia_s = f"Producto integrador: {ef_info.get('anexo_nombre', 'Cartel escolar')}."
 
                 secuencias_md += f"""
@@ -4841,7 +4967,7 @@ if authentication_status:
     
     query_tema = st.text_input(
         "Tema, Contenido o PDA que deseas investigar:",
-        placeholder="Escribe aquí el tema, Contenido o PDA (Ej. Fotosíntesis 5° primaria, cálculo mental lúdico...)",
+        placeholder="Escribe aquí el tema, Contenido o PDA (Ej. Alimentos procesados y sellos NOM-051 6° primaria, cálculo mental lúdico...)",
         key="query_busqueda"
     )
     
@@ -5113,7 +5239,7 @@ if authentication_status:
         if not verificar_conexion_internet():
             st.error("No hay conexión a internet. Por favor, revisa tu red e inténtalo de nuevo.")
         elif not active_api_key:
-            st.error("⚠️ Para generar con Búsqueda Web necesitas ingresar tu API Key en la barra lateral izquierda. Si aún no la tienes, puedes hacer clic en 'Descargar Plantilla Base (Sin IA)' o 'Cargar Ejemplo Completo 5° Grado'.")
+            st.error("⚠️ Para generar con Búsqueda Web necesitas ingresar tu API Key en la barra lateral izquierda. Si aún no la tienes, puedes hacer clic en 'Descargar Plantilla Base (Sin IA)' o 'Cargar Ejemplo Completo 6° Grado'.")
         elif not dias_seleccionados:
             st.warning("Por favor selecciona al menos un día de la semana a planear.")
         elif not campos_sel:
@@ -5334,8 +5460,8 @@ if authentication_status:
             st.markdown(f"""
             <div style="background: linear-gradient(135deg, #F3E8FF 0%, #EDE9FE 100%); border-left: 5px solid #7C3AED; border-radius: 8px; padding: 12px 18px; margin: 10px 0 16px 0;">
                 <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">📘 Cuadernillo Didáctico Profa Kempis Integrado (Semana {sem_kempis_act}):</span><br>
-                <span style="color: #5B21B6; font-size: 0.9rem;">
-                    El archivo <b>Word (.docx)</b> descargable incluye la sección oficial de <b>Anexos Imprimibles y Fichas de Trabajo</b> listas para fotocopiar para los alumnos (organizador del cuento, semáforo de grasas y sellos NOM-051, múltiplos del gramo, cálculo de IVA, mediación de conflictos y efemérides), así como los enlaces directos a los videos de YouTube.
+                <span style="color: #1F2937; font-size: 0.88rem; line-height: 1.45;">
+                    El archivo <b>Word (.docx)</b> descargable incluye la sección oficial de <b>Anexos Imprimibles y Fichas de Trabajo</b> listas para fotocopiar para los alumnos (organizador del cuento, semáforo de grasas y sellos NOM-051, múltiplos del gramo, cálculo de IVA, mediación de conflictos y efemérides), con orientaciones vivenciales y actividades estructuradas.
                 </span>
             </div>
             """, unsafe_allow_html=True)
@@ -5455,38 +5581,92 @@ if authentication_status:
                     st.markdown("# " + p)
 
         with tab_kempis:
-            st.markdown(f"### 📘 Cuadernillo Didáctico de Actividades (Semana {sem_kempis_act} — Profa Kempis)")
+            sem_kempis_act = 7 if (semana_seleccionada == 7) else 6
             kempis_data_vista = obtener_recursos_kempis_por_semana(sem_kempis_act)
             if kempis_data_vista:
-                st.markdown(f"**Periodo sugerido:** `{kempis_data_vista.get('periodo_sugerido', 'Octubre')}` | **Tema General:** *{kempis_data_vista.get('titulo_general', '')}*")
-                
-                c_k1, c_k2 = st.columns(2)
-                with c_k1:
-                    st.markdown("#### 📝 Fichas y Anexos Imprimibles")
-                    for c_nom, c_val in kempis_data_vista["campos"].items():
-                        st.markdown(f"""
-                        <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
-                            <span style="font-weight: 700; color: #7C3AED;">{c_nom}:</span> <b>{c_val['anexo_nombre']}</b><br>
-                            <span style="font-size: 0.85rem; color: #334155;">{c_val['actividad_practica']}</span>
+                st.markdown(f"""
+                <div class="kempis-header-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                        <div style="font-weight: 800; font-size: 1.05rem; color: #4C1D95; display: flex; align-items: center; gap: 8px;">
+                            📘 <b>Cuadernillo Didáctico de Actividades (Semana {sem_kempis_act} — Profa Kempis)</b>
                         </div>
-                        """, unsafe_allow_html=True)
-                with c_k2:
-                    st.markdown("#### 🎥 Videos de Apoyo en YouTube")
-                    for c_nom, c_val in kempis_data_vista["campos"].items():
+                        <span style="font-size: 0.78rem; background: #EDE9FE; color: #6D28D9; padding: 3px 10px; border-radius: 9999px; font-weight: 700;">
+                            {kempis_data_vista.get('periodo_sugerido', 'Octubre')} • Fase 5 (6° Primaria)
+                        </span>
+                    </div>
+                    <div style="font-size: 0.88rem; font-weight: 700; color: #1F2937; margin-bottom: 4px;">
+                        {kempis_data_vista.get('titulo_general', '')}
+                    </div>
+                    <div style="font-size: 0.84rem; color: #374151; line-height: 1.5;">
+                        {kempis_data_vista.get('descripcion', '')} Fichas de trabajo, retos de cálculo y dinámicas estructuradas listas para aplicar en el aula e integradas en el Word descargable.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                campos_items = list(kempis_data_vista["campos"].items())
+                col_kempis_left, col_kempis_right = st.columns(2)
+
+                iconos_campos = {
+                    "Lenguajes": ("🗣️", "#7C3AED", "#EDE9FE", "#6D28D9"),
+                    "Saberes y Pensamiento Científico": ("🔬", "#059669", "#D1FAE5", "#065F46"),
+                    "Ética, Naturaleza y Sociedades": ("🌍", "#2563EB", "#DBEAFE", "#1D4ED8"),
+                    "De lo Humano y lo Comunitario": ("🤝", "#D97706", "#FEF3C7", "#B45309")
+                }
+
+                for idx_k, (cf_nombre, cf_detalles) in enumerate(campos_items):
+                    col_target = col_kempis_left if (idx_k % 2 == 0) else col_kempis_right
+                    c_icono, c_border, c_bg_pill, c_txt_pill = iconos_campos.get(cf_nombre, ("📚", "#7C3AED", "#EDE9FE", "#6D28D9"))
+                    
+                    with col_target:
                         st.markdown(f"""
-                        <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
-                            <span style="font-weight: 700; color: #BE185D;">{c_nom}:</span> <b>{c_val['video_titulo']}</b><br>
-                            <a href="{c_val['video_url']}" target="_blank" style="color: #2563EB; font-size: 0.85rem; text-decoration: underline;">▶ Ver video explicativo en YouTube</a>
+                        <div class="kempis-act-card" style="border-top: 4px solid {c_border};">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+                                <span style="font-weight: 800; font-size: 0.95rem; color: #1F2937;">{c_icono} {cf_nombre}</span>
+                                <span style="font-size: 0.74rem; background: {c_bg_pill}; color: {c_txt_pill}; padding: 2px 8px; border-radius: 9999px; font-weight: 700;">
+                                    {cf_detalles['anexo_nombre'].split(':')[0]}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.88rem; font-weight: 700; color: #1F2937; margin-bottom: 6px; line-height: 1.4;">
+                                📌 <b>Tema:</b> <span style="font-weight: 600; color: #374151;">{cf_detalles['tema']}</span>
+                            </div>
+                            <div style="font-size: 0.80rem; color: #4B5563; margin-bottom: 8px;">
+                                <b>PDA:</b> {cf_detalles['pda_vinculado']}
+                            </div>
+                            <div class="kempis-anexo-box">
+                                <div style="font-size: 0.84rem; font-weight: 700; color: #1F2937; margin-bottom: 3px;">
+                                    📝 <b>{cf_detalles['anexo_nombre']}</b>
+                                </div>
+                                <div style="font-size: 0.80rem; color: #374151; line-height: 1.45;">
+                                    {cf_detalles['anexo_descripcion']}
+                                </div>
+                            </div>
+                            <div style="font-size: 0.82rem; color: #1F2937; line-height: 1.5; margin-top: 8px;">
+                                <div style="font-weight: 700; color: #1F2937; margin-bottom: 4px;">🎯 Secuencia Didáctica de Intervención:</div>
+                                <div style="margin-bottom: 3px;"><span style="color: #047857; font-weight: 700;">🟢 Inicio:</span> {cf_detalles['inicio']}</div>
+                                <div style="margin-bottom: 3px;"><span style="color: #B45309; font-weight: 700;">🟡 Desarrollo:</span> {cf_detalles['desarrollo']}</div>
+                                <div><span style="color: #4C1D95; font-weight: 700;">🔴 Cierre:</span> {cf_detalles['cierre']}</div>
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
 
                 ef_info_tab = kempis_data_vista.get("efemeride_principal", {})
                 if ef_info_tab:
-                    st.markdown(f"#### 🇲🇽 Conmemoración Cívica: {ef_info_tab.get('nombre', '')}")
-                    st.markdown(f"- **Actividad:** {ef_info_tab.get('actividad', '')}")
-                    st.markdown(f"- **Anexo imprimible:** `{ef_info_tab.get('anexo_nombre', '')}`")
-                    if ef_info_tab.get('video_url'):
-                        st.markdown(f"- **Video de apoyo:** [{ef_info_tab.get('video_titulo', 'Ver en YouTube')}]({ef_info_tab.get('video_url')})")
+                    st.markdown(f"""
+                    <div class="kempis-efemeride-card">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                            <span style="font-size: 1.25rem;">🇲🇽</span>
+                            <span style="font-weight: 800; font-size: 0.95rem; color: #1F2937;">
+                                Conmemoración Cívica e Histórica: <b>{ef_info_tab.get('nombre', '')}</b> ({ef_info_tab.get('fecha', '')})
+                            </span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #1F2937; line-height: 1.5; margin-bottom: 8px;">
+                            <b>🎯 Actividad Comunitaria:</b> {ef_info_tab.get('actividad', '')}
+                        </div>
+                        <div style="font-size: 0.83rem; color: #1F2937;">
+                            <b>📄 Ficha Imprimible de Apoyo:</b> <code style="background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{ef_info_tab.get('anexo_nombre', '')}</code> — <i>{ef_info_tab.get('anexo_descripcion', 'Análisis reflexivo y contextualizado.')}</i>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
     
 # ==========================================
 # PIE DE PÁGINA INSTITUCIONAL

@@ -214,7 +214,7 @@ def generate_planeacion(
         fase_seleccionada = kwargs.get("fase_seleccionada") or fase_correspondiente
     fase_limpia = str(fase_seleccionada).replace("Fase", "").strip() or "5"
 
-    grado_seleccionado = datos_escuela.get('grado', '5° de Primaria')
+    grado_seleccionado = datos_escuela.get('grado', '6° de Primaria')
 
     # 4. PROGRAMA SINTÉTICO Y FUNCIÓN DE RESPALDO (WEB SCRAPING SEP)
     if programa_sintetico is None:
@@ -237,13 +237,13 @@ def generate_planeacion(
 Como no se proporcionó un documento oficial, utiliza tu conocimiento interno y capacidad de búsqueda para acceder a los lineamientos de la Nueva Escuela Mexicana (SEP) para la Fase {fase_limpia} y Semana {semana_seleccionada}.
 * REGLA DE FIDELIDAD CURRICULAR: Fundamenta los Contenidos sintéticos y Procesos de Desarrollo de Aprendizaje (PDA) oficiales en el currículo nacional vigente de la Nueva Escuela Mexicana para la Fase {fase_limpia}."""
     else:
-        directriz_programa_sintetico_txt = f"""=== BASE DE DATOS PRINCIPAL Y OFICIAL: PROGRAMA SINTÉTICO FASE 5 (5° DE PRIMARIA - SEP) ===
+        directriz_programa_sintetico_txt = f"""=== BASE DE DATOS PRINCIPAL Y OFICIAL: PROGRAMA SINTÉTICO FASE 5 (6° DE PRIMARIA - SEP) ===
 DOCUMENTO OFICIAL CARGADO: "Programa_Sintetico_Fase_5.pdf"
 * DIRECTRIZ MANDATORIA DE MÁXIMA PRIORIDAD Y FIDELIDAD CURRICULAR:
-Utiliza este documento oficial cargado como la BASE DE DATOS PRINCIPAL Y OFICIAL para tu análisis pedagógico y la planeación didáctica de 5° de Primaria.
+Utiliza este documento oficial cargado como la BASE DE DATOS PRINCIPAL Y OFICIAL para tu análisis pedagógico y la planeación didáctica de 6° de Primaria.
 Debes extraer rigurosamente y sin excepción de este documento:
-1. CONTENIDOS SINTÉTICOS: Los contenidos oficiales de la Fase 5 correspondientes específicamente a 5° de Primaria.
-2. PROCESOS DE DESARROLLO DE APRENDIZAJE (PDA): Los PDA oficiales específicos de 5° de Primaria exactamente con la redacción y alcance del documento.
+1. CONTENIDOS SINTÉTICOS: Los contenidos oficiales de la Fase 5 correspondientes específicamente a 6° de Primaria.
+2. PROCESOS DE DESARROLLO DE APRENDIZAJE (PDA): Los PDA oficiales específicos de 6° de Primaria exactamente con la redacción y alcance del documento.
 3. CAMPOS FORMATIVOS: Articulación en los 4 Campos Formativos (Lenguajes, Saberes y Pensamiento Científico, Ética, Naturaleza y Sociedades, De lo Humano y lo Comunitario).
 4. EJES ARTICULADORES: Vinculación con los 7 Ejes Articuladores de la Nueva Escuela Mexicana.
 PROHIBICIÓN ESTRICTA: Queda terminantemente prohibido inventar, distorsionar o sustituir los Contenidos y PDA por versiones genéricas. Cada momento de la secuencia didáctica (Inicio, Desarrollo y Cierre) y las actividades de inicio del día deben derivarse de forma estricta de esta base curricular oficial.
@@ -430,9 +430,9 @@ Estructura la Secuencia Didáctica separando claramente cada día. Desarrolla de
   * Actividades con estímulos KINESTÉSICOS vivenciales (manipulación de material concreto, dinámicas activas, dramatización, estaciones de trabajo colaborativo para los 26 alumnos).
   * Actividades con recursos VISUALES estructurados (elaboración de organizadores gráficos, esquemas ilustrados, infografías a color).
   * Articulación transversal de los 4 Campos Formativos y consulta de páginas sugeridas de libros SEP (Proyectos, Nuestros Saberes, Múltiples Lenguajes).
-  * Si se aborda la Semana 6 o 7, o los temas correspondientes, vincula e incorpora expresamente las actividades prácticas, anexos imprimibles y videos explicativos del Cuadernillo Profa Kempis.
+  * Si se aborda la Semana 6 o 7, o los temas correspondientes, vincula e incorpora expresamente las actividades prácticas y anexos imprimibles del Cuadernillo Profa Kempis.
 - **Cierre (15-20 min):** Socialización comunitaria, síntesis, conclusiones colectivas y metacognición.
-- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP, recursos tecnológicos y cita explícita de Anexos/videos de Profa Kempis cuando aplique.
+- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP, recursos del aula y cita explícita de Anexos del Cuadernillo Profa Kempis cuando aplique.
 - **Evidencia / Producto de la sesión:** Qué registrará o elaborará el estudiante.
 
 
@@ -531,7 +531,7 @@ def generate_sample_fallback(
     **kwargs
 ) -> str:
     """
-    Genera una planeación didáctica pre-elaborada completa de 5° Grado en caso de que
+    Genera una planeación didáctica pre-elaborada completa de 6° Grado en caso de que
     el usuario desee visualizar el resultado o explorar la app antes de ingresar su API Key,
     ajustando las rutinas y sesiones estrictamente a los días seleccionados.
     """
@@ -588,7 +588,7 @@ def generate_sample_fallback(
   * Aplicación del anexo imprimible del Cuadernillo Profa Kempis: `{cf_val['anexo_nombre']}`.
 - **Cierre (15-20 min):**
   * {cf_val['cierre']}
-- **Recursos didácticos:** Libros de texto gratuitos SEP, Cuadernillo Profa Kempis ({cf_val['anexo_nombre']}) y video de apoyo en YouTube: '{cf_val['video_titulo']}' ({cf_val['video_url']}).
+- **Recursos didácticos:** Libros de texto gratuitos SEP, Cuadernillo Profa Kempis ({cf_val['anexo_nombre']}) y libreta del alumno.
 - **Evidencia / Evaluación formativa:** Ficha de trabajo resuelta: {cf_val['anexo_nombre']} y registro en lista de cotejo."""
             else:
                 dias_sesiones_map[d_nom] = f"""Fase de Integración Cívico-Comunitaria: {ef_info.get('nombre', 'Efeméride Oficial')}
@@ -600,19 +600,19 @@ def generate_sample_fallback(
   * Resolución del anexo complementario: `{ef_info.get('anexo_nombre', 'Anexo Cívico')}`.
 - **Cierre (15-20 min):**
   * Exposición de acuerdos comunitarios, autoevaluación grupal y socialización con la comunidad escolar.
-- **Recursos didácticos:** Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}) y video explicativo: '{ef_info.get('video_titulo', '')}' ({ef_info.get('video_url', '')}).
+- **Recursos didácticos:** Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}), cartulina y marcadores.
 - **Evidencia / Evaluación formativa:** Producto integrador `{ef_info.get('anexo_nombre', 'Cartel')}` evaluado con rúbrica."""
 
         sample_rutinas = dias_rutinas_map
         sample_sesiones = dias_sesiones_map
         nombre_proyecto_fallback = f"{kempis_data['titulo_general']} — Proyecto Integrador de Saberes y Convivencia"
-        proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {sem_kempis} a través del Cuadernillo de Actividades Profa Kempis, fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con recursos audiovisuales y fichas prácticas."
+        proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {sem_kempis} a través del Cuadernillo de Actividades Profa Kempis, fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con dinámicas vivenciales y fichas prácticas."
         
         filas_art = []
         for c_n, c_v in kempis_data["campos"].items():
             pda_texto = c_v.get("pda_vinculado") or c_v.get("pda") or "Proceso de desarrollo de aprendizaje oficial NEM"
             filas_art.append(
-                f"| **{c_n}** | {c_v['tema']} | {pda_texto} | Libros de Texto SEP, Cuadernillo Profa Kempis y YouTube | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
+                f"| **{c_n}** | {c_v['tema']} | {pda_texto} | Libros de Texto SEP y Cuadernillo Profa Kempis | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
             )
         tabla_articulacion_str = "\n".join(filas_art)
     else:
@@ -639,7 +639,7 @@ def generate_sample_fallback(
   * Dinámica detonadora "¿Qué desayunamos hoy?": En plenaria, las y los alumnos comparten sus alimentos cotidianos en una lluvia de ideas en el pizarrón.
   * Planteamiento de la pregunta generadora del proyecto: *¿De qué manera los alimentos que consumimos en la escuela y en casa impactan en nuestra energía, salud y concentración?*
 - **Desarrollo (50 min):**
-  * Lectura compartida en el libro *Nuestros Saberes: 5° grado*, páginas 68 a 71, analizando los conceptos de alimentos naturales, procesados y ultraprocesados.
+  * Lectura compartida en el libro *Nuestros Saberes: 6° grado*, páginas 68 a 71, analizando los conceptos de alimentos naturales, procesados y ultraprocesados.
   * En comunidades de 4 integrantes, elaboran una lista comparativa en sus libretas dividida en dos columnas: "Alimentos cotidianos nutritivos" vs. "Alimentos ultraprocesados frecuentes en la comunidad".
   * El docente acompaña a los equipos guiando la identificación del Plato del Bien Comer y la Jarra del Buen Beber.
 - **Cierre (20 min):**
@@ -654,7 +654,7 @@ def generate_sample_fallback(
   * Rutina de inicio del día (dictado, cálculo mental y problema razonado de fracciones).
   * Recordatorio de los acuerdos de la sesión previa y lectura de una cápsula del libro *Múltiples Lenguajes*.
 - **Desarrollo (55 min):**
-  * Consulta del libro *Proyectos Comunitarios (5° grado)*, páginas 24 a 27.
+  * Consulta del libro *Proyectos Comunitarios (6° grado)*, páginas 24 a 27.
   * Diseño participativo de un guion de entrevista para consultar a los encargados de la cooperativa escolar y familiares sobre los hábitos de consumo alimenticio.
   * Los estudiantes redactan 5 preguntas abiertas con signos de interrogación correctos y ortografía cuidada.
   * Simulación de la entrevista en parejas mediante juego de roles (entrevistador y entrevistado).
