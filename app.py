@@ -5,6 +5,7 @@ Planeaciones Escolares de Primaria basadas en el modelo de la Nueva Escuela Mexi
 """
 
 import os
+import json
 import streamlit as st
 import streamlit_authenticator as stauth
 from dotenv import load_dotenv
@@ -3420,9 +3421,25 @@ if authentication_status:
                     st.success(f"✓ ¡Versión '{ver_nombre_custom}' guardada exitosamente!")
                     st.rerun()
 
+            # Inicialización previa garantizada para evitar NameError
+            all_records_full = []
+            json_backup = "[]"
+
             if lista_guardadas_main:
-                all_records_full = [obtener_planeacion_por_id(p["id"]) for p in lista_guardadas_main]
-                json_backup = json.dumps(all_records_full, ensure_ascii=False, indent=2)
+                try:
+                    all_records_full = [
+                        obtener_planeacion_por_id(p["id"])
+                        for p in lista_guardadas_main
+                        if p and isinstance(p, dict) and "id" in p
+                    ]
+                    all_records_full = [r for r in all_records_full if r is not None]
+                    if 'all_records_full' in locals() and all_records_full:
+                        json_backup = json.dumps(all_records_full, ensure_ascii=False, indent=2)
+                except Exception as err_dumps:
+                    all_records_full = []
+                    json_backup = "[]"
+
+            if 'all_records_full' in locals() and all_records_full and json_backup != "[]":
                 st.download_button(
                     label="📥 Exportar Todo el Historial a JSON",
                     data=json_backup,
@@ -3430,6 +3447,47 @@ if authentication_status:
                     mime="application/json",
                     use_container_width=True
                 )
+            else:
+                st.info("ℹ️ Aún no hay planeaciones registradas en el historial para exportar.")
+
+            # Módulo seguro de importación / restauración desde archivo JSON
+            st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+            with st.expander("📤 Restaurar o Importar Planeaciones desde archivo JSON"):
+                st.caption("Carga un archivo de respaldo JSON generado previamente para sincronizarlo o restaurarlo en tu historial.")
+                archivo_json_subido = st.file_uploader(
+                    "Selecciona el archivo JSON de respaldo:",
+                    type=["json"],
+                    key=f"uploader_backup_json_{st.session_state.widget_key}"
+                )
+                if archivo_json_subido is not None:
+                    try:
+                        contenido_raw = archivo_json_subido.read().decode("utf-8", errors="ignore").strip()
+                        if not contenido_raw:
+                            st.warning("⚠️ El archivo JSON seleccionado está vacío o no contiene datos.")
+                        else:
+                            datos_importados = json.loads(contenido_raw)
+                            if isinstance(datos_importados, dict):
+                                datos_importados = [datos_importados]
+                            if isinstance(datos_importados, list) and len(datos_importados) > 0:
+                                count_ok = 0
+                                for item_imp in datos_importados:
+                                    if isinstance(item_imp, dict) and "semana" in item_imp:
+                                        guardar_planeacion(
+                                            username=docente_usuario_main,
+                                            data=item_imp,
+                                            es_autoguardado=False,
+                                            version_nombre=item_imp.get("version_nombre", "Importado JSON")
+                                        )
+                                        count_ok += 1
+                                if count_ok > 0:
+                                    st.success(f"✓ ¡Se importaron exitosamente {count_ok} planeaciones del respaldo JSON!")
+                                    st.rerun()
+                                else:
+                                    st.warning("⚠️ No se encontraron planeaciones estructuradas válidas en el archivo JSON.")
+                            else:
+                                st.warning("⚠️ El formato del archivo JSON debe contener una lista o registro de planeaciones.")
+                    except Exception as err_json_read:
+                        st.error(f"❌ Error al procesar el archivo JSON: {err_json_read}")
 
     st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
     
