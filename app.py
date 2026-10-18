@@ -14,9 +14,12 @@ from planeaciones_storage import (
     guardar_planeacion,
     listar_planeaciones,
     obtener_planeacion_por_id,
+    obtener_planeacion_por_nombre,
     eliminar_planeacion_por_id,
     obtener_resumen_semanas_cubiertas,
-    calcular_hash_planeacion
+    calcular_hash_planeacion,
+    CATEGORIAS_RUTAS_DEFAULT,
+    sanitizar_nombre_ruta
 )
 
 # Cargar variables de entorno desde .env si existe
@@ -2540,7 +2543,8 @@ def cargar_planeacion_guardada(planeacion_id: int) -> bool:
             "dias_", "campos_", "ejes_", "libros_", "pda_",
             "contenidos_", "custom_contenido_", "custom_pda_",
             "directrices_", "url_referencia_", "uploader_",
-            "semana_", "periodo_", "chk_dia_", "chk_pda_manual_"
+            "semana_", "periodo_", "chk_dia_", "chk_pda_manual_",
+            "inp_nombre_archivo_", "sel_categoria_ruta_"
         ]:
             if k.startswith(prefix) and k != "semana_activa_previa":
                 del st.session_state[k]
@@ -2566,16 +2570,23 @@ def cargar_planeacion_guardada(planeacion_id: int) -> bool:
     st.session_state.planeacion_generada = plan.get("planeacion_generada") or None
     st.session_state.prompt_enviado = plan.get("prompt_enviado") or None
 
-    # 6. Restaurar textos de referencia y directrices
+    # 6. Restaurar textos de referencia, directrices y metadatos de archivo
     st.session_state["directrices"] = plan.get("directrices") or ""
     st.session_state["url_referencia"] = plan.get("url_referencia") or ""
     st.session_state.archivos_procesados = {}
     if plan.get("contenidos_pda"):
         st.session_state["pda_cargados"] = plan["contenidos_pda"]
 
+    nom_arch = plan.get("nombre_archivo") or f"Planeacion_Semana_{sem}"
+    cat_arch = plan.get("categoria_ruta") or ("Trimestre 1 (Diagnóstico e Inicio)" if sem <= 13 else ("Trimestre 2 (Desarrollo y Proyectos)" if sem <= 26 else "Trimestre 3 (Consolidación y Cierre)"))
+    st.session_state["nombre_archivo_actual"] = nom_arch
+    st.session_state["categoria_ruta_actual"] = cat_arch
+
     # 7. Asignar valores cargados a los widgets con la nueva widget_key
     st.session_state[f"modo_cal_sel_{wk}"] = "Semana SEP (1 a 37)"
     st.session_state[f"sel_semana_sep_{wk}"] = sem
+    st.session_state[f"inp_nombre_archivo_{wk}"] = nom_arch
+    st.session_state[f"sel_categoria_ruta_{wk}"] = cat_arch
     st.session_state[f"directrices_{wk}"] = plan.get("directrices") or ""
     st.session_state[f"metodologia_{wk}"] = plan.get("metodologia") or "Aprendizaje Basado en Proyectos Comunitarios"
     st.session_state[f"num_sesiones_{wk}"] = int(plan.get("num_sesiones", len(dias_rest)))
@@ -2594,7 +2605,7 @@ def cargar_planeacion_guardada(planeacion_id: int) -> bool:
 
     # 8. Sincronizar hash para evitar re-escritura inmediata
     st.session_state["ultimo_hash_guardado"] = plan.get("hash_contenido")
-    st.session_state["aviso_planeacion_cargada"] = f"Semana {sem} ({plan.get('periodo', f'Semana {sem} de 37')})"
+    st.session_state["aviso_planeacion_cargada"] = f"📄 {nom_arch} — Semana {sem} ({cat_arch})"
     return True
 
 # ==========================================
@@ -2742,7 +2753,7 @@ if authentication_status:
             )
 
         # Gestor de Archivos / Historial en la barra lateral
-        with st.expander("📂 Historial de Planeaciones", expanded=False):
+        with st.expander("📂 Gestor de Archivos y Planeaciones", expanded=False):
             st.markdown(
                 f"<div style='font-size: 0.78rem; margin-bottom: 6px; color: #3730A3;'>"
                 f"📊 <b>Cobertura:</b> {stats_cubiertas_sb['semanas_completas']} de 37 semanas ({stats_cubiertas_sb['porcentaje_avance']}%)"
@@ -2753,20 +2764,38 @@ if authentication_status:
             if not lista_historial_sb:
                 st.caption("No hay planeaciones guardadas aún. Se guardarán automáticamente al configurar o generar.")
             else:
+                dict_sb_planes = {p["id"]: p for p in lista_historial_sb}
+                st.markdown("<div style='font-size:0.75rem; font-weight:700; color:#4B5563; margin-top:2px; margin-bottom:2px;'>Cargar Archivo por Nombre:</div>", unsafe_allow_html=True)
+                sel_sb_pid = st.selectbox(
+                    "Selecciona un archivo guardado:",
+                    options=list(dict_sb_planes.keys()),
+                    format_func=lambda pid: f"📄 {dict_sb_planes[pid]['nombre_archivo']} (Sem. {dict_sb_planes[pid]['semana']})",
+                    key=f"sel_sb_plan_{st.session_state.widget_key}",
+                    label_visibility="collapsed"
+                )
+                if st.button("📂 Abrir Archivo", key=f"btn_sb_open_sel_{st.session_state.widget_key}", use_container_width=True, type="primary"):
+                    if sel_sb_pid:
+                        cargar_planeacion_guardada(sel_sb_pid)
+                        st.rerun()
+
+                st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
+                st.markdown("<div style='font-size:0.73rem; font-weight:700; color:#6B7280; margin-bottom:4px;'>Historial de Archivos Guardados:</div>", unsafe_allow_html=True)
                 for p_item in lista_historial_sb:
                     p_id = p_item["id"]
                     tag_estado = "🟢 Lista" if p_item["tiene_plan"] else "📝 Borrador"
                     ver_tag = f" [{p_item['version_nombre']}]" if not p_item["es_autoguardado"] else ""
                     st.markdown(
-                        f"<div style='font-size:0.8rem; font-weight:600; margin-top:4px;'>"
-                        f"Semana {p_item['semana']}{ver_tag} <span style='font-size:0.72rem; font-weight:normal; color:#059669;'>({tag_estado})</span>"
+                        f"<div style='font-size:0.78rem; font-weight:600; margin-top:4px; color:#1E293B;'>"
+                        f"📄 {p_item['nombre_archivo']}<br>"
+                        f"<span style='font-size:0.7rem; color:#6D28D9; font-weight:bold;'>📁 {p_item['categoria_ruta']}</span> • "
+                        f"<span style='font-size:0.7rem; color:#059669;'>Sem. {p_item['semana']}{ver_tag} ({tag_estado})</span>"
                         f"</div>"
-                        f"<div style='font-size:0.7rem; color:#6B7280;'>{p_item['fecha_guardado']}</div>",
+                        f"<div style='font-size:0.68rem; color:#94A3B8;'>Guardado: {p_item['fecha_guardado']}</div>",
                         unsafe_allow_html=True
                     )
                     col_h1, col_h2 = st.columns([2.2, 1])
                     with col_h1:
-                        if st.button("📂 Abrir", key=f"btn_sb_load_{p_id}_{st.session_state.widget_key}", use_container_width=True, help=f"Cargar y editar Semana {p_item['semana']}"):
+                        if st.button("📂 Abrir", key=f"btn_sb_load_{p_id}_{st.session_state.widget_key}", use_container_width=True, help=f"Cargar {p_item['nombre_archivo']}"):
                             cargar_planeacion_guardada(p_id)
                             st.rerun()
                     with col_h2:
@@ -3279,12 +3308,88 @@ if authentication_status:
             hora_act = st.session_state.get("ultimo_autoguardado_hora", "En vivo")
             st.metric("Autoguardado", hora_act)
 
-        tab_g_sem, tab_g_fecha, tab_g_campo, tab_g_backup = st.tabs([
+        tab_g_archivos, tab_g_sem, tab_g_fecha, tab_g_campo, tab_g_backup = st.tabs([
+            "📂 Por Nombre y Carpeta / Ruta",
             "📅 Por Semana (1 a 37)",
             "🕒 Por Fecha de Guardado",
             "🎨 Por Campo Formativo / Asignatura",
             "💾 Respaldos y Versiones"
         ])
+
+        with tab_g_archivos:
+            st.markdown("#### 📂 Gestor de Archivos por Nombre y Carpeta / Destino")
+            st.caption("Administra, organiza por carpetas (Trimestre, Proyectos, CTE) y abre tus planeaciones guardadas con su nombre personalizado.")
+            
+            if not lista_guardadas_main:
+                st.info("ℹ️ Aún no hay planeaciones guardadas. Configura una semana y se guardará automáticamente con su nombre de archivo.")
+            else:
+                # 1. Menú desplegable / selector rápido de archivos
+                c_sel_arch, c_btn_arch = st.columns([2.5, 1])
+                with c_sel_arch:
+                    dict_planes_main = {p["id"]: p for p in lista_guardadas_main}
+                    def format_main_arch_opt(pid):
+                        p = dict_planes_main[pid]
+                        tag = "🟢 Lista" if p["tiene_plan"] else "📝 Borrador"
+                        return f"📄 {p['nombre_archivo']} — Sem. {p['semana']} [{p['categoria_ruta']}] ({tag})"
+                    
+                    id_sel_main = st.selectbox(
+                        "Selecciona un archivo guardado para cargar:",
+                        options=list(dict_planes_main.keys()),
+                        format_func=format_main_arch_opt,
+                        key=f"sel_main_arch_{st.session_state.widget_key}"
+                    )
+                with c_btn_arch:
+                    st.markdown("<div style='height: 1.7rem;'></div>", unsafe_allow_html=True)
+                    if st.button("📂 Abrir y Cargar Archivo", key=f"btn_main_load_arch_{st.session_state.widget_key}", use_container_width=True, type="primary"):
+                        if id_sel_main:
+                            cargar_planeacion_guardada(id_sel_main)
+                            st.rerun()
+
+                st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
+
+                # 2. Organización y filtro por Categoría / Carpeta
+                categorias_existentes = sorted(list(set(p["categoria_ruta"] for p in lista_guardadas_main)))
+                filtro_cat = st.selectbox(
+                    "📁 Filtrar por Carpeta / Categoría:",
+                    options=["Todas las Carpetas"] + categorias_existentes,
+                    key=f"flt_cat_gestor_{st.session_state.widget_key}"
+                )
+                
+                archivos_filtrados = [
+                    p for p in lista_guardadas_main
+                    if filtro_cat == "Todas las Carpetas" or p["categoria_ruta"] == filtro_cat
+                ]
+
+                st.markdown(f"<div style='font-size:0.82rem; color:#475569; margin-bottom:8px;'>Mostrando <b>{len(archivos_filtrados)}</b> planeaciones en <b>{filtro_cat}</b>:</div>", unsafe_allow_html=True)
+
+                for p_arch in archivos_filtrados:
+                    p_id = p_arch["id"]
+                    col_a1, col_a2, col_a3 = st.columns([2.8, 1, 1.2])
+                    with col_a1:
+                        c_list_str = ", ".join(p_arch["campos_formativos"][:2]) + ("..." if len(p_arch["campos_formativos"]) > 2 else "")
+                        st.markdown(
+                            f"**📄 {p_arch['nombre_archivo']}**<br>"
+                            f"<span style='font-size:0.75rem; color:#6D28D9; font-weight:600;'>📁 {p_arch['categoria_ruta']}</span> • "
+                            f"<span style='font-size:0.75rem; color:#475569;'>Semana {p_arch['semana']} ({p_arch['periodo']})</span><br>"
+                            f"<span style='font-size:0.72rem; color:#64748B;'>{c_list_str} • {p_arch['num_sesiones']} sesiones • {p_arch['fecha_guardado']}</span>",
+                            unsafe_allow_html=True
+                        )
+                    with col_a2:
+                        if p_arch["tiene_plan"]:
+                            st.markdown("<span style='background:#DCFCE7; color:#15803D; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;'>🟢 Lista (Word/PDF)</span>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<span style='background:#FEF3C7; color:#B45309; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;'>📝 Borrador</span>", unsafe_allow_html=True)
+                    with col_a3:
+                        col_sub_btn1, col_sub_btn2 = st.columns([1.5, 1])
+                        with col_sub_btn1:
+                            if st.button("📂 Abrir", key=f"btn_arch_open_{p_id}_{st.session_state.widget_key}", use_container_width=True):
+                                cargar_planeacion_guardada(p_id)
+                                st.rerun()
+                        with col_sub_btn2:
+                            if st.button("🗑️", key=f"btn_arch_del_{p_id}_{st.session_state.widget_key}", use_container_width=True, help="Eliminar planeación"):
+                                eliminar_planeacion_por_id(p_id)
+                                st.rerun()
+                    st.markdown("<hr style='margin: 4px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
 
         with tab_g_sem:
             dict_guardadas_por_sem = {p["semana"]: p for p in lista_guardadas_main if p["es_autoguardado"]}
@@ -3968,6 +4073,20 @@ if authentication_status:
     # AUTOGUARDADO EN TIEMPO REAL (SQLITE)
     # ==========================================
     docente_usuario_act = st.session_state.get("username", "docente")
+    
+    # Metadatos de guardado: nombre personalizado de archivo y carpeta/categoría
+    default_campo_slug = re.sub(r'[^a-zA-Z0-9]', '', str(campos_sel[0])) if campos_sel else "Lenguajes"
+    nombre_archivo_actual = st.session_state.get("nombre_archivo_actual")
+    if not nombre_archivo_actual:
+        nombre_archivo_actual = f"Planeacion_Semana_{semana_seleccionada}_{default_campo_slug}"
+    
+    default_cat_semana = (
+        "Trimestre 1 (Diagnóstico e Inicio)" if semana_seleccionada <= 13
+        else ("Trimestre 2 (Desarrollo y Proyectos)" if semana_seleccionada <= 26
+        else "Trimestre 3 (Consolidación y Cierre)")
+    )
+    categoria_ruta_actual = st.session_state.get("categoria_ruta_actual", default_cat_semana)
+
     data_actual_para_guardar = {
         "semana": semana_seleccionada,
         "periodo": periodo_sel,
@@ -3986,11 +4105,19 @@ if authentication_status:
         "num_sesiones": num_sesiones,
         "planeacion_generada": st.session_state.get("planeacion_generada") or "",
         "prompt_enviado": st.session_state.get("prompt_enviado") or "",
-        "url_referencia": url_referencia if 'url_referencia' in locals() else ""
+        "url_referencia": url_referencia if 'url_referencia' in locals() else "",
+        "nombre_archivo": nombre_archivo_actual,
+        "categoria_ruta": categoria_ruta_actual
     }
     hash_actual_form = calcular_hash_planeacion(data_actual_para_guardar)
     if hash_actual_form != st.session_state.get("ultimo_hash_guardado"):
-        guardar_planeacion(username=docente_usuario_act, data=data_actual_para_guardar, es_autoguardado=True)
+        guardar_planeacion(
+            username=docente_usuario_act,
+            data=data_actual_para_guardar,
+            es_autoguardado=True,
+            nombre_archivo=nombre_archivo_actual,
+            categoria_ruta=categoria_ruta_actual
+        )
         st.session_state["ultimo_hash_guardado"] = hash_actual_form
         st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
         st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
@@ -4220,14 +4347,66 @@ if authentication_status:
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
     
     # ==========================================
-    # SECCIÓN 3: BOTONES DE GENERACIÓN
+    # SECCIÓN 3: BOTONES DE GENERACIÓN Y GESTIÓN DE ARCHIVO
     # ==========================================
     st.markdown("""
     <div class="nem-card-header">
         <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
-        <h3 class="nem-card-title">3. Generación Automatizada del Plano Didáctico</h3>
+        <h3 class="nem-card-title">3. Guardado y Generación del Plano Didáctico</h3>
     </div>
     """, unsafe_allow_html=True)
+
+    # Panel de Configuración de Archivo: Nombre Personalizado y Carpeta de Destino
+    st.markdown("""
+    <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 12px 16px; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="color: #7C3AED; font-size: 1.2rem;">📁</span>
+            <span style="font-weight: 700; font-size: 0.98rem; color: #1E293B;">Configuración de Guardado: Nombre de Archivo y Carpeta de Destino</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+    c_nom_arch, c_cat_ruta = st.columns([1.3, 1.2])
+    with c_nom_arch:
+        nombre_archivo_input = st.text_input(
+            "Nombre personalizado del archivo (ej. Planeacion_Semana_20_Matematicas):",
+            value=st.session_state.get(f"inp_nombre_archivo_{st.session_state.widget_key}", nombre_archivo_actual),
+            key=f"inp_nombre_archivo_{st.session_state.widget_key}",
+            help="Escribe el nombre con el que deseas guardar y organizar este archivo en tu historial y en la carpeta local de respaldos."
+        )
+        st.session_state["nombre_archivo_actual"] = nombre_archivo_input
+        data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
+
+    with c_cat_ruta:
+        cat_index_sel = CATEGORIAS_RUTAS_DEFAULT.index(categoria_ruta_actual) if categoria_ruta_actual in CATEGORIAS_RUTAS_DEFAULT else 1
+        categoria_ruta_input = st.selectbox(
+            "Carpeta / Categoría de Destino:",
+            options=CATEGORIAS_RUTAS_DEFAULT,
+            index=cat_index_sel,
+            key=f"sel_categoria_ruta_{st.session_state.widget_key}",
+            help="Selecciona la carpeta organizativa donde se archivará la planeación (por trimestre, tipo de proyecto o CTE)."
+        )
+        st.session_state["categoria_ruta_actual"] = categoria_ruta_input
+        data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
+
+    col_btn_save_named, col_info_named = st.columns([1, 1.8])
+    with col_btn_save_named:
+        if st.button("💾 Guardar con este Nombre y Ruta", key=f"btn_save_named_{st.session_state.widget_key}", use_container_width=True, help="Guarda inmediatamente tu avance con el nombre y carpeta elegidos."):
+            data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
+            data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
+            guardar_planeacion(
+                username=docente_usuario_act,
+                data=data_actual_para_guardar,
+                es_autoguardado=False,
+                version_nombre=nombre_archivo_input,
+                nombre_archivo=nombre_archivo_input,
+                categoria_ruta=categoria_ruta_input
+            )
+            st.success(f"✓ ¡Planeación guardada como '{nombre_archivo_input}' en '{categoria_ruta_input}'!")
+            st.rerun()
+    with col_info_named:
+        st.caption(f"📍 Destino actual: `guardados/{sanitizar_nombre_ruta(categoria_ruta_input)}/{sanitizar_nombre_ruta(nombre_archivo_input)}.json`")
+
+    st.markdown("</div>", unsafe_allow_html=True)
     
     col_btn_gen, col_btn_demo = st.columns([1.5, 1.2])
     
@@ -4539,7 +4718,12 @@ if authentication_status:
     
         # Botones de descarga y exportación interactiva (DOCX, PDF, MD)
         col_d1, col_d2, col_d3 = st.columns(3)
-        nombre_base = f"Planeacion_{escuela_nombre.replace(' ', '_')}_{grado_sel[:2]}_{periodo_sel.replace(' ', '_')}"
+        if 'nombre_archivo_input' in locals() and nombre_archivo_input:
+            nombre_base = sanitizar_nombre_ruta(nombre_archivo_input).replace(".json", "")
+        elif st.session_state.get("nombre_archivo_actual"):
+            nombre_base = sanitizar_nombre_ruta(st.session_state["nombre_archivo_actual"]).replace(".json", "")
+        else:
+            nombre_base = f"Planeacion_{escuela_nombre.replace(' ', '_')}_{grado_sel[:2]}_{periodo_sel.replace(' ', '_')}"
         
         with col_d1:
             st.download_button(
