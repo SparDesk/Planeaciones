@@ -20,7 +20,19 @@ try:
 except ImportError:
     METODOLOGIAS_SOCIOCRITICAS = {}
 
+try:
+    from cuadernillo_kempis import (
+        detectar_relevancia_kempis,
+        formatear_kempis_para_prompt,
+        obtener_recursos_kempis_por_semana
+    )
+except ImportError:
+    detectar_relevancia_kempis = lambda *args, **kwargs: False
+    formatear_kempis_para_prompt = lambda *args, **kwargs: ""
+    obtener_recursos_kempis_por_semana = lambda *args, **kwargs: None
+
 DEFAULT_MODEL = "gemini-3.8-flash"
+
 AVAILABLE_MODELS = [
     "gemini-3.8-flash",
     "gemini-3.8-pro",
@@ -273,12 +285,26 @@ PROHIBICIÓN ESTRICTA: Queda terminantemente prohibido inventar, distorsionar o 
 Antes de estructurar la secuencia didáctica, utiliza tu herramienta de búsqueda en internet para encontrar ejemplos prácticos, noticias recientes o dinámicas interactivas modernas relacionadas con el Contenido y PDA seleccionado. Integra estos hallazgos web de forma natural dentro de las actividades de Inicio, Desarrollo y Cierre.
 """
 
-    directriz_contexto_url_txt = ""
-    if contexto_url and str(contexto_url).strip():
-        directriz_contexto_url_txt = f"""
-=== MATERIAL DE REFERENCIA DESDE URL (WEB SCRAPING) ===
-El usuario ha proporcionado el siguiente material de referencia extraído de una página web educativa: {contexto_url}. Analiza este contenido y adapta las secuencias didácticas semanales o por proyectos basándote en los ejemplos y la estructura de este material.
-"""
+    # Detección e integración obligatoria del Cuadernillo Profa Kempis (Semanas 6 y 7)
+    vincular_kempis = kwargs.get("vincular_cuadernillo_kempis")
+    if vincular_kempis is None:
+        vincular_kempis = detectar_relevancia_kempis(
+            semana=semana_seleccionada,
+            contenidos_pda=contenidos_pda,
+            directrices_o_texto=directrices_docente,
+            campos=campos_formativos
+        )
+
+    directriz_kempis_txt = ""
+    if vincular_kempis:
+        sem_k = 6
+        try:
+            sem_k = int(semana_seleccionada)
+            if sem_k not in [6, 7]:
+                sem_k = 6
+        except Exception:
+            sem_k = 6
+        directriz_kempis_txt = formatear_kempis_para_prompt(sem_k, campos_formativos)
 
     prompt = f"""{build_system_instruction()}
 
@@ -369,6 +395,7 @@ REGLA ESTRICTA ADICIONAL: TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o in
 === TEXTOS Y ARCHIVOS DE REFERENCIA ADICIONALES APORTADOS ===
 {contexto_archivos}
 {directriz_contexto_url_txt}
+{directriz_kempis_txt}
 ESTRUCTURA DE RESPUESTA EXIGIDA (Usa Markdown profesional, encabezados claros y tablas):
 
 # I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
@@ -385,7 +412,7 @@ Genera una tabla con:
 | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
 
 # III. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA - {num_sesiones} SESIONES)
-Genera la rutina matutina ÚNICAMENTE para los siguientes días: {dias_seleccionados}. Cada día debe atender directamente las problemáticas de ortografía, velocidad lectora y cálculo mental:
+Genera la rutina matutina ÚNICAMENTE para los siguientes días: {dias_seleccionados}. Cada día debe atender directamente las problemáticas de ortografía, velocidad lectora y cálculo mental (articulando los retos ortográficos, múltiplos del gramo, IVA o conmemoraciones del Cuadernillo Profa Kempis cuando corresponda):
 Para cada día en {dias_seleccionados}:
 - Sesión N ([Día de la semana]):
   * Dictado Ortográfico: 5 palabras u oraciones con dificultad ortográfica explícita (acentuación, grafías b/v, c/s/z, g/j, h o signos).
@@ -403,9 +430,11 @@ Estructura la Secuencia Didáctica separando claramente cada día. Desarrolla de
   * Actividades con estímulos KINESTÉSICOS vivenciales (manipulación de material concreto, dinámicas activas, dramatización, estaciones de trabajo colaborativo para los 26 alumnos).
   * Actividades con recursos VISUALES estructurados (elaboración de organizadores gráficos, esquemas ilustrados, infografías a color).
   * Articulación transversal de los 4 Campos Formativos y consulta de páginas sugeridas de libros SEP (Proyectos, Nuestros Saberes, Múltiples Lenguajes).
+  * Si se aborda la Semana 6 o 7, o los temas correspondientes, vincula e incorpora expresamente las actividades prácticas, anexos imprimibles y videos explicativos del Cuadernillo Profa Kempis.
 - **Cierre (15-20 min):** Socialización comunitaria, síntesis, conclusiones colectivas y metacognición.
-- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP y recursos tecnológicos.
+- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP, recursos tecnológicos y cita explícita de Anexos/videos de Profa Kempis cuando aplique.
 - **Evidencia / Producto de la sesión:** Qué registrará o elaborará el estudiante.
+
 
 # V. INSTRUMENTO DE EVALUACIÓN FORMATIVA
 ### Rúbrica Analítica de Desempeño ({fase_correspondiente} - {grado_seleccionado})
@@ -523,16 +552,87 @@ def generate_sample_fallback(
 
     num_sesiones = len(dias_seleccionados)
 
-    sample_rutinas = {
-        "Lunes": "- **Dictado Ortográfico (Reglas y Acentuación):** 1. Comprensión, 2. Argumentación, 3. Tecnología, 4. Científico, 5. Análisis.\n- **Velocidad y Fluidez Lectora:** Lectura guiada en voz alta (1 minuto) de un fragmento de *Múltiples Lenguajes (6° grado)*, cronometrando palabras por minuto y evaluando modulación.\n- **Cálculo Mental Contextualizado:** a) 350 + 650, b) 1500 - 450, c) 12 x 8, d) El 25% de 800, e) 4.5 x 10.\n- **Problema Razonado:** En la biblioteca escolar de la Primaria Revolución Social de 1910 hay 650 libros. Si el 40% son textos informativos y el resto narrativos, ¿cuántos libros informativos hay y cuántos faltan para duplicar la colección?",
-        "Martes": "- **Dictado Ortográfico (Grafías B/V y C/S/Z):** 1. Convivencia, 2. Civilización, 3. Accesibilidad, 4. Búsqueda, 5. Precisión.\n- **Velocidad y Fluidez Lectora:** Lectura por parejas en eco para corregir pausas y silabeos con énfasis en signos de puntuación.\n- **Cálculo Mental Contextualizado:** a) 3/4 + 2/4, b) 480 ÷ 6, c) 25 x 4, d) 2000 - 675, e) Triple de 3.25.\n- **Problema Razonado:** Para equipar el rincón de lectura comunitaria, 26 alumnos reunieron $78 pesos cada uno. ¿Cuánto dinero recolectaron en total y cuánto sobrará si adquieren 12 paquetes de libros de $145 pesos cada uno?",
-        "Miércoles": "- **Dictado Ortográfico (Palabras Graves y Esdrújulas):** 1. Sintético, 2. Analítico, 3. Préstamo, 4. Crítico, 5. Éxito.\n- **Velocidad y Fluidez Lectora:** Lectura individual con registro de palabras leídas por minuto y rescate oral de la idea central del texto.\n- **Cálculo Mental Contextualizado:** a) 15 x 7, b) 1200 - 380, c) 1/2 de 450, d) 6.8 + 3.2, e) 81 ÷ 9.\n- **Problema Razonado:** De los 26 alumnos del grupo de 6° 'A', 18 utilizan computadoras o tabletas para consultar información en internet y el resto consulta enciclopedias físicas. ¿Qué fracción y qué porcentaje del grupo utiliza medios digitales?",
-        "Jueves": "- **Dictado Ortográfico (Signos de Puntuación y Conectores):** 1. Por consiguiente, 2. No obstante, 3. Explicación, 4. Indagación, 5. Cohesión.\n- **Velocidad y Fluidez Lectora:** Dinámica 'Lectura de relevos': cada alumno lee un párrafo cuidando entonación y volumen audible.\n- **Cálculo Mental Contextualizado:** a) 60 x 7, b) 3000 - 850, c) 3/5 + 1/5, d) Cuádruple de 25, e) 72 ÷ 8 + 15.\n- **Problema Razonado:** Un informe escolar de investigación comunitaria tiene 1,200 palabras. Si un estudiante lee a una velocidad promedio de 150 palabras por minuto, ¿cuántos minutos tardará en leer el informe completo?",
-        "Viernes": "- **Dictado Ortográfico (Léxico Científico e Informativo):** 1. Hipótesis, 2. Verificación, 3. Sociedad, 4. Biodiversidad, 5. Solidaridad.\n- **Velocidad y Fluidez Lectora:** Círculo de lectura compartida: lectura expresiva dramatizada con énfasis en posturas y gesticulación kinestésica.\n- **Cálculo Mental Contextualizado:** a) 90 x 5, b) 800 - 245, c) 0.50 + 0.75, d) 56 ÷ 7, e) 250 x 4.\n- **Problema Razonado:** Si se imprimen 26 trípticos informativos para promover la lectura comunitaria y cada juego de copias cuesta $6.50 pesos, ¿cuál es el costo total y cuál sería el descuento si se aplica el 15% por volumen?"
-    }
+    semana_num = kwargs.get('semana_seleccionada')
+    if not semana_num and datos_escuela:
+        semana_num = datos_escuela.get('semana') or datos_escuela.get('semana_seleccionada')
+    
+    vincular_k = kwargs.get('vincular_cuadernillo_kempis', True)
+    sem_kempis = 7 if (semana_num == 7) else 6
+    kempis_data = obtener_recursos_kempis_por_semana(sem_kempis)
+    es_kempis = bool(vincular_k and kempis_data and (semana_num in [6, 7] or detectar_relevancia_kempis(semana_num, directrices_o_texto=str(datos_escuela))))
 
-    sample_sesiones = {
-        "Lunes": """Fase 1. Planeación (Momento 1: Identificación y Momento 2: Recuperación)
+    if es_kempis and kempis_data:
+        r_dictados = kempis_data["rutinas_matutinas_sugeridas"]["dictado"]
+        r_calculo = kempis_data["rutinas_matutinas_sugeridas"]["calculo_mental"]
+        r_problemas = kempis_data["rutinas_matutinas_sugeridas"]["problemas_razonados"]
+        k_campos = list(kempis_data["campos"].items())
+        ef_info = kempis_data.get("efemeride_principal", {})
+
+        dias_rutinas_map = {}
+        dias_sesiones_map = {}
+        for idx, d_nom in enumerate(["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]):
+            dias_rutinas_map[d_nom] = (
+                f"- **Dictado Ortográfico (Cuadernillo Kempis):** {r_dictados[idx % len(r_dictados)]}\n"
+                f"- **Velocidad y Fluidez Lectora:** Lectura dramatizada y en voz alta (1 minuto) con modulación y registro de palabras por minuto.\n"
+                f"- **Cálculo Mental Contextualizado:** {r_calculo[idx % len(r_calculo)]}\n"
+                f"- **Problema Razonado (Gramos / IVA / Desperdicio):** {r_problemas[idx % len(r_problemas)]}"
+            )
+            if idx < len(k_campos):
+                cf_nom, cf_val = k_campos[idx]
+                dias_sesiones_map[d_nom] = f"""Fase de Intervención: {cf_nom} — {cf_val['tema']}
+- **Tiempo estimado:** 90 minutos.
+- **Inicio (15-20 min):**
+  * {cf_val['inicio']}
+- **Desarrollo (50-60 min):**
+  * {cf_val['desarrollo']}
+  * Aplicación del anexo imprimible del Cuadernillo Profa Kempis: `{cf_val['anexo_nombre']}`.
+- **Cierre (15-20 min):**
+  * {cf_val['cierre']}
+- **Recursos didácticos:** Libros de texto gratuitos SEP, Cuadernillo Profa Kempis ({cf_val['anexo_nombre']}) y video de apoyo en YouTube: '{cf_val['video_titulo']}' ({cf_val['video_url']}).
+- **Evidencia / Evaluación formativa:** Ficha de trabajo resuelta: {cf_val['anexo_nombre']} y registro en lista de cotejo."""
+            else:
+                dias_sesiones_map[d_nom] = f"""Fase de Integración Cívico-Comunitaria: {ef_info.get('nombre', 'Efeméride Oficial')}
+- **Tiempo estimado:** 90 minutos.
+- **Inicio (15-20 min):**
+  * Activación colectiva y recuperación de los aprendizajes de la semana en asamblea de aula.
+- **Desarrollo (50-60 min):**
+  * {ef_info.get('actividad', 'Elaboración de cartel informativo colaborativo.')}
+  * Resolución del anexo complementario: `{ef_info.get('anexo_nombre', 'Anexo Cívico')}`.
+- **Cierre (15-20 min):**
+  * Exposición de acuerdos comunitarios, autoevaluación grupal y socialización con la comunidad escolar.
+- **Recursos didácticos:** Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}) y video explicativo: '{ef_info.get('video_titulo', '')}' ({ef_info.get('video_url', '')}).
+- **Evidencia / Evaluación formativa:** Producto integrador `{ef_info.get('anexo_nombre', 'Cartel')}` evaluado con rúbrica."""
+
+        sample_rutinas = dias_rutinas_map
+        sample_sesiones = dias_sesiones_map
+        nombre_proyecto_fallback = f"{kempis_data['titulo_general']} — Proyecto Integrador de Saberes y Convivencia"
+        proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {sem_kempis} a través del Cuadernillo de Actividades Profa Kempis, fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con recursos audiovisuales y fichas prácticas."
+        
+        filas_art = []
+        for c_n, c_v in kempis_data["campos"].items():
+            pda_texto = c_v.get("pda_vinculado") or c_v.get("pda") or "Proceso de desarrollo de aprendizaje oficial NEM"
+            filas_art.append(
+                f"| **{c_n}** | {c_v['tema']} | {pda_texto} | Libros de Texto SEP, Cuadernillo Profa Kempis y YouTube | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
+            )
+        tabla_articulacion_str = "\n".join(filas_art)
+    else:
+        nombre_proyecto_fallback = '"Voces Comunitarias en Acción: Lectura, Ortografía y Tecnologías para el Bienestar"'
+        proposito_fallback = 'Que las y los 26 alumnos de 6° Grado Grupo “A” investiguen y elaboren textos informativos y argumentativos sobre temas de interés comunitario, superando las dificultades detectadas en comprensión lectora, velocidad lectora y ortografía, mediante dinámicas activas kinestésicas y organizadores visuales estructurados, promoviendo la lectura en familia y el uso crítico de tecnologías.'
+        tabla_articulacion_str = """| **Lenguajes** | Comprensión y producción de textos informativos y argumentativos sobre temas comunitarios. | Lee comprensivamente textos informativos y reflexiona sobre su organización; elabora resúmenes, fichas de opinión y trípticos con ortografía cuidada y coherencia sintáctica para difundir en su comunidad. | *Proyectos Comunitarios (6° grado)* (págs. 20-35) y *Múltiples lenguajes (6° grado)* (págs. 40-47) | Comprensión lectora, velocidad y ortografía |
+| **Saberes y Pensamiento Científico** | Relaciones de proporcionalidad y cálculo de porcentajes aplicados a la comunidad. | Resuelve situaciones problemáticas cotidianas que implican calcular porcentajes, fracciones y razones aplicadas a datos estadísticos de lectura y salud comunitaria. | *Nuestros Saberes (6° grado)* (págs. 68-76) y *Proyectos de Aula (6° grado)* (págs. 82-95) | Comprensión de textos científicos y cálculo mental |
+| **Ética, Naturaleza y Sociedades** | Movimientos sociales en el México de los siglos XIX y XX: la Independencia y la Revolución Social de 1910. | Analiza críticamente las causas y consecuencias de la Revolución Social de 1910 y los ideales de justicia social, reconociendo su vigencia en la transformación democrática de su entorno escolar y comunitario. | *Nuestros Saberes (6° grado)* (págs. 140-149) y *Proyectos Escolares (6° grado)* (págs. 80-92) | Análisis crítico de fuentes y redacción cívica |
+| **De lo Humano y lo Comunitario** | La comunidad como espacio para el aprendizaje y el bienestar común. | Diseña y organiza acciones colectivas para fomentar la lectura compartida en el hogar y promover el acceso ético y equitativo a tecnologías y recursos de información. | *Proyectos Comunitarios (6° grado)* (págs. 50-63) | Fomento a la lectura comunitaria y acceso a tecnologías |"""
+
+        sample_rutinas = {
+            "Lunes": "- **Dictado Ortográfico (Reglas y Acentuación):** 1. Comprensión, 2. Argumentación, 3. Tecnología, 4. Científico, 5. Análisis.\n- **Velocidad y Fluidez Lectora:** Lectura guiada en voz alta (1 minuto) de un fragmento de *Múltiples Lenguajes (6° grado)*, cronometrando palabras por minuto y evaluando modulación.\n- **Cálculo Mental Contextualizado:** a) 350 + 650, b) 1500 - 450, c) 12 x 8, d) El 25% de 800, e) 4.5 x 10.\n- **Problema Razonado:** En la biblioteca escolar de la Primaria Revolución Social de 1910 hay 650 libros. Si el 40% son textos informativos y el resto narrativos, ¿cuántos libros informativos hay y cuántos faltan para duplicar la colección?",
+            "Martes": "- **Dictado Ortográfico (Grafías B/V y C/S/Z):** 1. Convivencia, 2. Civilización, 3. Accesibilidad, 4. Búsqueda, 5. Precisión.\n- **Velocidad y Fluidez Lectora:** Lectura por parejas en eco para corregir pausas y silabeos con énfasis en signos de puntuación.\n- **Cálculo Mental Contextualizado:** a) 3/4 + 2/4, b) 480 ÷ 6, c) 25 x 4, d) 2000 - 675, e) Triple de 3.25.\n- **Problema Razonado:** Para equipar el rincón de lectura comunitaria, 26 alumnos reunieron $78 pesos cada uno. ¿Cuánto dinero recolectaron en total y cuánto sobrará si adquieren 12 paquetes de libros de $145 pesos cada uno?",
+            "Miércoles": "- **Dictado Ortográfico (Palabras Graves y Esdrújulas):** 1. Sintético, 2. Analítico, 3. Préstamo, 4. Crítico, 5. Éxito.\n- **Velocidad y Fluidez Lectora:** Lectura individual con registro de palabras leídas por minuto y rescate oral de la idea central del texto.\n- **Cálculo Mental Contextualizado:** a) 15 x 7, b) 1200 - 380, c) 1/2 de 450, d) 6.8 + 3.2, e) 81 ÷ 9.\n- **Problema Razonado:** De los 26 alumnos del grupo de 6° 'A', 18 utilizan computadoras o tabletas para consultar información en internet y el resto consulta enciclopedias físicas. ¿Qué fracción y qué porcentaje del grupo utiliza medios digitales?",
+            "Jueves": "- **Dictado Ortográfico (Signos de Puntuación y Conectores):** 1. Por consiguiente, 2. No obstante, 3. Explicación, 4. Indagación, 5. Cohesión.\n- **Velocidad y Fluidez Lectora:** Dinámica 'Lectura de relevos': cada alumno lee un párrafo cuidando entonación y volumen audible.\n- **Cálculo Mental Contextualizado:** a) 60 x 7, b) 3000 - 850, c) 3/5 + 1/5, d) Cuádruple de 25, e) 72 ÷ 8 + 15.\n- **Problema Razonado:** Un informe escolar de investigación comunitaria tiene 1,200 palabras. Si un estudiante lee a una velocidad promedio de 150 palabras por minuto, ¿cuántos minutos tardará en leer el informe completo?",
+            "Viernes": "- **Dictado Ortográfico (Léxico Científico e Informativo):** 1. Hipótesis, 2. Verificación, 3. Sociedad, 4. Biodiversidad, 5. Solidaridad.\n- **Velocidad y Fluidez Lectora:** Círculo de lectura compartida: lectura expresiva dramatizada con énfasis en posturas y gesticulación kinestésica.\n- **Cálculo Mental Contextualizado:** a) 90 x 5, b) 800 - 245, c) 0.50 + 0.75, d) 56 ÷ 7, e) 250 x 4.\n- **Problema Razonado:** Si se imprimen 26 trípticos informativos para promover la lectura comunitaria y cada juego de copias cuesta $6.50 pesos, ¿cuál es el costo total y cuál sería el descuento si se aplica el 15% por volumen?"
+        }
+
+        sample_sesiones = {
+            "Lunes": """Fase 1. Planeación (Momento 1: Identificación y Momento 2: Recuperación)
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (20 min):**
   * Bienvenida activa y realización de la rutina matutina (dictado y cálculo mental).
@@ -548,7 +648,7 @@ def generate_sample_fallback(
 - **Recursos didácticos:** Libro *Nuestros Saberes*, cuaderno del alumno, plumones y papel bond.
 - **Evidencia:** Tabla comparativa en el cuaderno y ficha de registro de saberes previos.""",
 
-        "Martes": """Fase 1. Planeación (Momento 3: Planificación) y Fase 2. Acción (Momento 4: Acercamiento)
+            "Martes": """Fase 1. Planeación (Momento 3: Planificación) y Fase 2. Acción (Momento 4: Acercamiento)
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (15 min):**
   * Rutina de inicio del día (dictado, cálculo mental y problema razonado de fracciones).
@@ -564,7 +664,7 @@ def generate_sample_fallback(
 - **Recursos didácticos:** Libro *Proyectos Comunitarios*, libreta de notas, lápiz y borrador.
 - **Evidencia:** Borrador del guion de entrevista validado con criterios de claridad y pertinencia.""",
 
-        "Miércoles": """Fase 2. Acción (Momento 5: Comprensión y Producción)
+            "Miércoles": """Fase 2. Acción (Momento 5: Comprensión y Producción)
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (15 min):**
   * Rutina matutina con énfasis en cálculo mental de proporciones y porcentajes simples.
@@ -580,7 +680,7 @@ def generate_sample_fallback(
 - **Recursos didácticos:** Hojas blancas, colores, reglas, datos de las entrevistas y recortes.
 - **Evidencia:** Gráfica de barras en el cuaderno y maqueta inicial del tríptico informativo.""",
 
-        "Jueves": """Fase 2. Acción (Momento 6: Reconocimiento y Momento 7: Concreción)
+            "Jueves": """Fase 2. Acción (Momento 6: Reconocimiento y Momento 7: Concreción)
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (15 min):**
   * Rutina matutina (dictado ortográfico de términos científicos y problema matemático de medidas de capacidad).
@@ -595,7 +695,7 @@ def generate_sample_fallback(
 - **Recursos didácticos:** Trípticos finalizados, cartulinas de apoyo, marcadores y lista de cotejo.
 - **Evidencia:** Tríptico informativo final terminado y evaluado con rúbrica docente.""",
 
-        "Viernes": """Fase 3. Intervención (Momentos 8, 9, 10 y 11: Difusión, Consideraciones y Avances)
+            "Viernes": """Fase 3. Intervención (Momentos 8, 9, 10 y 11: Difusión, Consideraciones y Avances)
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (15 min):**
   * Rutina de inicio del día (dictado, cálculo mental y problema matemático integrador).
@@ -609,7 +709,7 @@ def generate_sample_fallback(
   * Autoevaluación final de la experiencia mediante una diana de evaluación formativa.
 - **Recursos didácticos:** Mural escolar, cinta adhesiva, trípticos y dianas de evaluación.
 - **Evidencia:** Registro fotográfico de la socialización, diana de autoevaluación y notas en el diario de campo."""
-    }
+        }
 
     dias_fechas_map = datos_escuela.get("dias_fechas", {}) if isinstance(datos_escuela, dict) else {}
     rutinas_str = ""
@@ -625,7 +725,7 @@ def generate_sample_fallback(
 
     return f"""# I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
 
-- **Nombre del Proyecto:** "Voces Comunitarias en Acción: Lectura, Ortografía y Tecnologías para el Bienestar"
+- **Nombre del Proyecto:** {nombre_proyecto_fallback}
 - **Escuela:** {escuela} | **C.C.T.:** {cct} | **Zona 49, Sector 02, Durango**
 - **Docente:** {docente} | **Director:** {director}
 - **Fase y Grado:** {fase_correspondiente} — {grado_seleccionado} Grupo '{grupo}' (Matrícula: 26 alumnos)
@@ -633,7 +733,7 @@ def generate_sample_fallback(
 - **Escenario:** Comunitario, Escolar y de Aula
 - **Metodología Sociocrítica:** {metodologia}
 - **Ejes Articuladores:** {', '.join(ejes)}
-- **Propósito:** Que las y los 26 alumnos de 6° Grado Grupo “A” investiguen y elaboren textos informativos y argumentativos sobre temas de interés comunitario, superando las dificultades detectadas en comprensión lectora, velocidad lectora y ortografía, mediante dinámicas activas kinestésicas y organizadores visuales estructurados, promoviendo la lectura en familia y el uso crítico de tecnologías.
+- **Propósito:** {proposito_fallback}
 
 ---
 
@@ -641,10 +741,7 @@ def generate_sample_fallback(
 
 | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
 | :--- | :--- | :--- | :--- | :--- |
-| **Lenguajes** | Comprensión y producción de textos informativos y argumentativos sobre temas comunitarios. | Lee comprensivamente textos informativos y reflexiona sobre su organización; elabora resúmenes, fichas de opinión y trípticos con ortografía cuidada y coherencia sintáctica para difundir en su comunidad. | *Proyectos Comunitarios (6° grado)* (págs. 20-35) y *Múltiples lenguajes (6° grado)* (págs. 40-47) | Comprensión lectora, velocidad y ortografía |
-| **Saberes y Pensamiento Científico** | Relaciones de proporcionalidad y cálculo de porcentajes aplicados a la comunidad. | Resuelve situaciones problemáticas cotidianas que implican calcular porcentajes, fracciones y razones aplicadas a datos estadísticos de lectura y salud comunitaria. | *Nuestros Saberes (6° grado)* (págs. 68-76) y *Proyectos de Aula (6° grado)* (págs. 82-95) | Comprensión de textos científicos y cálculo mental |
-| **Ética, Naturaleza y Sociedades** | Movimientos sociales en el México de los siglos XIX y XX: la Independencia y la Revolución Social de 1910. | Analiza críticamente las causas y consecuencias de la Revolución Social de 1910 y los ideales de justicia social, reconociendo su vigencia en la transformación democrática de su entorno escolar y comunitario. | *Nuestros Saberes (6° grado)* (págs. 140-149) y *Proyectos Escolares (6° grado)* (págs. 80-92) | Análisis crítico de fuentes y redacción cívica |
-| **De lo Humano y lo Comunitario** | La comunidad como espacio para el aprendizaje y el bienestar común. | Diseña y organiza acciones colectivas para fomentar la lectura compartida en el hogar y promover el acceso ético y equitativo a tecnologías y recursos de información. | *Proyectos Comunitarios (6° grado)* (págs. 50-63) | Fomento a la lectura comunitaria y acceso a tecnologías |
+{tabla_articulacion_str}
 
 ---
 

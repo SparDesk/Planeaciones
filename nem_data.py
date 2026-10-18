@@ -158,25 +158,37 @@ LIBROS_SEP_POR_GRADO = {
 }
 
 GUIAS_CTE_CATALOGO = {
-    "Orientaciones CTE - 5ª Sesión Ordinaria (Febrero 2026 - Fase 5)": {
-        "enfoque": "Evaluación formativa, retroalimentación dialógica y análisis de los avances en proyectos comunitarios.",
-        "directrices": "Priorizar la evaluación como un proceso continuo y no punitivo; promover la autorreflexión de los alumnos y la coevaluación en asambleas de aula. Atender BAP mediante ajustes razonables en lectura y razonamiento lógico."
+    "Orientaciones CTE - 1ª Sesión Ordinaria (Septiembre 2026 - Fase 5)": {
+        "enfoque": "Diagnóstico socioeducativo inicial e identificación de barreras de aprendizaje.",
+        "directrices": "Fortalecer habilidades fundamentales en lectoescritura, cálculo mental reflexivo y resolución de problemas matemáticos contextualizados."
     },
-    "Orientaciones CTE - 4ª Sesión Ordinaria (Enero 2026 - Fase 5)": {
-        "enfoque": "Articulación curricular y codiseño del Plan Analítico en la Fase 5.",
-        "directrices": "Vincular problemáticas del contexto escolar (alimentación, comprensión lectora, convivencia) con los contenidos sintéticos y PDA integrados."
-    },
-    "Orientaciones CTE - 3ª Sesión Ordinaria (Noviembre 2025 - Fase 5)": {
-        "enfoque": "Compromiso con la comunidad y metodologías sociocríticas activas.",
-        "directrices": "Desarrollar proyectos interdisciplinarios que trasciendan el salón de clases y vinculen a las familias y el entorno local."
-    },
-    "Orientaciones CTE - 2ª Sesión Ordinaria (Octubre 2025 - Fase 5)": {
+    "Orientaciones CTE - 2ª Sesión Ordinaria (Octubre 2026 - Fase 5)": {
         "enfoque": "Ejes articuladores y Diseño Universal para el Aprendizaje (DUA).",
         "directrices": "Garantizar la inclusión, el pensamiento crítico y la igualdad de género en todas las secuencias didácticas planeadas."
     },
-    "Orientaciones CTE - 1ª Sesión Ordinaria (Septiembre 2025 - Fase 5)": {
-        "enfoque": "Diagnóstico socioeducativo inicial e identificación de barreras de aprendizaje.",
-        "directrices": "Fortalecer habilidades fundamentales en lectoescritura, cálculo mental reflexivo y resolución de problemas matemáticos contextualizados."
+    "Orientaciones CTE - 3ª Sesión Ordinaria (Noviembre 2026 - Fase 5)": {
+        "enfoque": "Compromiso con la comunidad y metodologías sociocríticas activas.",
+        "directrices": "Desarrollar proyectos interdisciplinarios que trasciendan el salón de clases y vinculen a las familias y el entorno local."
+    },
+    "Orientaciones CTE - 4ª Sesión Ordinaria (Enero 2027 - Fase 5)": {
+        "enfoque": "Articulación curricular y codiseño del Plan Analítico en la Fase 5.",
+        "directrices": "Vincular problemáticas del contexto escolar (alimentación, comprensión lectora, convivencia) con los contenidos sintéticos y PDA integrados."
+    },
+    "Orientaciones CTE - 5ª Sesión Ordinaria (Febrero 2027 - Fase 5)": {
+        "enfoque": "Evaluación formativa, retroalimentación dialógica y análisis de los avances en proyectos comunitarios.",
+        "directrices": "Priorizar la evaluación como un proceso continuo y no punitivo; promover la autorreflexión de los alumnos y la coevaluación en asambleas de aula. Atender BAP mediante ajustes razonables en lectura y razonamiento lógico."
+    },
+    "Orientaciones CTE - 6ª Sesión Ordinaria (Marzo 2027 - Fase 5)": {
+        "enfoque": "Avances en la comprensión lectora, fluidez y pensamiento matemático.",
+        "directrices": "Evaluar el impacto de las estrategias didácticas implementadas y reajustar actividades de apoyo para alumnos que requieren mayor acompañamiento."
+    },
+    "Orientaciones CTE - 7ª Sesión Ordinaria (Mayo 2027 - Fase 5)": {
+        "enfoque": "Consolidación de proyectos escolares e integración de los 4 Campos Formativos.",
+        "directrices": "Fortalecer la vinculación comunitaria, el diálogo reflexivo y la socialización de productos de aprendizaje en la escuela."
+    },
+    "Orientaciones CTE - 8ª Sesión Ordinaria (Junio 2027 - Fase 5)": {
+        "enfoque": "Evaluación final del ciclo escolar, balance de proyectos comunitarios y rendición de cuentas pedagógicas.",
+        "directrices": "Sistematizar los logros del Programa Analítico 2026-2027 y proyectar acuerdos de mejora formativa para el siguiente ciclo escolar."
     },
     "Guía General de Consejo Técnico Escolar - Primaria (NEM)": {
         "enfoque": "Autonomía profesional del magisterio y transformación pedagógica.",
@@ -460,6 +472,10 @@ CONTENIDOS_PDA_POR_GRADO = {
                 "pda": "Lee textos sobre temas polémicos e identifica los argumentos sustentados; escribe textos argumentativos con postura fundamentada."
             },
             {
+                "contenido": "Análisis y representación de textos literarios: el cuento y la lectura dramatizada.",
+                "pda": "Lee, analiza y recrea cuentos reconociendo planteamiento, nudo y desenlace; interpreta guiones teatrales en lectura dramatizada empleando acotaciones, modulación de voz y expresión corporal."
+            },
+            {
                 "contenido": "Elaboración de un manual de juegos de patio o de mesa para favorecer la convivencia.",
                 "pda": "Diseña un manual de juegos colectivos con instrucciones claras, reglas consensuadas y materiales para fomentar la inclusión en el recreo."
             },
@@ -470,12 +486,16 @@ CONTENIDOS_PDA_POR_GRADO = {
         ],
         "Saberes y Pensamiento Científico": [
             {
+                "contenido": "Alimentación saludable: alimentos procesados, sellos de advertencia NOM-051, Plato del Bien Comer y múltiplos y submúltiplos del gramo.",
+                "pda": "Analiza etiquetas y sellos de advertencia en alimentos ultraprocesados; diseña menús balanceados con el Plato del Bien Comer y resuelve situaciones problemáticas con conversiones de múltiplos y submúltiplos del gramo."
+            },
+            {
                 "contenido": "Estructura y funcionamiento del cuerpo humano: sistemas circulatorio, nervioso y endocrino en la pubertad.",
                 "pda": "Explica los cambios físicos y emocionales durante la pubertad y su relación con el sistema endocrino; propone acciones de autocuidado integral."
             },
             {
-                "contenido": "Relaciones de proporcionalidad: cálculo de porcentajes y aplicación comercial.",
-                "pda": "Resuelve situaciones problemáticas que implican calcular porcentajes (descuentos, intereses e IVA) en contextos financieros cotidianos."
+                "contenido": "Relaciones de proporcionalidad: cálculo de porcentajes y aplicación comercial (descuentos e IVA).",
+                "pda": "Resuelve situaciones problemáticas que implican calcular porcentajes (descuentos, intereses e IVA del 16%) en compras cotidianas y finanzas familiares."
             },
             {
                 "contenido": "Funciones vitales que caracterizan a plantas y animales como seres vivos, y su reproducción.",
@@ -484,26 +504,34 @@ CONTENIDOS_PDA_POR_GRADO = {
         ],
         "Ética, Naturaleza y Sociedades": [
             {
+                "contenido": "Servicios públicos, cultura contributiva (impuestos e IVA) y calidad de vida en la comunidad.",
+                "pda": "Comprende la función de los servicios públicos en la satisfacción de necesidades básicas, la importancia del pago de impuestos y el IVA en su financiamiento, y evalúa las dimensiones de la calidad de vida en su entorno local."
+            },
+            {
                 "contenido": "La cultura democrática: principios éticos que subyacen en los acuerdos, normas y leyes.",
                 "pda": "Evalúa la aplicación justa y equitativa de las normas y leyes en la vida escolar y comunitaria, promoviendo la rendición de cuentas."
             },
             {
                 "contenido": "Cultura de paz: derechos humanos, justicia social y resolución pacífica de controversias.",
-                "pda": "Analiza el papel de las instituciones garantes de los derechos humanos y propone acciones para erradicar cualquier tipo de violencia."
+                "pda": "Aplica mecanismos de mediación dialógica, negociación y arbitraje para la resolución pacífica de controversias escolares, erradicando cualquier forma de discriminación y violencia."
             },
             {
-                "contenido": "Movimientos sociales en el México de los siglos XIX y XX: la Independencia y la Revolución Social de 1910.",
-                "pda": "Analiza críticamente las causas y consecuencias de la Revolución Social de 1910 y los ideales de justicia social, reconociendo su vigencia en la transformación democrática de su entorno escolar y comunitario."
+                "contenido": "Movimientos sociales en el México de los siglos XIX y XX y conmemoraciones históricas (12 de Octubre y Revolución de 1910).",
+                "pda": "Analiza críticamente el encuentro de dos mundos (12 de octubre) valorando la resistencia de los pueblos originarios, así como las causas de la Revolución Social de 1910 y los ideales de justicia social en Durango."
             }
         ],
         "De lo Humano y lo Comunitario": [
             {
-                "contenido": "Proyectos de vida y valoración de metas personales y colectivas.",
-                "pda": "Valora sus logros y habilidades en distintas áreas para plantearse metas realistas a corto y mediano plazo hacia la educación secundaria."
+                "contenido": "Estilos de vida activos y saludables, alimentación balanceada y Día Mundial de la Alimentación.",
+                "pda": "Diseña y evalúa un plan semanal de actividad física y alimentación balanceada basado en el Plato del Bien Comer, promoviendo campañas de cero desperdicio de comida en la escuela."
             },
             {
-                "contenido": "Estilos de vida activos y saludables para la prevención de enfermedades crónicas.",
-                "pda": "Diseña y evalúa un plan semanal de actividad física y alimentación balanceada para su comunidad escolar."
+                "contenido": "Resolución pacífica de conflictos y convivencia armónica en el aula y la escuela.",
+                "pda": "Establece acuerdos colectivos y decálogos de aula para la convivencia pacífica, utilizando el diálogo respetuoso y la empatía en la mediación de desacuerdos."
+            },
+            {
+                "contenido": "Proyectos de vida y valoración de metas personales y colectivas.",
+                "pda": "Valora sus logros y habilidades en distintas áreas para plantearse metas realistas a corto y mediano plazo hacia la educación secundaria."
             },
             {
                 "contenido": "La comunidad como el espacio para el aprendizaje y el bienestar común.",
@@ -512,6 +540,18 @@ CONTENIDOS_PDA_POR_GRADO = {
         ]
     }
 }
+
+try:
+    from cuadernillo_kempis import (
+        CUADERNILLO_KEMPIS_DATA,
+        detectar_relevancia_kempis,
+        obtener_recursos_kempis_por_semana,
+        formatear_kempis_para_prompt,
+        obtener_anexos_kempis_para_docx
+    )
+except ImportError:
+    pass
+
 
 CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["6° de Primaria"]
 

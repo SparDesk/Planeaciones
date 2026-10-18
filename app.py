@@ -28,6 +28,14 @@ from planeaciones_storage import (
     sanitizar_nombre_ruta,
     guardar_archivo_fisico_json
 )
+from cuadernillo_kempis import (
+    CUADERNILLO_KEMPIS_DATA,
+    detectar_relevancia_kempis,
+    obtener_recursos_kempis_por_semana,
+    formatear_kempis_para_prompt,
+    obtener_anexos_kempis_para_docx
+)
+
 
 # Cargar variables de entorno desde .env si existe
 load_dotenv()
@@ -168,25 +176,37 @@ LIBROS_SEP_POR_GRADO = {
 LIBROS_SEP_RECOMENDADOS = LIBROS_SEP_POR_GRADO["6° de Primaria"]
 
 GUIAS_CTE_CATALOGO = {
-    "Orientaciones CTE - 5ª Sesión Ordinaria (Febrero 2026 - Fase 5)": {
-        "enfoque": "Evaluación formativa, retroalimentación dialógica y análisis de los avances en proyectos comunitarios.",
-        "directrices": "Priorizar la evaluación como un proceso continuo y no punitivo; promover la autorreflexión de los alumnos y la coevaluación en asambleas de aula. Atender BAP mediante ajustes razonables en lectura y razonamiento lógico."
+    "Orientaciones CTE - 1ª Sesión Ordinaria (Septiembre 2026 - Fase 5)": {
+        "enfoque": "Diagnóstico socioeducativo inicial e identificación de barreras de aprendizaje.",
+        "directrices": "Fortalecer habilidades fundamentales en lectoescritura, cálculo mental reflexivo y resolución de problemas matemáticos contextualizados."
     },
-    "Orientaciones CTE - 4ª Sesión Ordinaria (Enero 2026 - Fase 5)": {
-        "enfoque": "Articulación curricular y codiseño del Plan Analítico en la Fase 5.",
-        "directrices": "Vincular problemáticas del contexto escolar (alimentación, comprensión lectora, convivencia) con los contenidos sintéticos y PDA integrados."
-    },
-    "Orientaciones CTE - 3ª Sesión Ordinaria (Noviembre 2025 - Fase 5)": {
-        "enfoque": "Compromiso con la comunidad y metodologías sociocríticas activas.",
-        "directrices": "Desarrollar proyectos interdisciplinarios que trasciendan el salón de clases y vinculen a las familias y el entorno local."
-    },
-    "Orientaciones CTE - 2ª Sesión Ordinaria (Octubre 2025 - Fase 5)": {
+    "Orientaciones CTE - 2ª Sesión Ordinaria (Octubre 2026 - Fase 5)": {
         "enfoque": "Ejes articuladores y Diseño Universal para el Aprendizaje (DUA).",
         "directrices": "Garantizar la inclusión, el pensamiento crítico y la igualdad de género en todas las secuencias didácticas planeadas."
     },
-    "Orientaciones CTE - 1ª Sesión Ordinaria (Septiembre 2025 - Fase 5)": {
-        "enfoque": "Diagnóstico socioeducativo inicial e identificación de barreras de aprendizaje.",
-        "directrices": "Fortalecer habilidades fundamentales en lectoescritura, cálculo mental reflexivo y resolución de problemas matemáticos contextualizados."
+    "Orientaciones CTE - 3ª Sesión Ordinaria (Noviembre 2026 - Fase 5)": {
+        "enfoque": "Compromiso con la comunidad y metodologías sociocríticas activas.",
+        "directrices": "Desarrollar proyectos interdisciplinarios que trasciendan el salón de clases y vinculen a las familias y el entorno local."
+    },
+    "Orientaciones CTE - 4ª Sesión Ordinaria (Enero 2027 - Fase 5)": {
+        "enfoque": "Articulación curricular y codiseño del Plan Analítico en la Fase 5.",
+        "directrices": "Vincular problemáticas del contexto escolar (alimentación, comprensión lectora, convivencia) con los contenidos sintéticos y PDA integrados."
+    },
+    "Orientaciones CTE - 5ª Sesión Ordinaria (Febrero 2027 - Fase 5)": {
+        "enfoque": "Evaluación formativa, retroalimentación dialógica y análisis de los avances en proyectos comunitarios.",
+        "directrices": "Priorizar la evaluación como un proceso continuo y no punitivo; promover la autorreflexión de los alumnos y la coevaluación en asambleas de aula. Atender BAP mediante ajustes razonables en lectura y razonamiento lógico."
+    },
+    "Orientaciones CTE - 6ª Sesión Ordinaria (Marzo 2027 - Fase 5)": {
+        "enfoque": "Avances en la comprensión lectora, fluidez y pensamiento matemático.",
+        "directrices": "Evaluar el impacto de las estrategias didácticas implementadas y reajustar actividades de apoyo para alumnos que requieren mayor acompañamiento."
+    },
+    "Orientaciones CTE - 7ª Sesión Ordinaria (Mayo 2027 - Fase 5)": {
+        "enfoque": "Consolidación de proyectos escolares e integración de los 4 Campos Formativos.",
+        "directrices": "Fortalecer la vinculación comunitaria, el diálogo reflexivo y la socialización de productos de aprendizaje en la escuela."
+    },
+    "Orientaciones CTE - 8ª Sesión Ordinaria (Junio 2027 - Fase 5)": {
+        "enfoque": "Evaluación final del ciclo escolar, balance de proyectos comunitarios y rendición de cuentas pedagógicas.",
+        "directrices": "Sistematizar los logros del Programa Analítico 2026-2027 y proyectar acuerdos de mejora formativa para el siguiente ciclo escolar."
     },
     "Guía General de Consejo Técnico Escolar - Primaria (NEM)": {
         "enfoque": "Autonomía profesional del magisterio y transformación pedagógica.",
@@ -618,7 +638,7 @@ from gemini_engine import (
     AVAILABLE_MODELS,
     verificar_conexion_internet
 )
-from docx_generator import build_docx_planeacion
+from docx_generator import build_docx_planeacion, parse_plan_sections, extract_day_from_text
 from pdf_generator import build_pdf_planeacion
 from conaliteg_scraper import obtener_libros_conaliteg, buscar_programa_sintetico_sep
 
@@ -1113,14 +1133,24 @@ st.markdown("""
         -webkit-text-fill-color: #1F2937 !important;
     }
 
-    /* Subtítulos y descripciones en contenedores claros */
+    /* Subtítulos y descripciones en contenedores claros (#374151) */
     [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
     [data-testid="stSidebar"] .stCaption,
     .nem-card [data-testid="stCaptionContainer"] p,
     .nem-card .stCaption,
-    [data-testid="stForm"] [data-testid="stCaptionContainer"] p {
-        color: #1F2937 !important;
-        -webkit-text-fill-color: #1F2937 !important;
+    [data-testid="stForm"] [data-testid="stCaptionContainer"] p,
+    div.stCaption p {
+        color: #374151 !important;
+        -webkit-text-fill-color: #374151 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Subtítulos dentro de expanders oscuros en la barra lateral (#F3E8FF / #FFFFFF) */
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] [data-testid="stCaptionContainer"] p,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] .stCaption,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] [data-testid="stCaptionContainer"] span {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
         font-weight: 500 !important;
     }
 
@@ -2284,6 +2314,231 @@ st.markdown("""
             padding: 0.85rem 0.65rem !important;
         }
     }
+
+    /* =======================================================
+       MENSAJE DE ESTADO: HISTORIAL VACÍO Y GESTOR DE ARCHIVOS
+       Garantiza contraste óptimo y nitidez en temas claros (#374151) y oscuros (#F3E8FF)
+       ======================================================= */
+    .empty-history-box {
+        background-color: #F8FAFC !important;
+        border: 1.5px solid #CBD5E1 !important;
+        border-left: 4px solid #7C3AED !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        margin: 8px 0 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .empty-history-box * {
+        background-color: transparent !important;
+    }
+
+    .empty-history-title {
+        color: #111827 !important;
+        -webkit-text-fill-color: #111827 !important;
+        font-weight: 700 !important;
+        font-size: 0.84rem !important;
+        margin-bottom: 3px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    .empty-history-text {
+        color: #374151 !important;
+        -webkit-text-fill-color: #374151 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        line-height: 1.45 !important;
+    }
+
+    /* En expanders oscuros de la barra lateral (#1E1B4B), estilo de tarjeta oscura con alto contraste */
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] .empty-history-box {
+        background: #2D1B4E !important;
+        background-color: #2D1B4E !important;
+        border: 1.5px solid #8B5CF6 !important;
+        border-left: 4px solid #C084FC !important;
+        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.22) !important;
+    }
+
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] .empty-history-title,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] .empty-history-title * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] .empty-history-text,
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"] .empty-history-text * {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+    }
+
+    /* Soporte modo oscuro global */
+    @media (prefers-color-scheme: dark) {
+        .empty-history-box {
+            background: linear-gradient(135deg, #2E1065 0%, #1E1B4B 100%) !important;
+            background-color: #2E1065 !important;
+            border-color: #8B5CF6 !important;
+            border-left: 4px solid #C084FC !important;
+        }
+        .empty-history-title, .empty-history-title * {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+        .empty-history-text, .empty-history-text * {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
+    }
+
+    [data-theme="dark"] .empty-history-box {
+        background: linear-gradient(135deg, #2E1065 0%, #1E1B4B 100%) !important;
+        background-color: #2E1065 !important;
+        border-color: #8B5CF6 !important;
+        border-left: 4px solid #C084FC !important;
+    }
+    [data-theme="dark"] .empty-history-title, [data-theme="dark"] .empty-history-title * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+    /* =======================================================
+       REDISEÑO MINIMALISTA: PESTAÑAS DÍA POR DÍA Y TOOLBAR COMPACTA
+       ======================================================= */
+    /* Barra de navegación de pestañas con scroll horizontal táctil suave */
+    div[data-baseweb="tab-list"],
+    .stTabs [data-baseweb="tab-list"] {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        scrollbar-width: thin !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-bottom: 2px solid #E2E8F0 !important;
+        gap: 6px !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 12px !important;
+    }
+
+    button[data-baseweb="tab"] {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        padding: 8px 16px !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px 8px 0 0 !important;
+        color: #4B5563 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background-color: #EDE9FE !important;
+        color: #6D28D9 !important;
+        -webkit-text-fill-color: #6D28D9 !important;
+        border-bottom: 3px solid #7C3AED !important;
+        font-weight: 700 !important;
+    }
+
+    /* Tarjeta contenedor de la barra de acciones (Toolbar) */
+    .action-toolbar-box {
+        background: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%) !important;
+        border: 1.5px solid #C4B5FD !important;
+        border-radius: 14px !important;
+        padding: 16px 18px !important;
+        box-shadow: 0 4px 18px rgba(124, 58, 237, 0.08) !important;
+        margin: 16px 0 !important;
+    }
+
+    /* Tarjeta modular por día (Día por Día) */
+    .day-card-container {
+        background: #FFFFFF !important;
+        border: 1.5px solid #E2E8F0 !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .day-moment-box {
+        background: #F8FAFC !important;
+        border-left: 4px solid #7C3AED !important;
+        border-radius: 8px !important;
+        padding: 12px 14px !important;
+        margin: 8px 0 !important;
+    }
+
+    .day-moment-title {
+        font-weight: 700 !important;
+        font-size: 0.86rem !important;
+        color: #4C1D95 !important;
+        margin-bottom: 4px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    .day-moment-text {
+        font-size: 0.84rem !important;
+        color: #334151 !important;
+        line-height: 1.5 !important;
+    }
+
+    /* Adaptación modo oscuro */
+    @media (prefers-color-scheme: dark) {
+        div[data-baseweb="tab-list"],
+        .stTabs [data-baseweb="tab-list"] {
+            border-bottom-color: #4C1D95 !important;
+        }
+        button[data-baseweb="tab"] {
+            color: #C4B5FD !important;
+            -webkit-text-fill-color: #C4B5FD !important;
+        }
+        button[data-baseweb="tab"][aria-selected="true"] {
+            background-color: #2E1065 !important;
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            border-bottom-color: #A78BFA !important;
+        }
+        .action-toolbar-box {
+            background: linear-gradient(180deg, #1E1B4B 0%, #2E1065 100%) !important;
+            border-color: #7C3AED !important;
+            box-shadow: 0 4px 18px rgba(124, 58, 237, 0.25) !important;
+        }
+        .day-card-container {
+            background: #1E1B4B !important;
+            border-color: #4C1D95 !important;
+        }
+        .day-moment-box {
+            background: #2D1B4E !important;
+            border-left-color: #C084FC !important;
+        }
+        .day-moment-title {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+        .day-moment-text {
+            color: #F3E8FF !important;
+            -webkit-text-fill-color: #F3E8FF !important;
+        }
+    }
+
+    [data-theme="dark"] .action-toolbar-box {
+        background: linear-gradient(180deg, #1E1B4B 0%, #2E1065 100%) !important;
+        border-color: #7C3AED !important;
+    }
+    [data-theme="dark"] .day-card-container {
+        background: #1E1B4B !important;
+        border-color: #4C1D95 !important;
+    }
+    [data-theme="dark"] .day-moment-box {
+        background: #2D1B4E !important;
+        border-left-color: #C084FC !important;
+    }
+    [data-theme="dark"] .day-moment-title {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+    [data-theme="dark"] .day-moment-text {
+        color: #F3E8FF !important;
+        -webkit-text-fill-color: #F3E8FF !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -2326,36 +2581,36 @@ DIAS_HABIL_NOMBRES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 PERIODOS_VACACIONALES_SEP = [
     {
         "nombre": "Vacaciones de Invierno",
-        "inicio": datetime.date(2025, 12, 22),
-        "fin": datetime.date(2026, 1, 9),
+        "inicio": datetime.date(2026, 12, 21),
+        "fin": datetime.date(2027, 1, 8),
         "tipo": "invierno",
         "icono": "❄️"
     },
     {
         "nombre": "Vacaciones de Semana Santa",
-        "inicio": datetime.date(2026, 3, 30),
-        "fin": datetime.date(2026, 4, 10),
+        "inicio": datetime.date(2027, 3, 22),
+        "fin": datetime.date(2027, 4, 2),
         "tipo": "semana_santa",
         "icono": "🌿"
     },
     {
         "nombre": "Receso de Verano",
-        "inicio": datetime.date(2026, 7, 16),
-        "fin": datetime.date(2026, 8, 28),
+        "inicio": datetime.date(2027, 7, 16),
+        "fin": datetime.date(2027, 8, 27),
         "tipo": "verano",
         "icono": "🏖️"
     }
 ]
 
 FECHAS_CTE_OFICIALES = {
-    datetime.date(2025, 9, 26): "1ª Sesión Ordinaria CTE",
-    datetime.date(2025, 10, 31): "2ª Sesión Ordinaria CTE",
-    datetime.date(2025, 11, 28): "3ª Sesión Ordinaria CTE",
-    datetime.date(2026, 1, 30): "4ª Sesión Ordinaria CTE",
-    datetime.date(2026, 2, 27): "5ª Sesión Ordinaria CTE",
-    datetime.date(2026, 3, 27): "6ª Sesión Ordinaria CTE",
-    datetime.date(2026, 5, 29): "7ª Sesión Ordinaria CTE",
-    datetime.date(2026, 6, 26): "8ª Sesión Ordinaria CTE"
+    datetime.date(2026, 9, 25): "1ª Sesión Ordinaria CTE",
+    datetime.date(2026, 10, 30): "2ª Sesión Ordinaria CTE",
+    datetime.date(2026, 11, 27): "3ª Sesión Ordinaria CTE",
+    datetime.date(2027, 1, 29): "4ª Sesión Ordinaria CTE",
+    datetime.date(2027, 2, 26): "5ª Sesión Ordinaria CTE",
+    datetime.date(2027, 3, 26): "6ª Sesión Ordinaria CTE",
+    datetime.date(2027, 5, 28): "7ª Sesión Ordinaria CTE",
+    datetime.date(2027, 6, 25): "8ª Sesión Ordinaria CTE"
 }
 
 def es_fecha_vacaciones(d_obj: datetime.date):
@@ -2367,17 +2622,17 @@ def es_fecha_vacaciones(d_obj: datetime.date):
 def construir_catalogo_sep_2026():
     """
     Construye las 37 semanas escolares oficiales (185 días lectivos de clase)
-    del ciclo escolar SEP 2025-2026 / 2026.
+    del ciclo escolar SEP 2026-2027.
     Sincroniza periodos lectivos, vacaciones oficiales (Invierno, Semana Santa y Verano)
     y sesiones de Consejo Técnico Escolar (CTE).
     Mapea bi-direccionalmente:
       - número de semana (1 a 37) -> fechas, mes y sesión CTE
-      - fecha (mes, día) -> número de semana (1 a 37)
+      - fecha (mes, día) y (año, mes, día) -> número de semana (1 a 37)
     """
     catalogo_por_semana = {}
     catalogo_por_fecha = {}
 
-    lunes_inicio_ciclo = datetime.date(2025, 9, 1)
+    lunes_inicio_ciclo = datetime.date(2026, 8, 31)
     curr = lunes_inicio_ciclo
     s_num = 1
 
@@ -2413,6 +2668,7 @@ def construir_catalogo_sep_2026():
                 "fecha_completa": f"{nom} {d_obj.day} de {m_nom} de {d_obj.year}"
             })
             catalogo_por_fecha[(d_obj.month, d_obj.day)] = s_num
+            catalogo_por_fecha[(d_obj.year, d_obj.month, d_obj.day)] = s_num
 
         m_rep = MESES_2026[curr.month - 1]
         catalogo_por_semana[s_num] = {
@@ -2762,17 +3018,27 @@ if authentication_status:
         # Gestor de Archivos / Historial en la barra lateral
         with st.expander("📂 Gestor de Archivos y Planeaciones", expanded=False):
             st.markdown(
-                f"<div style='font-size: 0.78rem; margin-bottom: 6px; color: #3730A3;'>"
+                f"<div style='font-size: 0.78rem; margin-bottom: 6px; color: #E0E7FF; font-weight: 500;'>"
                 f"📊 <b>Cobertura:</b> {stats_cubiertas_sb['semanas_completas']} de 37 semanas ({stats_cubiertas_sb['porcentaje_avance']}%)"
                 f"</div>",
                 unsafe_allow_html=True
             )
             lista_historial_sb = listar_planeaciones(user_actual_sb)
             if not lista_historial_sb:
-                st.caption("No hay planeaciones guardadas aún. Se guardarán automáticamente al configurar o generar.")
+                st.markdown(
+                    "<div class='empty-history-box' style='background: #2D1B4E; border: 1.5px solid #8B5CF6; border-left: 4px solid #C084FC; border-radius: 8px; padding: 10px 12px; margin: 8px 0;'>"
+                    "<div class='empty-history-title' style='color: #FFFFFF; font-weight: 700; font-size: 0.82rem; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;'>"
+                    "<span>📁</span> <span style='color: #FFFFFF;'>No hay planeaciones guardadas aún</span>"
+                    "</div>"
+                    "<div class='empty-history-text' style='color: #F3E8FF; font-size: 0.77rem; font-weight: 500; line-height: 1.45;'>"
+                    "Se guardarán automáticamente con su nombre de archivo al configurar o generar cualquier semana."
+                    "</div>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
             else:
                 dict_sb_planes = {p["id"]: p for p in lista_historial_sb}
-                st.markdown("<div style='font-size:0.75rem; font-weight:700; color:#4B5563; margin-top:2px; margin-bottom:2px;'>Cargar Archivo por Nombre:</div>", unsafe_allow_html=True)
+                st.markdown("<div style='font-size:0.75rem; font-weight:700; color:#E0E7FF; margin-top:2px; margin-bottom:2px;'>Cargar Archivo por Nombre:</div>", unsafe_allow_html=True)
                 sel_sb_pid = st.selectbox(
                     "Selecciona un archivo guardado:",
                     options=list(dict_sb_planes.keys()),
@@ -2785,19 +3051,19 @@ if authentication_status:
                         cargar_planeacion_guardada(sel_sb_pid)
                         st.rerun()
 
-                st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
-                st.markdown("<div style='font-size:0.73rem; font-weight:700; color:#6B7280; margin-bottom:4px;'>Historial de Archivos Guardados:</div>", unsafe_allow_html=True)
+                st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #4C1D95;'>", unsafe_allow_html=True)
+                st.markdown("<div style='font-size:0.73rem; font-weight:700; color:#C7D2FE; margin-bottom:4px;'>Historial de Archivos Guardados:</div>", unsafe_allow_html=True)
                 for p_item in lista_historial_sb:
                     p_id = p_item["id"]
                     tag_estado = "🟢 Lista" if p_item["tiene_plan"] else "📝 Borrador"
                     ver_tag = f" [{p_item['version_nombre']}]" if not p_item["es_autoguardado"] else ""
                     st.markdown(
-                        f"<div style='font-size:0.78rem; font-weight:600; margin-top:4px; color:#1E293B;'>"
+                        f"<div style='font-size:0.78rem; font-weight:600; margin-top:4px; color:#FFFFFF;'>"
                         f"📄 {p_item['nombre_archivo']}<br>"
-                        f"<span style='font-size:0.7rem; color:#6D28D9; font-weight:bold;'>📁 {p_item['categoria_ruta']}</span> • "
-                        f"<span style='font-size:0.7rem; color:#059669;'>Sem. {p_item['semana']}{ver_tag} ({tag_estado})</span>"
+                        f"<span style='font-size:0.7rem; color:#DDD6FE; font-weight:bold;'>📁 {p_item['categoria_ruta']}</span> • "
+                        f"<span style='font-size:0.7rem; color:#34D399;'>Sem. {p_item['semana']}{ver_tag} ({tag_estado})</span>"
                         f"</div>"
-                        f"<div style='font-size:0.68rem; color:#94A3B8;'>Guardado: {p_item['fecha_guardado']}</div>",
+                        f"<div style='font-size:0.68rem; color:#CBD5E1;'>Guardado: {p_item['fecha_guardado']}</div>",
                         unsafe_allow_html=True
                     )
                     col_h1, col_h2 = st.columns([2.2, 1])
@@ -2809,7 +3075,7 @@ if authentication_status:
                         if st.button("🗑️", key=f"btn_sb_del_{p_id}_{st.session_state.widget_key}", use_container_width=True, help="Eliminar planeación"):
                             eliminar_planeacion_por_id(p_id)
                             st.rerun()
-                    st.markdown("<hr style='margin: 4px 0; border: none; border-top: 1px dashed #E2E8F0;'>", unsafe_allow_html=True)
+                    st.markdown("<hr style='margin: 4px 0; border: none; border-top: 1px dashed #4C1D95;'>", unsafe_allow_html=True)
 
         st.markdown("---")
         st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Datos de la Escuela y Docente', unsafe_allow_html=True)
@@ -2876,7 +3142,13 @@ if authentication_status:
         with col_fase:
             st.markdown(f"**Fase Curricular:** `{fase_correspondiente}`")
         with col_ciclo:
-            ciclo_sel = st.text_input("Ciclo Escolar:", value=DATOS_PREDETERMINADOS["ciclo_escolar"], key=f"ciclo_{st.session_state.widget_key}")
+            ciclo_input_raw = st.text_input(
+                "Ciclo Escolar:",
+                value="2026-2027",
+                help="Ciclo Escolar Oficial SEP 2026-2027.",
+                key=f"ciclo_{st.session_state.widget_key}"
+            )
+            ciclo_sel = "2026-2027"
 
         semana_seleccionada = int(st.session_state.get("cal_semana_escolar", 20))
         if semana_seleccionada > 37:
@@ -2956,7 +3228,7 @@ if authentication_status:
             libros_disponibles.append(l_clean)
     
         if conaliteg_online:
-            st.markdown("<span style='color:#166534; font-size:0.8rem; font-weight:600;'>🟢 Catálogo CONALITEG 2025-2026 (En vivo)</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#166534; font-size:0.8rem; font-weight:600;'>🟢 Catálogo CONALITEG 2026-2027 (En vivo)</span>", unsafe_allow_html=True)
         else:
             st.markdown("<span style='color:#92400E; font-size:0.8rem; font-weight:600;'>🟡 Catálogo SEP NEM (Modo Respaldo)</span>", unsafe_allow_html=True)
     
@@ -3328,7 +3600,17 @@ if authentication_status:
             st.caption("Administra, organiza por carpetas (Trimestre, Proyectos, CTE) y abre tus planeaciones guardadas con su nombre personalizado.")
             
             if not lista_guardadas_main:
-                st.info("ℹ️ Aún no hay planeaciones guardadas. Configura una semana y se guardará automáticamente con su nombre de archivo.")
+                st.markdown(
+                    "<div class='empty-history-box' style='background-color: #F8FAFC; border: 1.5px solid #CBD5E1; border-left: 4px solid #7C3AED; border-radius: 8px; padding: 12px 14px; margin: 10px 0;'>"
+                    "<div class='empty-history-title' style='color: #111827; font-weight: 700; font-size: 0.86rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;'>"
+                    "<span>ℹ️</span> <span style='color: #111827;'>No hay planeaciones guardadas aún</span>"
+                    "</div>"
+                    "<div class='empty-history-text' style='color: #374151; font-size: 0.82rem; font-weight: 500; line-height: 1.5;'>"
+                    "Configura una semana o genera una planeación y se guardará automáticamente con su nombre de archivo personalizado."
+                    "</div>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
             else:
                 # 1. Menú desplegable / selector rápido de archivos
                 c_sel_arch, c_btn_arch = st.columns([2.5, 1])
@@ -3448,7 +3730,17 @@ if authentication_status:
 
         with tab_g_fecha:
             if not lista_guardadas_main:
-                st.info("Aún no se han guardado planeaciones en el sistema.")
+                st.markdown(
+                    "<div class='empty-history-box' style='background-color: #F8FAFC; border: 1.5px solid #CBD5E1; border-left: 4px solid #7C3AED; border-radius: 8px; padding: 12px 14px; margin: 10px 0;'>"
+                    "<div class='empty-history-title' style='color: #111827; font-weight: 700; font-size: 0.86rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;'>"
+                    "<span>ℹ️</span> <span style='color: #111827;'>No hay planeaciones guardadas aún en el sistema</span>"
+                    "</div>"
+                    "<div class='empty-history-text' style='color: #374151; font-size: 0.82rem; font-weight: 500;'>"
+                    "Las planeaciones guardadas aparecerán aquí ordenadas cronológicamente por fecha de guardado."
+                    "</div>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
             else:
                 for p_rec in sorted(lista_guardadas_main, key=lambda x: x["timestamp"], reverse=True):
                     col_f1, col_f2, col_f3 = st.columns([2.5, 1.2, 1.3])
@@ -3560,7 +3852,14 @@ if authentication_status:
                     use_container_width=True
                 )
             else:
-                st.info("ℹ️ Aún no hay planeaciones registradas en el historial para exportar.")
+                st.markdown(
+                    "<div class='empty-history-box' style='background-color: #F8FAFC; border: 1.5px solid #CBD5E1; border-left: 4px solid #7C3AED; border-radius: 8px; padding: 12px 14px; margin: 10px 0;'>"
+                    "<div class='empty-history-text' style='color: #374151; font-size: 0.82rem; font-weight: 500;'>"
+                    "ℹ️ Aún no hay planeaciones guardadas en el historial para exportar."
+                    "</div>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
 
             # Módulo seguro de importación / restauración desde archivo JSON
             st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
@@ -3661,18 +3960,19 @@ if authentication_status:
                 semana_seleccionada = semana_sep_sel
                 periodo_sel = f"Semana {semana_seleccionada} de 37"
             else:
-                cal_año_actual = 2026
-                idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Febrero"))
+                idx_mes_actual = MESES_2026.index(st.session_state.get("cal_mes_nombre", "Octubre"))
                 cal_mes_actual = st.selectbox(
-                    "📅 Mes 2026:",
+                    "📅 Mes del Ciclo Escolar (2026-2027):",
                     options=MESES_2026,
                     index=idx_mes_actual,
                     key=f"sel_mes_cal_{st.session_state.widget_key}"
                 )
                 st.session_state.cal_mes_nombre = cal_mes_actual
                 m_idx = MESES_2026.index(cal_mes_actual) + 1
+                # En el ciclo 2026-2027: Agosto a Diciembre corresponden a 2026; Enero a Julio corresponden a 2027
+                cal_año_actual = 2026 if cal_mes_actual in ["Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] else 2027
                 cal_obj = calendar.Calendar(firstweekday=0)
-                month_weeks = cal_obj.monthdatescalendar(2026, m_idx)
+                month_weeks = cal_obj.monthdatescalendar(cal_año_actual, m_idx)
 
                 # Filtrar semanas con presencia en este mes
                 valid_week_indices = []
@@ -3687,16 +3987,21 @@ if authentication_status:
                     lun = w_d[0]
                     vie = w_d[4]
                     vac_info = es_fecha_vacaciones(lun) and es_fecha_vacaciones(vie)
-                    sem_num = CATALOGO_FECHAS_SEP.get((lun.month, lun.day)) or CATALOGO_FECHAS_SEP.get((vie.month, vie.day))
+                    sem_num = (
+                        CATALOGO_FECHAS_SEP.get((lun.year, lun.month, lun.day))
+                        or CATALOGO_FECHAS_SEP.get((lun.month, lun.day))
+                        or CATALOGO_FECHAS_SEP.get((vie.year, vie.month, vie.day))
+                        or CATALOGO_FECHAS_SEP.get((vie.month, vie.day))
+                    )
                     tiene_cte = any(d in FECHAS_CTE_OFICIALES for d in w_d[:5])
                     cte_tag = " [📌 CTE]" if tiene_cte else ""
                     if vac_info:
                         vac = es_fecha_vacaciones(lun)
-                        return f"🏖️ {vac['nombre']} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]})"
+                        return f"🏖️ {vac['nombre']} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]} {lun.year})"
                     elif sem_num:
-                        return f"Semana {sem_num} de 37 ({lun.day} al {vie.day} {MESES_2026[lun.month-1][:3]}){cte_tag}"
+                        return f"Semana {sem_num} de 37 ({lun.day} al {vie.day} {MESES_2026[lun.month-1][:3]} {lun.year}){cte_tag}"
                     else:
-                        return f"Bloque {idx_w + 1} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]}){cte_tag}"
+                        return f"Bloque {idx_w + 1} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]} {lun.year}){cte_tag}"
 
                 current_sem_idx = st.session_state.get("cal_sem_idx", valid_week_indices[0])
                 if current_sem_idx not in valid_week_indices:
@@ -3714,7 +4019,13 @@ if authentication_status:
                 active_week_dates = active_week_full[:5]
                 lun_d = active_week_dates[0]
                 vie_d = active_week_dates[4]
-                sem_detectada = CATALOGO_FECHAS_SEP.get((lun_d.month, lun_d.day)) or CATALOGO_FECHAS_SEP.get((vie_d.month, vie_d.day)) or 20
+                sem_detectada = (
+                    CATALOGO_FECHAS_SEP.get((lun_d.year, lun_d.month, lun_d.day))
+                    or CATALOGO_FECHAS_SEP.get((lun_d.month, lun_d.day))
+                    or CATALOGO_FECHAS_SEP.get((vie_d.year, vie_d.month, vie_d.day))
+                    or CATALOGO_FECHAS_SEP.get((vie_d.month, vie_d.day))
+                    or 1
+                )
                 semana_sep_sel = sem_detectada
                 info_semana = CATALOGO_SEMANAS_SEP[semana_sep_sel]
                 st.session_state.cal_semana_escolar = semana_sep_sel
@@ -3913,6 +4224,59 @@ if authentication_status:
             for f in metodo_info.get("fases_oficiales", []):
                 st.markdown(f"- {f}")
     
+    # ==========================================
+    # CUADERNILLO DE ACTIVIDADES: SEMANAS 6 Y 7 (PROFA KEMPIS)
+    # ==========================================
+    es_kempis_pertinente = detectar_relevancia_kempis(
+        semana=semana_seleccionada,
+        directrices_o_texto=st.session_state.get(f"directrices_{st.session_state.widget_key}", "")
+    )
+    sem_kempis_sug = 7 if (semana_seleccionada == 7) else 6
+    kempis_data_sug = obtener_recursos_kempis_por_semana(sem_kempis_sug)
+
+    st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
+    with st.expander(
+        f"📘 Cuadernillo de Actividades y Recursos de Apoyo (Semanas 6 y 7 — Profa Kempis)" + (" ⭐ [Sugerido para esta semana]" if semana_seleccionada in [6, 7] else ""),
+        expanded=(semana_seleccionada in [6, 7] or es_kempis_pertinente)
+    ):
+        st.markdown(
+            f"""
+            <div style="background-color: #F5F3FF; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span style="font-size: 1.3rem;">🌟</span>
+                    <span style="font-weight: 700; font-size: 1rem; color: #4C1D95;">Cuadernillo Didáctico Oficial: {kempis_data_sug['titulo_general']}</span>
+                </div>
+                <div style="font-size: 0.86rem; color: #374151; line-height: 1.45;">
+                    Contenidos y temas integrados: <b>Textos literarios, cuentos, lectura dramatizada, alimentos procesados, grasas, sellos NOM-051, múltiplos y submúltiplos del gramo, Plato del Bien Comer, servicios públicos, impuestos, IVA (16%), calidad de vida, resolución pacífica de conflictos, convivencia sana, Descubrimiento de América y Día Mundial de la Alimentación</b>.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        col_k1, col_k2 = st.columns(2)
+        with col_k1:
+            st.markdown(f"**📚 Actividades y Anexos Imprimibles ({kempis_data_sug['periodo_sugerido']}):**")
+            for c_nom, c_val in kempis_data_sug["campos"].items():
+                st.markdown(f"- **{c_nom}:** {c_val['tema']}\n  *Anexo:* `{c_val['anexo_nombre']}`")
+            ef_info = kempis_data_sug.get("efemeride_principal", {})
+            if ef_info:
+                st.markdown(f"- **Conmemoración:** {ef_info.get('nombre', '')}\n  *Actividad:* {ef_info.get('actividad', '')}")
+
+        with col_k2:
+            st.markdown("**🎥 Videos de Apoyo Profa Kempis (YouTube):**")
+            for c_nom, c_val in kempis_data_sug["campos"].items():
+                st.markdown(f"- [{c_val['video_titulo']}]({c_val['video_url']})")
+            if ef_info and ef_info.get("video_titulo"):
+                st.markdown(f"- [{ef_info.get('video_titulo')}]({ef_info.get('video_url')})")
+
+        vincular_kempis_sel = st.checkbox(
+            f"✅ Vincular e integrar automáticamente el Cuadernillo Profa Kempis (Semana {sem_kempis_sug}) en las secuencias didácticas (Inicio, Desarrollo, Cierre), Recursos y descargable en Word",
+            value=True,
+            key=f"chk_kempis_{st.session_state.widget_key}",
+            help="Al mantener marcada esta casilla, las secuencias didácticas, los retos de cálculo mental/gramos/IVA, las preguntas de inicio, las fichas y el Word incluirán estas actividades."
+        )
+
     # Articulación Curricular: Contenidos y PDA (100% Dinámico por Grado y Fase)
     st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
     st.markdown('#### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Articulación Curricular: Contenidos y Procesos de Desarrollo de Aprendizaje (PDA)', unsafe_allow_html=True)
@@ -4000,14 +4364,27 @@ if authentication_status:
                 default_indices_pda = matched_indices
 
         if not default_indices_pda:
-            campos_vistos = set()
-            for idx_sug, sug_item in enumerate(sugerencias_pda):
-                c_sug = sug_item.get("campo")
-                if c_sug not in campos_vistos:
-                    campos_vistos.add(c_sug)
-                    default_indices_pda.append(idx_sug)
-                if len(default_indices_pda) >= (len(campos_sel) if campos_sel else 4):
-                    break
+            # Si corresponde a Semana 6 o 7 o temas Kempis, priorizar PDA afines
+            if semana_seleccionada in [6, 7] or es_kempis_pertinente:
+                kempis_keywords = ["texto literario", "cuento", "dramatiz", "alimento", "gramo", "proporcionalidad", "iva", "servicio", "paz", "conflicto", "estilos de vida", "12 de octubre", "1910"]
+                campos_vistos = set()
+                for idx_sug, sug_item in enumerate(sugerencias_pda):
+                    c_sug = sug_item.get("campo")
+                    c_txt = (sug_item.get("contenido", "") + " " + sug_item.get("pda", "")).lower()
+                    if c_sug not in campos_vistos and any(kw in c_txt for kw in kempis_keywords):
+                        campos_vistos.add(c_sug)
+                        default_indices_pda.append(idx_sug)
+
+            if not default_indices_pda:
+                campos_vistos = set()
+                for idx_sug, sug_item in enumerate(sugerencias_pda):
+                    c_sug = sug_item.get("campo")
+                    if c_sug not in campos_vistos:
+                        campos_vistos.add(c_sug)
+                        default_indices_pda.append(idx_sug)
+                    if len(default_indices_pda) >= (len(campos_sel) if campos_sel else 4):
+                        break
+
         if not default_indices_pda and sugerencias_pda:
             default_indices_pda = list(range(min(4, len(sugerencias_pda))))
 
@@ -4020,6 +4397,7 @@ if authentication_status:
             help=f"Mostrando los Contenidos y PDA oficiales del programa sintético para {grado_seleccionado} ({fase_correspondiente})."
         )
         items_pda_final = [sugerencias_pda[i] for i in pda_seleccionados_indices]
+
     else:
         items_pda_final = []
         st.info(f"No hay Contenidos y PDA precargados para los campos formativos seleccionados en {grado_seleccionado}. Puedes redactarlos abajo.")
@@ -4074,6 +4452,125 @@ if authentication_status:
             key=f"num_sesiones_{st.session_state.widget_key}"
         )
     
+    # ==========================================
+    # SECCIÓN 2.5: PLANIFICACIÓN Y CAPTURA DÍA POR DÍA (PESTAÑAS)
+    # ==========================================
+    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="nem-card-header">
+        <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
+        <h3 class="nem-card-title">Secuencia y Captura Pedagógica Día por Día</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    st.caption("Organización modular en pestañas independientes para cada día. Consulta y ajusta la rutina matutina y los momentos de la clase (Inicio, Desarrollo y Cierre) de forma limpia y enfocada, sin saturar la pantalla.")
+
+    dias_activos_tabs = dias_seleccionados if dias_seleccionados else DIAS_HABIL_NOMBRES
+    tabs_dias_captura = st.tabs([f"📅 {d}" for d in dias_activos_tabs])
+
+    dias_fechas_map = st.session_state.get("dias_fechas", {})
+    plan_guardado_actual = st.session_state.get("planeacion_generada")
+    parsed_actual = parse_plan_sections(plan_guardado_actual) if plan_guardado_actual else {}
+
+    sem_kempis_act = 7 if (semana_seleccionada == 7) else 6
+    kempis_data_dia = CUADERNILLO_KEMPIS_DATA.get(sem_kempis_act)
+    kempis_campos_lista = list(kempis_data_dia["campos"].items()) if kempis_data_dia else []
+
+    for idx_dia, (tab_d, nom_dia) in enumerate(zip(tabs_dias_captura, dias_activos_tabs)):
+        with tab_d:
+            fecha_dia_label = dias_fechas_map.get(nom_dia, f"{nom_dia} (Semana {semana_seleccionada})")
+            
+            # Obtener datos de rutina y sesión correspondientes a este día
+            r_dia = parsed_actual.get("rutinas_por_dia", {}).get(nom_dia)
+            if not r_dia and idx_dia < len(parsed_actual.get("rutinas", [])):
+                r_dia = parsed_actual["rutinas"][idx_dia]
+
+            s_dia = parsed_actual.get("sesiones_por_dia", {}).get(nom_dia)
+            if not s_dia and idx_dia < len(parsed_actual.get("sesiones", [])):
+                s_dia = parsed_actual["sesiones"][idx_dia]
+
+            # Si no hay planeación generada aún, pre-cargar con la plantilla oficial
+            if not r_dia:
+                if kempis_data_dia and (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada)):
+                    r_dictados = kempis_data_dia["rutinas_matutinas_sugeridas"]["dictado"]
+                    r_calc = kempis_data_dia["rutinas_matutinas_sugeridas"]["calculo_mental"]
+                    r_prob = kempis_data_dia["rutinas_matutinas_sugeridas"]["problemas_razonados"]
+                    dictado_val = r_dictados[idx_dia % len(r_dictados)]
+                    calc_val = r_calc[idx_dia % len(r_calc)]
+                    prob_val = r_prob[idx_dia % len(r_prob)]
+                else:
+                    dictado_val = f"Palabras clave reflexivas para {nom_dia} con desafío ortográfico."
+                    calc_val = f"Operaciones de cálculo mental contextualizadas para {nom_dia}."
+                    prob_val = f"Problema razonado de situaciones comunitarias en Durango."
+            else:
+                dictado_val = r_dia.get("dictado", "")
+                calc_val = r_dia.get("calculo", "")
+                prob_val = r_dia.get("problema", "")
+
+            if not s_dia:
+                if kempis_data_dia and idx_dia < len(kempis_campos_lista) and (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada)):
+                    cf_nom_k, cf_info_k = kempis_campos_lista[idx_dia]
+                    ini_val = cf_info_k['inicio']
+                    des_val = f"{cf_info_k['desarrollo']} (Anexo: {cf_info_k['anexo_nombre']})"
+                    cie_val = cf_info_k['cierre']
+                    rec_val = f"Libro SEP, Cuadernillo Kempis ({cf_info_k['anexo_nombre']}) y video: {cf_info_k['video_titulo']}"
+                else:
+                    ini_val = f"Activación de conocimientos previos y planteamiento de pregunta detonadora para {nom_dia}."
+                    des_val = f"Actividades de indagación colaborativa y resolución práctica con Libros de Texto Gratuitos."
+                    cie_val = f"Puesta en común, síntesis de aprendizajes y coevaluación en asamblea de aula."
+                    rec_val = f"Libros de Texto Gratuitos (LTG), cuaderno de notas y materiales del aula."
+            else:
+                ini_val = s_dia.get("inicio", "")
+                des_val = s_dia.get("desarrollo", "")
+                cie_val = s_dia.get("cierre", "")
+                rec_val = s_dia.get("recursos", "")
+
+            # Header visual del día
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); border: 1px solid #DDD6FE; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <div style="font-weight: 700; color: #4C1D95; font-size: 0.92rem;">
+                    🗓️ <b>{fecha_dia_label}</b> — Sesión {idx_dia + 1} de {len(dias_activos_tabs)}
+                </div>
+                <div style="font-size: 0.76rem; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">
+                    90 min lectivos • 08:00 - 13:00
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            col_dia_rutina, col_dia_secuencia = st.columns([1, 1.35])
+            with col_dia_rutina:
+                st.markdown(f"""
+                <div class="day-moment-box">
+                    <div class="day-moment-title">🌅 Rutina Matutina Permanente (15-20 min)</div>
+                    <div class="day-moment-text">
+                        <b>✍️ Dictado:</b> {dictado_val}<br><br>
+                        <b>🔢 Cálculo Mental:</b> {calc_val}<br><br>
+                        <b>🧩 Problema Razonado:</b> {prob_val}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with col_dia_secuencia:
+                st.markdown(f"""
+                <div class="day-moment-box" style="border-left-color: #059669;">
+                    <div class="day-moment-title" style="color: #065F46;">🎯 Secuencia Didáctica (Inicio, Desarrollo y Cierre)</div>
+                    <div class="day-moment-text">
+                        <span style="color: #047857; font-weight: 700;">🟢 Inicio (15-20 min):</span><br>{ini_val}<br><br>
+                        <span style="color: #B45309; font-weight: 700;">🟡 Desarrollo (50-60 min):</span><br>{des_val}<br><br>
+                        <span style="color: #4C1D95; font-weight: 700;">🔴 Cierre (15-20 min):</span><br>{cie_val}<br><br>
+                        <span style="color: #374151; font-weight: 700;">📦 Recursos:</span><br>{rec_val}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with st.expander(f"✏️ Notas y Ajustes Didácticos para {nom_dia}", expanded=False):
+                st.text_area(
+                    f"Ajuste personalizado para {nom_dia}:",
+                    value="",
+                    placeholder=f"Escribe aquí cualquier indicación específica o adecuación particular para la clase del {nom_dia}...",
+                    key=f"nota_dia_{nom_dia}_{st.session_state.widget_key}",
+                    height=70
+                )
+
     st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
     
     # ==========================================
@@ -4114,8 +4611,10 @@ if authentication_status:
         "prompt_enviado": st.session_state.get("prompt_enviado") or "",
         "url_referencia": url_referencia if 'url_referencia' in locals() else "",
         "nombre_archivo": nombre_archivo_actual,
-        "categoria_ruta": categoria_ruta_actual
+        "categoria_ruta": categoria_ruta_actual,
+        "vincular_cuadernillo_kempis": vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
     }
+    datos_escuela_actual["vincular_cuadernillo_kempis"] = data_actual_para_guardar["vincular_cuadernillo_kempis"]
     hash_actual_form = calcular_hash_planeacion(data_actual_para_guardar)
     if hash_actual_form != st.session_state.get("ultimo_hash_guardado"):
         guardar_planeacion(
@@ -4145,9 +4644,9 @@ if authentication_status:
     ) -> str:
         """
         Genera la estructura oficial de la planeación sin invocar a la API de Gemini,
-        prellenando todos los datos curriculares e institucionales seleccionados
-        y colocando marcadores de posición explícitos para la redacción docente,
-        estructurada estrictamente para los días seleccionados.
+        prellenando todos los datos curriculares e institucionales seleccionados,
+        incorporando los contenidos del Cuadernillo Profa Kempis si corresponde a Semanas 6 o 7,
+        y estructurada estrictamente para los días seleccionados.
         """
         escuela = datos_escuela.get('nombre_escuela', 'Escuela Primaria “Revolución Social de 1910”')
         cct = datos_escuela.get('cct', '10EPR0361N')
@@ -4173,6 +4672,14 @@ if authentication_status:
         ejes_txt = ", ".join(ejes) if ejes else "Ejes articuladores por definir"
         problemica_txt = directrices.strip() if directrices and directrices.strip() else EJEMPLO_PROBLEMICA_ANALITICO
     
+        # Detección de Cuadernillo Profa Kempis
+        sem_kempis = 7 if (semana_seleccionada == 7) else 6
+        kempis_data = CUADERNILLO_KEMPIS_DATA.get(sem_kempis)
+        vincular_k = vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
+        es_kempis_modo = bool(vincular_k and kempis_data and (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada, directrices_o_texto=problemica_txt)))
+
+        nombre_proyecto_def = f"{kempis_data['titulo_general']} — Proyecto Integrador de Saberes y Convivencia" if es_kempis_modo else "[Nombre del Proyecto de Intervención Docente]"
+
         # Preparar texto de contenidos y pda sintetizados para la tabla inicial
         if contenidos_pda:
             resumen_cont = " // ".join(f"[{item.get('campo', '')}] {item.get('contenido', '')}" for item in contenidos_pda)
@@ -4198,61 +4705,107 @@ if authentication_status:
         dias_fechas = datos_escuela.get("dias_fechas", {}) if isinstance(datos_escuela, dict) else {}
         rutinas_md = ""
         secuencias_md = ""
+
+        kempis_campos_lista = list(kempis_data["campos"].items()) if es_kempis_modo else []
+
         for s, nombre_dia in enumerate(dias_seleccionados, 1):
             fecha_dia = dias_fechas.get(nombre_dia, nombre_dia)
-            rutinas_md += f"""
-    ### Sesión {s} ({fecha_dia}):
-    - **Dictado:** [Redactar 5 palabras clave para dictado reflexivo aquí]
-    - **Cálculo Mental:** [Redactar 5 operaciones de cálculo mental aquí]
-    - **Problema Razonado:** [Redactar situación problemática contextualizada aquí]
-    """
-            secuencias_md += f"""
-    ### Sesión {s} (**Día: {fecha_dia}**) - [Nombre de la Sesión y Momento Metodológico]
-    - **Tiempo estimado:** 90 minutos
-    - **Inicio (15-20 min):** [Redactar actividades de inicio aquí]
-    - **Desarrollo (50-60 min):** [Redactar actividades de desarrollo aquí]
-    - **Cierre (15-20 min):** [Redactar actividades de cierre aquí]
-    - **Recursos didácticos y materiales:** {libros_txt}, libreta de apuntes y materiales del aula.
-    - **Evidencia / Producto de la sesión:** [Redactar producto o evidencia de aprendizaje aquí]
-    """
+            if es_kempis_modo:
+                r_dictados = kempis_data["rutinas_matutinas_sugeridas"]["dictado"]
+                r_calculo = kempis_data["rutinas_matutinas_sugeridas"]["calculo_mental"]
+                r_problemas = kempis_data["rutinas_matutinas_sugeridas"]["problemas_razonados"]
+                
+                dictado_txt = r_dictados[(s - 1) % len(r_dictados)]
+                calculo_txt = r_calculo[(s - 1) % len(r_calculo)]
+                problema_txt = r_problemas[(s - 1) % len(r_problemas)]
+                
+                rutinas_md += f"""
+### Sesión {s} ({fecha_dia}):
+- **Dictado Ortográfico:** {dictado_txt}
+- **Cálculo Mental:** {calculo_txt}
+- **Problema Razonado:** {problema_txt}
+"""
+                if s <= len(kempis_campos_lista):
+                    cf_nom, cf_info = kempis_campos_lista[s - 1]
+                    titulo_ses = f"{cf_nom} — {cf_info['tema']}"
+                    inicio_txt = cf_info['inicio']
+                    desarrollo_txt = f"{cf_info['desarrollo']} (Anexo imprimible: `{cf_info['anexo_nombre']}`)."
+                    cierre_txt = cf_info['cierre']
+                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({cf_info['anexo_nombre']}) y video en YouTube: '{cf_info['video_titulo']}' ({cf_info['video_url']})."
+                    evidencia_s = f"Ficha de trabajo completada: {cf_info['anexo_nombre']}."
+                else:
+                    ef_info = kempis_data.get("efemeride_principal", {})
+                    titulo_ses = f"Integración y Conmemoración — {ef_info.get('nombre', 'Proyecto Comunitario')}"
+                    inicio_txt = "Recuperación de aprendizajes de la semana mediante preguntas detonadoras en asamblea."
+                    desarrollo_txt = ef_info.get("actividad", "Elaboración de cartel colaborativo y síntesis de saberes.")
+                    cierre_txt = "Exposición de trabajos, autoevaluación grupal y acuerdos para la vida diaria."
+                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}) y video: '{ef_info.get('video_titulo', '')}' ({ef_info.get('video_url', '')})."
+                    evidencia_s = f"Producto integrador: {ef_info.get('anexo_nombre', 'Cartel escolar')}."
+
+                secuencias_md += f"""
+### Sesión {s} (**Día: {fecha_dia}**) - {titulo_ses}
+- **Tiempo estimado:** 90 minutos
+- **Inicio (15-20 min):** {inicio_txt}
+- **Desarrollo (50-60 min):** {desarrollo_txt}
+- **Cierre (15-20 min):** {cierre_txt}
+- **Recursos didácticos y materiales:** {recursos_s}
+- **Evidencia / Producto de la sesión:** {evidencia_s}
+"""
+            else:
+                rutinas_md += f"""
+### Sesión {s} ({fecha_dia}):
+- **Dictado:** [Redactar 5 palabras clave para dictado reflexivo aquí]
+- **Cálculo Mental:** [Redactar 5 operaciones de cálculo mental aquí]
+- **Problema Razonado:** [Redactar situación problemática contextualizada aquí]
+"""
+                secuencias_md += f"""
+### Sesión {s} (**Día: {fecha_dia}**) - [Nombre de la Sesión y Momento Metodológico]
+- **Tiempo estimado:** 90 minutos
+- **Inicio (15-20 min):** [Redactar actividades de inicio aquí]
+- **Desarrollo (50-60 min):** [Redactar actividades de desarrollo aquí]
+- **Cierre (15-20 min):** [Redactar actividades de cierre aquí]
+- **Recursos didácticos y materiales:** {libros_txt}, libreta de apuntes y materiales del aula.
+- **Evidencia / Producto de la sesión:** [Redactar producto o evidencia de aprendizaje aquí]
+"""
     
         dias_str = ", ".join(dias_fechas.get(d, d) for d in dias_seleccionados)
     
         return f"""# I. DATOS DE IDENTIFICACIÓN Y DOSIFICADOR GENERAL DEL PROYECTO
     
-    - **Nombre del Proyecto:** [Nombre del Proyecto de Intervención Docente]
-    - **Escuela:** {escuela} | **C.C.T.:** {cct} | **Turno:** {turno}
-    - **Docente:** Prof(a). {docente} | **Director:** Prof. {director}
-    - **Fase y Grado:** {fase} — {grado} Grupo '{grupo}'
-    - **Temporalidad:** {periodo} ({num_sesiones} sesiones: {dias_str}) | **Ciclo Escolar:** {ciclo}
-    - **Escenario:** Aula / Escolar / Comunitario
-    - **Metodología Sociocrítica:** {metodologia}
-    - **Ejes Articuladores:** {ejes_txt}
-    - **Libros de Texto Gratuitos (LTG):** {libros_txt}
-    - **Problemática del Plan Analítico:** {problemica_txt}
-    - **Propósito:** [Redactar el propósito formativo del proyecto aquí]
-    - **Contenido Sintético:** {resumen_cont}
-    - **PDA:** {resumen_pda}
-    
-    ---
-    
-    # II. ARTICULACIÓN CURRICULAR TRANSVERSAL (TABLA NEM - 4 CAMPOS FORMATIVOS)
-    
-    | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
-    | :--- | :--- | :--- | :--- | :--- |
-    {tabla_curricular_md}
-    
-    ---
-    
-    # III. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA - SESIONES 1 A {num_sesiones})
-    {rutinas_md}
-    
-    ---
-    
-    # IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES)
-    {secuencias_md}
-    
-    ---
+- **Nombre del Proyecto:** {nombre_proyecto_def}
+- **Escuela:** {escuela} | **C.C.T.:** {cct} | **Turno:** {turno}
+- **Docente:** Prof(a). {docente} | **Director:** Prof. {director}
+- **Fase y Grado:** {fase} — {grado} Grupo '{grupo}'
+- **Temporalidad:** {periodo} ({num_sesiones} sesiones: {dias_str}) | **Ciclo Escolar:** {ciclo}
+- **Escenario:** Aula / Escolar / Comunitario
+- **Metodología Sociocrítica:** {metodologia}
+- **Ejes Articuladores:** {ejes_txt}
+- **Libros de Texto Gratuitos (LTG):** {libros_txt}
+- **Problemática del Plan Analítico:** {problemica_txt}
+- **Propósito:** [Redactar el propósito formativo del proyecto aquí]
+- **Contenido Sintético:** {resumen_cont}
+- **PDA:** {resumen_pda}
+
+---
+
+# II. ARTICULACIÓN CURRICULAR TRANSVERSAL (TABLA NEM - 4 CAMPOS FORMATIVOS)
+
+| Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
+| :--- | :--- | :--- | :--- | :--- |
+{tabla_curricular_md}
+
+---
+
+# III. ACTIVIDADES DE INICIO DEL DÍA (RUTINA MATUTINA - SESIONES 1 A {num_sesiones})
+{rutinas_md}
+
+---
+
+# IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES)
+{secuencias_md}
+
+---
+
     
     # V. INSTRUMENTO DE EVALUACIÓN FORMATIVA
     
@@ -4354,89 +4907,96 @@ if authentication_status:
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
     
     # ==========================================
-    # SECCIÓN 3: BOTONES DE GENERACIÓN Y GESTIÓN DE ARCHIVO
+    # SECCIÓN 3: BARRA DE ACCIONES Y GENERACIÓN (TOOLBAR MINIMALISTA)
     # ==========================================
     st.markdown("""
     <div class="nem-card-header">
         <span style="color: #7C3AED; font-size: 1.5rem; line-height: 1;">•</span>
-        <h3 class="nem-card-title">3. Guardado y Generación del Plano Didáctico</h3>
+        <h3 class="nem-card-title">3. Acciones Principales y Generación del Plano Didáctico</h3>
     </div>
     """, unsafe_allow_html=True)
 
-    # Panel de Configuración de Archivo: Nombre Personalizado y Carpeta de Destino
+    # Configuración de Archivo en Expander Compacto
+    with st.expander("📁 Destino y Nombre de Archivo Personalizado", expanded=False):
+        c_nom_arch, c_cat_ruta = st.columns([1.3, 1.2])
+        with c_nom_arch:
+            nombre_archivo_input = st.text_input(
+                "Nombre personalizado del archivo (ej. Planeacion_Semana_20_Matematicas):",
+                value=st.session_state.get(f"inp_nombre_archivo_{st.session_state.widget_key}", nombre_archivo_actual),
+                key=f"inp_nombre_archivo_{st.session_state.widget_key}",
+                help="Escribe el nombre con el que deseas guardar y organizar este archivo en tu historial y en la carpeta local de respaldos."
+            )
+            st.session_state["nombre_archivo_actual"] = nombre_archivo_input
+            data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
+
+        with c_cat_ruta:
+            cat_index_sel = CATEGORIAS_RUTAS_DEFAULT.index(categoria_ruta_actual) if categoria_ruta_actual in CATEGORIAS_RUTAS_DEFAULT else 1
+            categoria_ruta_input = st.selectbox(
+                "Carpeta / Categoría de Destino:",
+                options=CATEGORIAS_RUTAS_DEFAULT,
+                index=cat_index_sel,
+                key=f"sel_categoria_ruta_{st.session_state.widget_key}",
+                help="Selecciona la carpeta organizativa donde se archivará la planeación (por trimestre, tipo de proyecto o CTE)."
+            )
+            st.session_state["categoria_ruta_actual"] = categoria_ruta_input
+            data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
+
+        st.caption(f"📍 Destino en disco: `guardados/{sanitizar_nombre_ruta(categoria_ruta_input)}/{sanitizar_nombre_ruta(nombre_archivo_input)}.json`")
+
+    # Si no se abrió el expander, asegurar que las variables existan en locals
+    if 'nombre_archivo_input' not in locals():
+        nombre_archivo_input = st.session_state.get("nombre_archivo_actual", nombre_archivo_actual)
+    if 'categoria_ruta_input' not in locals():
+        categoria_ruta_input = st.session_state.get("categoria_ruta_actual", categoria_ruta_actual)
+
+    # Barra de Herramientas Compacta (Toolbar 2x3)
     st.markdown("""
-    <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 12px 16px; margin-bottom: 1rem;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <span style="color: #7C3AED; font-size: 1.2rem;">📁</span>
-            <span style="font-weight: 700; font-size: 0.98rem; color: #1E293B;">Configuración de Guardado: Nombre de Archivo y Carpeta de Destino</span>
+    <div class="action-toolbar-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+            <div style="font-weight: 700; color: #4C1D95; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                ⚡ <b>Barra de Acciones Rápidas</b>
+            </div>
+            <span style="font-size: 0.78rem; background: #EDE9FE; color: #6D28D9; padding: 2px 10px; border-radius: 9999px; font-weight: 600;">
+                Ciclo Escolar 2026-2027 • Fase 5
+            </span>
         </div>
     """, unsafe_allow_html=True)
 
-    c_nom_arch, c_cat_ruta = st.columns([1.3, 1.2])
-    with c_nom_arch:
-        nombre_archivo_input = st.text_input(
-            "Nombre personalizado del archivo (ej. Planeacion_Semana_20_Matematicas):",
-            value=st.session_state.get(f"inp_nombre_archivo_{st.session_state.widget_key}", nombre_archivo_actual),
-            key=f"inp_nombre_archivo_{st.session_state.widget_key}",
-            help="Escribe el nombre con el que deseas guardar y organizar este archivo en tu historial y en la carpeta local de respaldos."
-        )
-        st.session_state["nombre_archivo_actual"] = nombre_archivo_input
-        data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
+    col_tb1, col_tb2, col_tb3 = st.columns(3)
+    with col_tb1:
+        btn_generar = st.button("🚀 Generar con Gemini", type="primary", use_container_width=True, help="Genera la planeación oficial completa con IA considerando el Programa Analítico y la NEM.")
+    with col_tb2:
+        btn_save_named = st.button("💾 Guardar Archivo", key=f"btn_save_named_{st.session_state.widget_key}", use_container_width=True, help="Guarda inmediatamente tu planeación en el historial y en la carpeta seleccionada.")
+    with col_tb3:
+        btn_busqueda_web = st.button("🌐 Generar con Web", key="btn_generar_web", use_container_width=True, help="Consulta la web en tiempo real con Google Search Grounding para enriquecer la secuencia didáctica con dinámicas, noticias y ejemplos prácticos recientes.")
 
-    with c_cat_ruta:
-        cat_index_sel = CATEGORIAS_RUTAS_DEFAULT.index(categoria_ruta_actual) if categoria_ruta_actual in CATEGORIAS_RUTAS_DEFAULT else 1
-        categoria_ruta_input = st.selectbox(
-            "Carpeta / Categoría de Destino:",
-            options=CATEGORIAS_RUTAS_DEFAULT,
-            index=cat_index_sel,
-            key=f"sel_categoria_ruta_{st.session_state.widget_key}",
-            help="Selecciona la carpeta organizativa donde se archivará la planeación (por trimestre, tipo de proyecto o CTE)."
-        )
-        st.session_state["categoria_ruta_actual"] = categoria_ruta_input
-        data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
-
-    col_btn_save_named, col_info_named = st.columns([1, 1.8])
-    with col_btn_save_named:
-        if st.button("💾 Guardar con este Nombre y Ruta", key=f"btn_save_named_{st.session_state.widget_key}", use_container_width=True, help="Guarda inmediatamente tu avance con el nombre y carpeta elegidos."):
-            data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
-            data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
-            guardar_planeacion(
-                username=docente_usuario_act,
-                data=data_actual_para_guardar,
-                es_autoguardado=False,
-                version_nombre=nombre_archivo_input,
-                nombre_archivo=nombre_archivo_input,
-                categoria_ruta=categoria_ruta_input
-            )
-            st.success(f"✓ ¡Planeación guardada como '{nombre_archivo_input}' en '{categoria_ruta_input}'!")
-            st.rerun()
-    with col_info_named:
-        st.caption(f"📍 Destino actual: `guardados/{sanitizar_nombre_ruta(categoria_ruta_input)}/{sanitizar_nombre_ruta(nombre_archivo_input)}.json`")
+    col_tb4, col_tb5, col_tb6 = st.columns(3)
+    with col_tb4:
+        btn_demo = st.button(f"👁️ Cargar Demo ({grado_sel})", use_container_width=True, help=f"Muestra una planeación oficial completa para {grado_sel} sin consumir cuota de API.")
+    with col_tb5:
+        btn_plantilla_base = st.button("📄 Plantilla Base (Sin IA)", use_container_width=True, help="Genera directamente la plantilla oficial en Word (.docx) y PDF con tus datos escolares y curriculares prellenados, sin realizar llamadas a la IA.")
+    with col_tb6:
+        if st.session_state.get("planeacion_generada"):
+            quick_docx = build_docx_planeacion(datos_escuela=datos_escuela_actual, plan_text=st.session_state.planeacion_generada)
+            st.download_button("📥 Descargar Word (.docx)", data=quick_docx, file_name=f"{sanitizar_nombre_ruta(nombre_archivo_input)}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True, key=f"btn_quick_word_{st.session_state.widget_key}")
+        else:
+            st.button("⚙️ Vista Previa en Espera", disabled=True, use_container_width=True, help="Genera una planeación o carga un demo para habilitar la descarga directa desde la barra.")
 
     st.markdown("</div>", unsafe_allow_html=True)
-    
-    col_btn_gen, col_btn_demo = st.columns([1.5, 1.2])
-    
-    with col_btn_gen:
-        btn_generar = st.button("Generar Planeación con Gemini", type="primary", use_container_width=True)
-        btn_busqueda_web = st.button(
-            "Generar Planeación con Búsqueda Web",
-            key="btn_generar_web",
-            use_container_width=True,
-            help="Consulta la web en tiempo real con Google Search Grounding para enriquecer la secuencia didáctica con dinámicas, noticias y ejemplos prácticos recientes."
+
+    if btn_save_named:
+        data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
+        data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
+        guardar_planeacion(
+            username=docente_usuario_act,
+            data=data_actual_para_guardar,
+            es_autoguardado=False,
+            version_nombre=nombre_archivo_input,
+            nombre_archivo=nombre_archivo_input,
+            categoria_ruta=categoria_ruta_input
         )
-        btn_plantilla_base = st.button(
-            "Descargar Plantilla Base (Sin IA)",
-            use_container_width=True,
-            help="Genera directamente la plantilla oficial en Word (.docx) y PDF con tus datos escolares y curriculares prellenados, sin realizar llamadas a la IA."
-        )
-    
-    with col_btn_demo:
-        btn_demo = st.button(
-            f"Cargar Ejemplo Completo ({grado_sel}) [Vista Previa Rápida]",
-            use_container_width=True,
-            help=f"Muestra una planeación oficial completa para {grado_sel} sin consumir cuota de API."
-        )
+        st.success(f"✓ ¡Planeación guardada como '{nombre_archivo_input}' en '{categoria_ruta_input}'!")
+        st.rerun()
     
     if btn_generar:
         if not verificar_conexion_internet():
@@ -4509,7 +5069,8 @@ if authentication_status:
                         modelo="gemini-3.8-flash",
                         guia_cte_detalle=cte_info,
                         busqueda_web=False,
-                        contexto_url=contexto_url
+                        contexto_url=contexto_url,
+                        vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
                     )
                     st.session_state.planeacion_generada = plan_generado
                     st.session_state.prompt_enviado = prompt_utilizado
@@ -4619,7 +5180,8 @@ if authentication_status:
                         modelo="gemini-3.8-flash",
                         guia_cte_detalle=cte_info,
                         busqueda_web=True,
-                        contexto_url=contexto_url
+                        contexto_url=contexto_url,
+                        vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
                     )
                     st.session_state.planeacion_generada = plan_generado
                     st.session_state.prompt_enviado = prompt_utilizado
@@ -4690,7 +5252,9 @@ if authentication_status:
                 metodologia=metodologia_sel,
                 ejes=ejes_sel if ejes_sel else ["Pensamiento crítico", "Apropiación de las culturas a través de la lectura y la escritura", "Vida saludable"],
                 dias_seleccionados=dias_seleccionados,
-                directrices=directrices_input
+                directrices=directrices_input,
+                semana_seleccionada=semana_seleccionada,
+                vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
             )
             st.session_state.planeacion_generada = demo_plan
             data_gen_save = dict(data_actual_para_guardar)
@@ -4734,27 +5298,27 @@ if authentication_status:
         
         with col_d1:
             st.download_button(
-                label="Descargar Word (.docx) [Plantilla Oficial]",
+                label="📄 Descargar Word (.docx)",
                 data=docx_buffer,
                 file_name=f"{nombre_base}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True,
-                help="Generado con la estructura exacta del documento original: Horario Escolar, Dosificador General, tablas por día con Inicio/Desarrollo/Cierre y firmas."
+                help="Plantilla oficial editable con Horario Escolar, Dosificador General, tablas por día (Inicio/Desarrollo/Cierre) y firmas institucionales."
             )
     
         with col_d2:
             st.download_button(
-                label="Descargar PDF (.pdf) [Listo para Imprimir]",
+                label="📑 Descargar PDF (.pdf)",
                 data=pdf_buffer,
                 file_name=f"{nombre_base}.pdf",
                 mime="application/pdf",
                 use_container_width=True,
-                help="Documento formateado con membrete SEP, tablas de Horario Escolar, rutinas matutinas y firmas institucionales."
+                help="Documento formateado con membrete SEP, tablas de Horario Escolar, rutinas matutinas y firmas institucionales listo para imprimir."
             )
     
         with col_d3:
             st.download_button(
-                label="Descargar Markdown (.md) [Texto]",
+                label="📝 Markdown (.md)",
                 data=st.session_state.planeacion_generada,
                 file_name=f"{nombre_base}.md",
                 mime="text/markdown",
@@ -4763,19 +5327,104 @@ if authentication_status:
             )
     
         st.caption("✓ **Replicación exacta del formato:** Conserva el membrete, el Horario Escolar, el Dosificador General de Proyectos, las tablas diarias (Dictado, Cálculo, Problema, Inicio, Desarrollo, Cierre), Recursos, Evaluación y los espacios para las firmas oficiales de **Aday Domínguez Domínguez** (Docente) y **José Guillermo Borjas Díaz** (Director).")
+
+        sem_kempis_act = 7 if (semana_seleccionada == 7) else 6
+        kempis_activo_vista = (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada, directrices_o_texto=st.session_state.planeacion_generada))
+        if kempis_activo_vista:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #F3E8FF 0%, #EDE9FE 100%); border-left: 5px solid #7C3AED; border-radius: 8px; padding: 12px 18px; margin: 10px 0 16px 0;">
+                <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">📘 Cuadernillo Didáctico Profa Kempis Integrado (Semana {sem_kempis_act}):</span><br>
+                <span style="color: #5B21B6; font-size: 0.9rem;">
+                    El archivo <b>Word (.docx)</b> descargable incluye la sección oficial de <b>Anexos Imprimibles y Fichas de Trabajo</b> listas para fotocopiar para los alumnos (organizador del cuento, semáforo de grasas y sellos NOM-051, múltiplos del gramo, cálculo de IVA, mediación de conflictos y efemérides), así como los enlaces directos a los videos de YouTube.
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
     
         st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
     
+        parsed_resultado = parse_plan_sections(st.session_state.planeacion_generada)
+        dias_para_mostrar = dias_seleccionados if dias_seleccionados else DIAS_HABIL_NOMBRES
+
         # Pestañas interactivas para revisar la planeación
-        tab_completa, tab_dosificador, tab_rutina, tab_sesiones, tab_evaluacion, tab_ajustes = st.tabs([
-            "Documento Completo",
-            "Dosificador y Articulación",
-            "Rutina de Inicio del Día",
-            "Secuencia por Sesiones",
-            "Instrumentos de Evaluación",
-            "Ajustes Razonables (BAP/DUA)"
+        tab_dias_ver, tab_completa, tab_dosificador, tab_evaluacion, tab_ajustes, tab_kempis = st.tabs([
+            "📅 Vista Día por Día (Lunes a Viernes)",
+            "📄 Documento Completo Oficial",
+            "📋 Dosificador y Articulación",
+            "📊 Instrumentos de Evaluación",
+            "♿ Inclusión (BAP/DUA)",
+            "📘 Cuadernillo Profa Kempis"
         ])
-    
+
+        with tab_dias_ver:
+            st.markdown("""
+            <div style="margin-bottom: 10px;">
+                <span style="font-weight: 700; color: #4C1D95; font-size: 0.96rem;">🗓️ Navegación Modular Día por Día</span>
+                <p style="color: #64748B; font-size: 0.84rem; margin: 2px 0 8px 0;">
+                    Visualiza de forma clara e independiente la Rutina Matutina y la Secuencia Didáctica (Inicio, Desarrollo y Cierre) de cada día sin saturar la pantalla.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            subtabs_dias = st.tabs([f"🗓️ {d}" for d in dias_para_mostrar])
+            dias_fechas_map_ver = st.session_state.get("dias_fechas", {})
+
+            for idx_d, (st_dia, nom_dia) in enumerate(zip(subtabs_dias, dias_para_mostrar)):
+                with st_dia:
+                    f_label = dias_fechas_map_ver.get(nom_dia, f"{nom_dia} (Semana {semana_seleccionada})")
+                    r_item = parsed_resultado.get("rutinas_por_dia", {}).get(nom_dia)
+                    if not r_item and idx_d < len(parsed_resultado.get("rutinas", [])):
+                        r_item = parsed_resultado["rutinas"][idx_d]
+                    
+                    s_item = parsed_resultado.get("sesiones_por_dia", {}).get(nom_dia)
+                    if not s_item and idx_d < len(parsed_resultado.get("sesiones", [])):
+                        s_item = parsed_resultado["sesiones"][idx_d]
+
+                    r_dictado = r_item.get("dictado", "Palabras clave ortográficas y de vocabulario.") if r_item else "Palabras clave ortográficas y de vocabulario."
+                    r_calculo = r_item.get("calculo", "Operaciones combinadas de cálculo mental rápido.") if r_item else "Operaciones combinadas de cálculo mental rápido."
+                    r_problema = r_item.get("problema", "Problema razonado de situaciones de la vida cotidiana.") if r_item else "Problema razonado de situaciones de la vida cotidiana."
+
+                    s_inicio = s_item.get("inicio", "Recuperación de saberes previos y planteamiento de pregunta detonadora.") if s_item else "Recuperación de saberes previos y planteamiento de pregunta detonadora."
+                    s_desarrollo = s_item.get("desarrollo", "Actividades de indagación y aplicación colaborativa con LTG.") if s_item else "Actividades de indagación y aplicación colaborativa con LTG."
+                    s_cierre = s_item.get("cierre", "Socialización de hallazgos, síntesis de aprendizajes y coevaluación.") if s_item else "Socialización de hallazgos, síntesis de aprendizajes y coevaluación."
+                    s_recursos = s_item.get("recursos", "Libro de texto gratuito, libreta de notas y materiales del aula.") if s_item else "Libro de texto gratuito, libreta de notas y materiales del aula."
+
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); border: 1.5px solid #DDD6FE; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-weight: 700; color: #4C1D95; font-size: 0.94rem;">
+                            🗓️ <b>{f_label}</b> — Sesión {idx_d + 1} de {len(dias_para_mostrar)}
+                        </div>
+                        <div style="font-size: 0.76rem; background: #EDE9FE; color: #6D28D9; padding: 3px 10px; border-radius: 9999px; font-weight: 600;">
+                            08:00 - 13:00 • 90 min de sesión
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    c_ver_rut, c_ver_sec = st.columns([1, 1.35])
+                    with c_ver_rut:
+                        st.markdown(f"""
+                        <div class="day-moment-box">
+                            <div class="day-moment-title">🌅 Rutina Matutina Permanente (15-20 min)</div>
+                            <div class="day-moment-text">
+                                <b>✍️ Dictado:</b> {r_dictado}<br><br>
+                                <b>🔢 Cálculo Mental:</b> {r_calculo}<br><br>
+                                <b>🧩 Problema Razonado:</b> {r_problema}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                    with c_ver_sec:
+                        st.markdown(f"""
+                        <div class="day-moment-box" style="border-left-color: #059669;">
+                            <div class="day-moment-title" style="color: #065F46;">🎯 Secuencia Didáctica (Inicio, Desarrollo y Cierre)</div>
+                            <div class="day-moment-text">
+                                <span style="color: #047857; font-weight: 700;">🟢 Inicio (15-20 min):</span><br>{s_inicio}<br><br>
+                                <span style="color: #B45309; font-weight: 700;">🟡 Desarrollo (50-60 min):</span><br>{s_desarrollo}<br><br>
+                                <span style="color: #4C1D95; font-weight: 700;">🔴 Cierre (15-20 min):</span><br>{s_cierre}<br><br>
+                                <span style="color: #374151; font-weight: 700;">📦 Recursos y Materiales:</span><br>{s_recursos}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
         with tab_completa:
             st.markdown(st.session_state.planeacion_generada)
     
@@ -4786,28 +5435,6 @@ if authentication_status:
             for p in partes:
                 if p.startswith("I. ") or p.startswith("II. "):
                     st.markdown("# " + p)
-    
-        with tab_rutina:
-            st.markdown("### Rutina Matutina Permanente (Dictado, Cálculo Mental y Problema Razonado)")
-            partes = st.session_state.planeacion_generada.split("# ")
-            encontrado = False
-            for p in partes:
-                if "ACTIVIDADES DE INICIO DEL DÍA" in p or "III. " in p:
-                    st.markdown("# " + p)
-                    encontrado = True
-            if not encontrado:
-                st.info("Revisa la pestaña de 'Documento Completo' para ver las actividades matutinas.")
-    
-        with tab_sesiones:
-            st.markdown("### Secuencia Didáctica de Intervención Docente (Inicio, Desarrollo y Cierre)")
-            partes = st.session_state.planeacion_generada.split("# ")
-            encontrado = False
-            for p in partes:
-                if "SECUENCIA DIDÁCTICA" in p or "IV. " in p:
-                    st.markdown("# " + p)
-                    encontrado = True
-            if not encontrado:
-                st.info("Revisa la pestaña de 'Documento Completo' para ver el desglose de sesiones.")
     
         with tab_evaluacion:
             st.markdown("### Instrumentos de Evaluación Formativa")
@@ -4826,6 +5453,40 @@ if authentication_status:
             for p in partes:
                 if "AJUSTES RAZONABLES" in p or "VI. " in p or "VII. " in p:
                     st.markdown("# " + p)
+
+        with tab_kempis:
+            st.markdown(f"### 📘 Cuadernillo Didáctico de Actividades (Semana {sem_kempis_act} — Profa Kempis)")
+            kempis_data_vista = obtener_recursos_kempis_por_semana(sem_kempis_act)
+            if kempis_data_vista:
+                st.markdown(f"**Periodo sugerido:** `{kempis_data_vista.get('periodo_sugerido', 'Octubre')}` | **Tema General:** *{kempis_data_vista.get('titulo_general', '')}*")
+                
+                c_k1, c_k2 = st.columns(2)
+                with c_k1:
+                    st.markdown("#### 📝 Fichas y Anexos Imprimibles")
+                    for c_nom, c_val in kempis_data_vista["campos"].items():
+                        st.markdown(f"""
+                        <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+                            <span style="font-weight: 700; color: #7C3AED;">{c_nom}:</span> <b>{c_val['anexo_nombre']}</b><br>
+                            <span style="font-size: 0.85rem; color: #334155;">{c_val['actividad_practica']}</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                with c_k2:
+                    st.markdown("#### 🎥 Videos de Apoyo en YouTube")
+                    for c_nom, c_val in kempis_data_vista["campos"].items():
+                        st.markdown(f"""
+                        <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+                            <span style="font-weight: 700; color: #BE185D;">{c_nom}:</span> <b>{c_val['video_titulo']}</b><br>
+                            <a href="{c_val['video_url']}" target="_blank" style="color: #2563EB; font-size: 0.85rem; text-decoration: underline;">▶ Ver video explicativo en YouTube</a>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                ef_info_tab = kempis_data_vista.get("efemeride_principal", {})
+                if ef_info_tab:
+                    st.markdown(f"#### 🇲🇽 Conmemoración Cívica: {ef_info_tab.get('nombre', '')}")
+                    st.markdown(f"- **Actividad:** {ef_info_tab.get('actividad', '')}")
+                    st.markdown(f"- **Anexo imprimible:** `{ef_info_tab.get('anexo_nombre', '')}`")
+                    if ef_info_tab.get('video_url'):
+                        st.markdown(f"- **Video de apoyo:** [{ef_info_tab.get('video_titulo', 'Ver en YouTube')}]({ef_info_tab.get('video_url')})")
     
 # ==========================================
 # PIE DE PÁGINA INSTITUCIONAL

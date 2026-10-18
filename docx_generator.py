@@ -12,13 +12,25 @@ Adopta estrictamente el diseño, tipografía y la paleta de colores estilo Gemin
 
 import io
 import re
-from typing import Dict, Any
+from typing import Dict, Any, List
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
+
+try:
+    from cuadernillo_kempis import (
+        detectar_relevancia_kempis,
+        obtener_anexos_kempis_para_docx,
+        CUADERNILLO_KEMPIS_DATA
+    )
+except ImportError:
+    detectar_relevancia_kempis = lambda *args, **kwargs: False
+    obtener_anexos_kempis_para_docx = lambda *args, **kwargs: []
+    CUADERNILLO_KEMPIS_DATA = {}
+
 
 # Paleta de Colores Estilo Gemini
 COLOR_MORADO_INTENSO = RGBColor(114, 9, 183)    # #7209B7 (Encabezados principales)
@@ -125,8 +137,10 @@ def parse_plan_sections(plan_text: str) -> Dict[str, Any]:
         "rutinas_por_dia": {},
         "sesiones_por_dia": {},
         "adecuaciones": "Uso de apoyos visuales y tutoría entre pares. Graduación de problemas con material concreto.",
-        "observaciones": "Seguimiento puntual a estudiantes con rezago en el diario de campo del docente."
+        "observaciones": "Seguimiento puntual a estudiantes con rezago en el diario de campo del docente.",
+        "raw_text": plan_text or ""
     }
+
 
     # Extraer campos de identificación curricular
     m_proj = re.search(r'Nombre (?:sugerido para el |del )?Proyecto[:\s\*]+([^\n]+)', plan_text, re.IGNORECASE)
@@ -483,7 +497,310 @@ def add_document_credits(doc):
             p_foot.runs[0].font.color.rgb = RGBColor(148, 163, 184)
 
 
+def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escuela: Dict[str, Any]):
+    """
+    Integra formalmente la sección didáctica y los anexos imprimibles del
+    Cuadernillo de Actividades (Semanas 6 y 7 - Profa Kempis) como recurso de apoyo,
+    incluyendo tablas con fichas de trabajo, conversión de múltiplos del gramo,
+    análisis de sellos de advertencia NOM-051, cálculo del IVA y enlaces a videos explicativos.
+    """
+    periodo_str = str(datos_escuela.get("periodo", "") if datos_escuela else "").lower()
+    raw_text = (parsed_info.get("raw_text", "") + " " + periodo_str).lower()
+
+    semana_num = None
+    if datos_escuela and "semana" in datos_escuela:
+        try:
+            semana_num = int(datos_escuela["semana"])
+        except Exception:
+            pass
+    if not semana_num:
+        m_sem = re.search(r'semana\s*(\d+)', periodo_str)
+        if m_sem:
+            semana_num = int(m_sem.group(1))
+
+    es_relevante = detectar_relevancia_kempis(
+        semana=semana_num,
+        directrices_o_texto=raw_text
+    )
+
+    if not es_relevante and semana_num not in [6, 7]:
+        return
+
+    # Determinar si es semana 6 o 7
+    if semana_num == 7 or any(k in raw_text for k in ["semana 7", "lectura dramatizada", "plato del bien comer", "jarra del buen", "calidad de vida", "16 de octubre", "alimentación"]):
+        sem_kempis = 7
+    else:
+        sem_kempis = 6
+
+    kempis_meta = CUADERNILLO_KEMPIS_DATA.get(sem_kempis)
+    if not kempis_meta:
+        return
+
+    anexos_lista = obtener_anexos_kempis_para_docx(sem_kempis)
+    if not anexos_lista:
+        return
+
+    # 1. Salto de página para presentar los anexos imprimibles
+    doc.add_page_break()
+
+    # 2. Encabezado principal de la sección
+    p_hdr = doc.add_paragraph()
+    p_hdr.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_sub = p_hdr.add_run("RECURSOS DIDÁCTICOS Y MATERIALES IMPRIMIBLES DE APOYO\n")
+    r_sub.font.name = 'Arial'
+    r_sub.font.bold = True
+    r_sub.font.size = Pt(10)
+    r_sub.font.color.rgb = COLOR_MORADO_OSCURO
+
+    r_tit = p_hdr.add_run(f"CUADERNILLO DE ACTIVIDADES — SEMANA {sem_kempis} (PROFA KEMPIS)\n")
+    r_tit.font.name = 'Arial'
+    r_tit.font.bold = True
+    r_tit.font.size = Pt(12)
+    r_tit.font.color.rgb = COLOR_MORADO_INTENSO
+
+    r_desc = p_hdr.add_run(f"{kempis_meta.get('descripcion', '')} Vinculado a los videos explicativos oficiales en YouTube.")
+    r_desc.font.name = 'Arial'
+    r_desc.font.size = Pt(8.5)
+    r_desc.font.italic = True
+    r_desc.font.color.rgb = COLOR_TEXTO_OSCURO
+
+    doc.add_paragraph()
+
+    # 3. Tabla Resumen de Anexos y Videos de Apoyo
+    p_t_lbl = doc.add_paragraph()
+    r_tl = p_t_lbl.add_run("1. ÍNDICE DE ANEXOS Y VIDEOS PEDAGÓGICOS ENLAZADOS:")
+    r_tl.font.name = 'Arial'
+    r_tl.font.bold = True
+    r_tl.font.size = Pt(9.5)
+    r_tl.font.color.rgb = COLOR_MORADO_INTENSO
+
+    tbl_resumen = doc.add_table(rows=len(anexos_lista) + 1, cols=4)
+    tbl_resumen.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tbl_resumen.autofit = False
+    set_table_borders(tbl_resumen, color=HEX_BORDE_TENUE)
+
+    headers_res = ["CAMPO FORMATIVO", "ANEXO IMPRIMIBLE", "ACTIVIDAD VIVENCIAL", "VIDEO DE APOYO"]
+    widths_res = [Inches(1.5), Inches(2.0), Inches(2.3), Inches(1.7)]
+
+    for c_i, h_txt in enumerate(headers_res):
+        c = tbl_resumen.rows[0].cells[c_i]
+        c.width = widths_res[c_i]
+        c.text = h_txt
+        set_cell_background(c, HEX_MORADO_INTENSO)
+        set_cell_margins(c, top=45, bottom=45, left=45, right=45)
+        p = c.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if p.runs:
+            p.runs[0].font.name = 'Arial'
+            p.runs[0].font.bold = True
+            p.runs[0].font.size = Pt(8)
+            p.runs[0].font.color.rgb = COLOR_BLANCO
+
+    for row_idx, anexo in enumerate(anexos_lista, 1):
+        row = tbl_resumen.rows[row_idx]
+        for c_i, w in enumerate(widths_res):
+            row.cells[c_i].width = w
+
+        c0 = row.cells[0]
+        c0.text = anexo.get("campo", "")
+        set_cell_background(c0, HEX_LILA_SUAVE)
+        set_cell_margins(c0, top=40, bottom=40, left=40, right=40)
+        if c0.paragraphs and c0.paragraphs[0].runs:
+            c0.paragraphs[0].runs[0].font.name = 'Arial'
+            c0.paragraphs[0].runs[0].font.size = Pt(7.5)
+            c0.paragraphs[0].runs[0].font.bold = True
+            c0.paragraphs[0].runs[0].font.color.rgb = COLOR_MORADO_OSCURO
+
+        c1 = row.cells[1]
+        c1.text = f"{anexo.get('nombre', '')}\n\n{anexo.get('descripcion', '')}"
+        set_cell_background(c1, HEX_BLANCO)
+        set_cell_margins(c1, top=40, bottom=40, left=40, right=40)
+        if c1.paragraphs and c1.paragraphs[0].runs:
+            c1.paragraphs[0].runs[0].font.name = 'Arial'
+            c1.paragraphs[0].runs[0].font.size = Pt(7.5)
+            c1.paragraphs[0].runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+        c2 = row.cells[2]
+        c2.text = anexo.get("actividad", "")
+        set_cell_background(c2, HEX_BLANCO)
+        set_cell_margins(c2, top=40, bottom=40, left=40, right=40)
+        if c2.paragraphs and c2.paragraphs[0].runs:
+            c2.paragraphs[0].runs[0].font.name = 'Arial'
+            c2.paragraphs[0].runs[0].font.size = Pt(7.5)
+            c2.paragraphs[0].runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+        c3 = row.cells[3]
+        c3.text = f"🎥 {anexo.get('video_titulo', '')}\n\n🔗 {anexo.get('video_url', '')}"
+        set_cell_background(c3, HEX_BLANCO)
+        set_cell_margins(c3, top=40, bottom=40, left=40, right=40)
+        if c3.paragraphs and c3.paragraphs[0].runs:
+            c3.paragraphs[0].runs[0].font.name = 'Arial'
+            c3.paragraphs[0].runs[0].font.size = Pt(7.5)
+            c3.paragraphs[0].runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+    doc.add_paragraph()
+
+    # 4. Fichas de Trabajo Imprimibles Detalladas
+    p_fichas_lbl = doc.add_paragraph()
+    r_fl = p_fichas_lbl.add_run("2. FICHAS DE TRABAJO IMPRIMIBLES (ANEXOS LISTOS PARA EL ALUMNO):")
+    r_fl.font.name = 'Arial'
+    r_fl.font.bold = True
+    r_fl.font.size = Pt(9.5)
+    r_fl.font.color.rgb = COLOR_MORADO_INTENSO
+
+    for anexo in anexos_lista:
+        t_ficha = doc.add_table(rows=3, cols=1)
+        t_ficha.alignment = WD_TABLE_ALIGNMENT.CENTER
+        t_ficha.autofit = False
+        set_table_borders(t_ficha, color=HEX_BORDE_TENUE)
+
+        c_hdr = t_ficha.rows[0].cells[0]
+        c_hdr.width = Inches(7.5)
+        c_hdr.text = f"ESCUELA PRIMARIA “REVOLUCIÓN SOCIAL DE 1910” | 6° GRADO “A”\n{anexo.get('nombre', '').upper()}"
+        set_cell_background(c_hdr, HEX_LILA_SUAVE)
+        set_cell_margins(c_hdr, top=45, bottom=45, left=60, right=60)
+        p_ch = c_hdr.paragraphs[0]
+        p_ch.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if p_ch.runs:
+            p_ch.runs[0].font.name = 'Arial'
+            p_ch.runs[0].font.bold = True
+            p_ch.runs[0].font.size = Pt(8.5)
+            p_ch.runs[0].font.color.rgb = COLOR_MORADO_OSCURO
+
+        c_al = t_ficha.rows[1].cells[0]
+        c_al.width = Inches(7.5)
+        c_al.text = "Nombre del alumno(a): ____________________________________________________  Fecha: ____________________"
+        set_cell_background(c_al, HEX_BLANCO)
+        set_cell_margins(c_al, top=35, bottom=35, left=60, right=60)
+        if c_al.paragraphs and c_al.paragraphs[0].runs:
+            c_al.paragraphs[0].runs[0].font.name = 'Arial'
+            c_al.paragraphs[0].runs[0].font.size = Pt(8)
+            c_al.paragraphs[0].runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+        c_body = t_ficha.rows[2].cells[0]
+        c_body.width = Inches(7.5)
+
+        a_nom = anexo.get('nombre', '')
+        if "6.1" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "1. Lee con atención el cuento seleccionado en el libro Múltiples Lenguajes (o el propuesto por la maestra).\n"
+                "2. Completa el siguiente organizador gráfico identificando la estructura de la narración:\n\n"
+                "• PLANTEAMIENTO / INICIO (¿Quiénes son los personajes y dónde ocurre la historia?):\n"
+                "  _______________________________________________________________________________________________\n\n"
+                "• NUDO / CONFLICTO (¿Qué problema o reto enfrentan los protagonistas?):\n"
+                "  _______________________________________________________________________________________________\n\n"
+                "• DESENLACE (¿Cómo se resuelve la situación y qué aprendieron?):\n"
+                "  _______________________________________________________________________________________________\n\n"
+                "• TIPO DE NARRADOR (Marca con una X):  (   ) Primera persona (Protagonista/Testigo)    (   ) Tercera persona (Omnisciente)\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "6.2" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "1. Observa el empaque de alimento que trajiste y completa la tabla de conversión (Método de la escalera: kg, hg, dag, g, dg, cg, mg).\n"
+                "2. Responde las preguntas de análisis nutricional:\n\n"
+                "• Nombre del producto: ________________________________  Contenido neto en gramos: ____________ g\n"
+                "• Conversión de masa: En kilogramos (kg): ___________ kg  |  En miligramos (mg): ___________ mg\n"
+                "• Sellos NOM-051 identificados (marca los que contiene):\n"
+                "  [  ] EXCESO CALORÍAS   [  ] EXCESO AZÚCARES   [  ] EXCESO GRASAS SATURADAS   [  ] EXCESO SODIO\n"
+                "• Si una porción de 100 g contiene 14 g de grasas, ¿cuántos gramos de grasa consumirá una persona en 350 g?\n"
+                "  Operaciones: ____________________________________________________  Resultado: _____________ g\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "6.3" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "1. Clasifica los servicios públicos de tu comunidad (agua, luz, recolección de basura, parques, escuelas).\n"
+                "2. Resuelve el cálculo del IVA (16%) en los siguientes recibos de compra simulados:\n\n"
+                "• Compra A: Artículos de limpieza escolar -> Subtotal: $300.00 pesos.\n"
+                "  Cálculo del IVA (300 x 0.16) = $___________  |  Total a pagar (Subtotal + IVA) = $___________\n\n"
+                "• Compra B: Balones y material deportivo -> Subtotal: $650.00 pesos.\n"
+                "  Cálculo del IVA (650 x 0.16) = $___________  |  Total a pagar (Subtotal + IVA) = $___________\n\n"
+                "• Pregunta de reflexión ciudadana: ¿Por qué es fundamental que todos contribuyamos con los impuestos?\n"
+                "  Respuesta: ___________________________________________________________________________________\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "6.4" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "1. Lee el caso práctico escolar: 'En el recreo, dos equipos de 6° grado quieren utilizar la única cancha disponible al mismo tiempo y comienzan a discutir acaloradamente'.\n"
+                "2. Aplica la ruta de mediación dialógica y responde:\n\n"
+                "• ¿Cuál es el origen o necesidad real de cada una de las partes? ____________________________________\n"
+                "• ¿Qué acuerdo pacífico propondrías tú como mediador(a) escolar? __________________________________\n"
+                "• Menciona los 3 valores indispensables para resolver desacuerdos sin violencia: ____________________\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "7.1" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "1. Lee el fragmento del guión teatral en equipo. Observa que los diálogos van precedidos por el nombre del personaje y las acotaciones entre paréntesis ( ).\n"
+                "2. Ensayen la lectura dramatizada cuidando entonación, pausas, volumen y gesticulación:\n\n"
+                "PERSONAJE A (con asombro y señalando al horizonte): —¡Miren lo que encontramos en el huerto escolar!\n"
+                "PERSONAJE B (acercándose con paso rápido y voz entusiasta): —¡Son las verduras que sembramos hace dos meses!\n"
+                "PERSONAJE C (sonriendo y tomando nota en su bitácora): —Registremos el peso en gramos antes de cosechar.\n\n"
+                "• Evaluación del equipo: Fluidez lectora: [  ] Sobresaliente  [  ] Satisfactorio  [  ] Por mejorar\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "7.2" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "1. Diseña un menú escolar saludable para un día, balanceando los 3 grupos del Plato del Bien Comer.\n"
+                "2. Estima la masa en gramos de cada alimento para asegurar una comida balanceada:\n\n"
+                "• Desayuno saludable:\n"
+                "  - Verduras y frutas (50% del plato): ____________________________ (Estimado: ________ g)\n"
+                "  - Granos y cereales integrales (30% del plato): _________________ (Estimado: ________ g)\n"
+                "  - Leguminosas y alimentos origen animal (20%): _________________ (Estimado: ________ g)\n"
+                "• Compromiso de hidratación: ¿Cuántos vasos de agua potable beberé hoy? (Meta: 6 a 8 vasos) -> [  ] Cumplido\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "7.3" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "Evalúa los indicadores de calidad de vida en tu colonia/comunidad en Durango marcando de 1 a 5 estrellas:\n\n"
+                "• Acceso a agua potable y drenaje seguro:  [ ★ ★ ★ ★ ★ ]\n"
+                "• Alumbrado y seguridad en las calles:     [ ★ ★ ★ ★ ★ ]\n"
+                "• Espacios verdes, parques y canchas:     [ ★ ★ ★ ★ ★ ]\n"
+                "• Servicios médicos y centros de salud:   [ ★ ★ ★ ★ ★ ]\n"
+                "• Propuesta comunitaria: ¿Qué acción colaborativa podemos realizar en la escuela para mejorar nuestro entorno?\n"
+                "  _______________________________________________________________________________________________\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        elif "7.4" in a_nom:
+            c_body.text = (
+                "INSTRUCCIONES:\n"
+                "Registra tu participación en el circuito kinestésico saludable de 6° 'A':\n\n"
+                "• Estación 1: Salto continuo de cuerda (1 minuto) -> Número de saltos: ________\n"
+                "• Estación 2: Carrera de relevos en zigzag -> Tiempo cronometrado: ________ seg\n"
+                "• Estación 3: Ejercicios de equilibrio y estiramiento muscular -> [  ] Realizado con éxito\n"
+                "• Pulso cardíaco en reposo: ______ lpm  |  Pulso cardíaco después de la actividad: ______ lpm\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+        else:
+            c_body.text = (
+                f"INSTRUCCIONES:\n"
+                f"1. Reflexiona sobre la conmemoración de: {anexo.get('tema')}.\n"
+                "2. Responde las siguientes interrogantes y elabora un dibujo o lema alusivo:\n\n"
+                f"• {anexo.get('actividad')}\n"
+                "• ¿Por qué es importante conmemorar esta fecha en nuestra comunidad escolar?\n"
+                "  _______________________________________________________________________________________________\n"
+                "• Lema o frase de acción comunitaria: ___________________________________________________________\n\n"
+                f"🎥 Video de consulta Profa Kempis: {anexo.get('video_titulo')} (Enlace: {anexo.get('video_url')})"
+            )
+
+        set_cell_background(c_body, HEX_BLANCO)
+        set_cell_margins(c_body, top=45, bottom=45, left=60, right=60)
+        for p_line in c_body.paragraphs:
+            if p_line.runs:
+                p_line.runs[0].font.name = 'Arial'
+                p_line.runs[0].font.size = Pt(7.5)
+                p_line.runs[0].font.color.rgb = COLOR_TEXTO_OSCURO
+
+        doc.add_paragraph()
+
+
 def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.BytesIO:
+
     """
     Construye la planeación oficial en Word (.docx) con rediseño tecnológico estilo Gemini:
     - Tipografía global estándar SEP: 'Arial' 10 pt
@@ -548,6 +865,22 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
     # DISTRIBUCIÓN DINÁMICA POR DÍA (for dia in dias_seleccionados:)
     # =======================================================
     dias_seleccionados = datos_escuela.get('dias_seleccionados') or datos_escuela.get('dias_planeados') or ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+
+    periodo_str = str(datos_escuela.get("periodo", "") if datos_escuela else "").lower()
+    raw_text = (parsed_info.get("raw_text", "") + " " + periodo_str).lower()
+    sem_val = None
+    if datos_escuela and "semana" in datos_escuela:
+        try:
+            sem_val = int(datos_escuela["semana"])
+        except Exception:
+            pass
+    if not sem_val:
+        m_s = re.search(r'semana\s*(\d+)', periodo_str)
+        if m_s:
+            sem_val = int(m_s.group(1))
+
+    es_kempis_activo = detectar_relevancia_kempis(semana=sem_val, directrices_o_texto=raw_text)
+    sem_kempis = 7 if (sem_val == 7 or any(k in raw_text for k in ["semana 7", "lectura dramatizada", "plato del bien comer", "jarra del buen", "calidad de vida", "16 de octubre", "alimentación"])) else 6
 
     for dia in dias_seleccionados:
         dia_idx = dias_seleccionados.index(dia)
@@ -714,7 +1047,10 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
 
         # Col 2: Recursos didácticos -> Celda de contenido con fondo completamente Blanco (#FFFFFF)
         c_rec = table.rows[4].cells[2]
-        c_rec.text = f"{sesion.get('recursos', 'Cuaderno del alumno, anexos y libros de texto SEP.')}"
+        rec_txt = str(sesion.get('recursos', 'Cuaderno del alumno, anexos y libros de texto SEP.'))
+        if es_kempis_activo and "kempis" not in rec_txt.lower():
+            rec_txt += f"\n\n• Cuadernillo Profa Kempis (Semana {sem_kempis}) y videos de apoyo en YouTube."
+        c_rec.text = rec_txt
         set_cell_background(c_rec, HEX_BLANCO)
         set_cell_margins(c_rec, top=45, bottom=45, left=45, right=45)
         if c_rec.paragraphs and c_rec.paragraphs[0].runs:
@@ -734,7 +1070,11 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
 
         document.add_paragraph()
 
+    # Integración del Cuadernillo de Actividades y Anexos Imprimibles (Profa Kempis)
+    add_cuadernillo_kempis_section(doc, parsed_info, datos_escuela)
+
     add_document_credits(doc)
+
 
     buf = io.BytesIO()
     doc.save(buf)

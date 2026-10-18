@@ -1,7 +1,7 @@
 """
 Módulo de conexión y extracción web en tiempo real con el catálogo oficial
 de la Comisión Nacional de Libros de Texto Gratuitos (CONALITEG - SEP).
-URL oficial: https://libros.conaliteg.gob.mx/primaria_2025.html
+URL oficial: https://libros.conaliteg.gob.mx/primaria.html
 """
 
 import re
@@ -70,7 +70,7 @@ LIBROS_SEP_FALLBACK = {
 # Desactivar advertencias de SSL en caso de certificados intermedios
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-CONALITEG_URL = "https://libros.conaliteg.gob.mx/primaria_2025.html"
+CONALITEG_URL = "https://libros.conaliteg.gob.mx/primaria.html"
 
 GRADE_MAPPING = {
     "1": "1° de Primaria",
@@ -105,7 +105,7 @@ def clean_title(title: str) -> str:
 def obtener_libros_conaliteg() -> Tuple[Dict[str, List[str]], bool]:
     """
     Realiza web scraping en tiempo real de la página oficial de CONALITEG
-    para extraer los libros de texto gratuitos vigentes del ciclo 2025-2026
+    para extraer los libros de texto gratuitos vigentes del ciclo 2026-2027
     clasificados por grado (1° a 6° de primaria).
     
     Retorna:
