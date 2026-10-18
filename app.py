@@ -677,7 +677,8 @@ from file_processor import (
     extract_text_from_docx,
     extract_text_from_txt,
     extraer_texto_url,
-    extraer_contenidos_pda_fase5
+    extraer_contenidos_pda_fase5,
+    busqueda_cruzada_archivos_plataforma
 )
 import socket
 import requests
@@ -4570,7 +4571,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                     "origen": "Programa Sintético Fase 5 (Oficial Subido)"
                 })
 
-    for campo in campos_sel:
+    for campo in CAMPOS_FORMATIVOS:
         if campo in banco_grado_activo:
             for item in banco_grado_activo[campo]:
                 if not any(s["contenido"] == item["contenido"] and s["pda"] == item["pda"] for s in sugerencias_pda):
@@ -4591,6 +4592,13 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             unsafe_allow_html=True
         )
 
+    campos_4_analitico = [
+        "Lenguajes",
+        "Saberes y Pensamiento Científico",
+        "Ética, Naturaleza y Sociedades",
+        "De lo Humano y lo Comunitario"
+    ]
+
     if sugerencias_pda:
         opciones_display = []
         for item in sugerencias_pda:
@@ -4599,7 +4607,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             else:
                 opciones_display.append(f"[{item['campo']}] {item['contenido'][:60]}... — PDA: {item['pda'][:70]}...")
 
-        # Predeterminar un PDA representativo de cada uno de los Campos Formativos seleccionados para transversalidad plena
+        # Predeterminar OBLIGATORIAMENTE un PDA de cada uno de los 4 Campos Formativos del Programa Analítico
         default_indices_pda = []
         pda_guardados = st.session_state.get("pda_cargados")
         if pda_guardados:
@@ -4617,40 +4625,59 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             if matched_indices:
                 default_indices_pda = matched_indices
 
-        if not default_indices_pda:
-            # Si corresponde a Semana 6 o 7 o temas Kempis, priorizar PDA afines
-            if semana_seleccionada in [6, 7] or es_kempis_pertinente:
-                kempis_keywords = ["texto literario", "cuento", "dramatiz", "alimento", "gramo", "proporcionalidad", "iva", "servicio", "paz", "conflicto", "estilos de vida", "12 de octubre", "1910"]
-                campos_vistos = set()
+        # Garantizar que los 4 campos formativos del Programa Analítico estén preseleccionados por defecto
+        campos_cubiertos = {sugerencias_pda[i]["campo"] for i in default_indices_pda if i < len(sugerencias_pda)}
+        kempis_keywords = ["texto literario", "cuento", "dramatiz", "alimento", "gramo", "proporcionalidad", "iva", "servicio", "paz", "conflicto", "estilos de vida", "12 de octubre", "1910"]
+        for c_target in campos_4_analitico:
+            if c_target not in campos_cubiertos:
+                idx_elegido = None
+                # Priorizar coincidencias temáticas del cuadernillo/semana
                 for idx_sug, sug_item in enumerate(sugerencias_pda):
-                    c_sug = sug_item.get("campo")
-                    c_txt = (sug_item.get("contenido", "") + " " + sug_item.get("pda", "")).lower()
-                    if c_sug not in campos_vistos and any(kw in c_txt for kw in kempis_keywords):
-                        campos_vistos.add(c_sug)
-                        default_indices_pda.append(idx_sug)
-
-            if not default_indices_pda:
-                campos_vistos = set()
-                for idx_sug, sug_item in enumerate(sugerencias_pda):
-                    c_sug = sug_item.get("campo")
-                    if c_sug not in campos_vistos:
-                        campos_vistos.add(c_sug)
-                        default_indices_pda.append(idx_sug)
-                    if len(default_indices_pda) >= (len(campos_sel) if campos_sel else 4):
-                        break
+                    if sug_item.get("campo") == c_target:
+                        c_txt = (sug_item.get("contenido", "") + " " + sug_item.get("pda", "")).lower()
+                        if any(kw in c_txt for kw in kempis_keywords):
+                            idx_elegido = idx_sug
+                            break
+                # Si no hubo coincidencia temática, tomar el primer PDA disponible para el campo
+                if idx_elegido is None:
+                    for idx_sug, sug_item in enumerate(sugerencias_pda):
+                        if sug_item.get("campo") == c_target:
+                            idx_elegido = idx_sug
+                            break
+                if idx_elegido is not None and idx_elegido not in default_indices_pda:
+                    default_indices_pda.append(idx_elegido)
+                    campos_cubiertos.add(c_target)
 
         if not default_indices_pda and sugerencias_pda:
             default_indices_pda = list(range(min(4, len(sugerencias_pda))))
 
         pda_seleccionados_indices = st.multiselect(
-            f"Contenidos y PDA oficiales disponibles para {grado_seleccionado}:",
+            f"Contenidos y PDA oficiales disponibles para {grado_seleccionado} (Programa Analítico / Sintético):",
             options=range(len(sugerencias_pda)),
             format_func=lambda x: opciones_display[x],
             default=default_indices_pda,
             key=f"pda_{st.session_state.widget_key}",
-            help=f"Mostrando los Contenidos y PDA oficiales del programa sintético para {grado_seleccionado} ({fase_correspondiente})."
+            help=f"Uso obligatorio del Programa Analítico: se preseleccionan los 4 Campos Formativos de la NEM para {grado_seleccionado} ({fase_correspondiente})."
         )
         items_pda_final = [sugerencias_pda[i] for i in pda_seleccionados_indices]
+
+        # Validar y notificar cobertura transversal de los 4 campos formativos
+        campos_en_seleccion = {it.get("campo") for it in items_pda_final}
+        campos_faltantes = [c for c in campos_4_analitico if c not in campos_en_seleccion]
+        if not campos_faltantes:
+            st.markdown(
+                f"<div style='background-color: #F5F3FF; border: 1.5px solid #8B5CF6; border-radius: 8px; padding: 0.5rem 0.85rem; margin-top: 0.4rem; color: #5B21B6; font-size: 0.85rem; font-weight: 600;'>"
+                f"✓ <b>Programa Analítico Integrado:</b> Los 4 Campos Formativos (Lenguajes, Saberes, Ética y De lo Humano) cuentan con contenidos y PDA oficiales seleccionados."
+                f"</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"<div style='background-color: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 8px; padding: 0.5rem 0.85rem; margin-top: 0.4rem; color: #92400E; font-size: 0.85rem; font-weight: 600;'>"
+                f"ℹ️ <b>Integración Automática del Programa Analítico:</b> El generador suplementará automáticamente los campos formativos pendientes ({', '.join(campos_faltantes)}) a partir del Programa Analítico y la búsqueda cruzada para asegurar la transversalidad completa."
+                f"</div>",
+                unsafe_allow_html=True
+            )
 
     else:
         items_pda_final = []
@@ -4930,28 +4957,69 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         ejes_txt = ", ".join(ejes) if ejes else "Ejes articuladores por definir"
         problemica_txt = directrices.strip() if directrices and directrices.strip() else EJEMPLO_PROBLEMICA_ANALITICO
     
+        # Búsqueda cruzada en archivos de la plataforma para garantizar los 4 Campos Formativos y recursos
+        dossier_base = None
+        try:
+            dossier_base = busqueda_cruzada_archivos_plataforma(
+                semana=semana_seleccionada,
+                grado=grado,
+                campos_formativos=campos_formativos,
+                dias_seleccionados=dias_seleccionados,
+                directrices_docente=directrices,
+                archivos_procesados=st.session_state.get("archivos_procesados"),
+                mes=st.session_state.get('cal_mes_nombre'),
+                libros_seleccionados=libros_seleccionados
+            )
+        except Exception:
+            dossier_base = None
+
         # Detección y vinculación dinámica del proyecto y anexos de la semana oficial SEP
-        proyecto_info = obtener_proyecto_semana(semana_seleccionada, mes=st.session_state.get('cal_mes_nombre'))
-        nombre_proyecto_def = f"{proyecto_info['proyecto']} — {proyecto_info.get('fase_metodologica', 'Proyecto Integrador Comunitario')}"
+        proyecto_info = (dossier_base.get("proyecto_semana") if dossier_base else None) or obtener_proyecto_semana(semana_seleccionada, mes=st.session_state.get('cal_mes_nombre'))
+        nombre_proyecto_def = f"{proyecto_info.get('proyecto', 'Proyecto Integrador Comunitario')} — {proyecto_info.get('fase_metodologica', 'Fase 5')}"
+
+        # Garantizar que contenidos_pda incluya los 4 Campos Formativos del Programa Analítico
+        campos_4_base = ["Lenguajes", "Saberes y Pensamiento Científico", "Ética, Naturaleza y Sociedades", "De lo Humano y lo Comunitario"]
+        campos_en_pda = set()
+        contenidos_pda_completos = list(contenidos_pda or [])
+        for it in contenidos_pda_completos:
+            c_nom = (it.get("campo") or "").strip()
+            for c_b in campos_4_base:
+                if c_b.lower() in c_nom.lower() or c_nom.lower() in c_b.lower():
+                    campos_en_pda.add(c_b)
+
+        if len(campos_en_pda) < 4 and dossier_base and "pda_4campos" in dossier_base:
+            for item_d in dossier_base["pda_4campos"]:
+                if item_d["campo"] not in campos_en_pda:
+                    contenidos_pda_completos.append({
+                        "campo": item_d["campo"],
+                        "contenido": item_d["contenido"],
+                        "pda": item_d["pda"],
+                        "libro_vinculado": item_d.get("libro_vinculado", libros_txt),
+                        "problematica": item_d.get("problematica_atendida", "Comprensión lectora, velocidad, ortografía y comunidad")
+                    })
+                    campos_en_pda.add(item_d["campo"])
 
         # Preparar texto de contenidos y pda sintetizados para la tabla inicial
-        if contenidos_pda:
-            resumen_cont = " // ".join(f"[{item.get('campo', '')}] {item.get('contenido', '')}" for item in contenidos_pda)
-            resumen_pda = " // ".join(f"[{item.get('campo', '')}] {item.get('pda', '')}" for item in contenidos_pda)
+        if contenidos_pda_completos:
+            resumen_cont = " // ".join(f"[{item.get('campo', '')}] {item.get('contenido', '')}" for item in contenidos_pda_completos)
+            resumen_pda = " // ".join(f"[{item.get('campo', '')}] {item.get('pda', '')}" for item in contenidos_pda_completos)
         else:
             resumen_cont = "[Redactar Contenido Sintético oficial del programa analítico]"
             resumen_pda = "[Redactar Procesos de Desarrollo de Aprendizaje (PDA)]"
     
-        # Construir tabla curricular NEM
+        # Construir tabla curricular NEM con los 4 Campos Formativos obligatorios
         filas_curricular = []
-        if contenidos_pda:
-            for item in contenidos_pda:
-                c_campo = item.get("campo", campos_formativos[0] if campos_formativos else "Lenguajes")
+        if contenidos_pda_completos:
+            for item in contenidos_pda_completos:
+                c_campo = item.get("campo", "Lenguajes")
                 c_cont = item.get("contenido", "[Redactar contenido sintético]")
                 c_pda = item.get("pda", "[Redactar PDA]")
-                filas_curricular.append(f"| **{c_campo}** | {c_cont} | {c_pda} | {libros_txt} | Comprensión lectora, velocidad, ortografía y comunidad |")
+                c_lib = item.get("libro_vinculado", libros_txt)
+                c_prob = item.get("problematica", "Comprensión lectora, velocidad, ortografía y comunidad")
+                filas_curricular.append(f"| **{c_campo}** | {c_cont} | {c_pda} | {c_lib} | {c_prob} |")
         else:
-            filas_curricular.append(f"| **{campos_txt}** | [Redactar Contenido Sintético aquí] | [Redactar PDA aquí] | {libros_txt} | [Articular problemáticas del Programa Analítico] |")
+            for c_n in campos_4_base:
+                filas_curricular.append(f"| **{c_n}** | Contenido oficial del Programa Analítico | PDA oficial Fase 5 | {libros_txt} | Comprensión lectora, velocidad, ortografía y comunidad |")
         
         tabla_curricular_md = "\n".join(filas_curricular)
     
@@ -4960,32 +5028,37 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         rutinas_md = ""
         secuencias_md = ""
 
+        recursos_por_dia = dossier_base.get("recursos_por_dia", {}) if dossier_base else {}
+
         for s, nombre_dia in enumerate(dias_seleccionados, 1):
             fecha_dia = dias_fechas.get(nombre_dia, nombre_dia)
-            anexo_dia = obtener_anexos_por_semana_y_dia(semana_seleccionada, nombre_dia, mes=st.session_state.get('cal_mes_nombre'))
+            rec_dia = recursos_por_dia.get(nombre_dia, {})
+
+            anexo_dia = rec_dia.get("anexo") or obtener_anexos_por_semana_y_dia(semana_seleccionada, nombre_dia, mes=st.session_state.get('cal_mes_nombre'))
             r_dictados = proyecto_info.get("rutinas_matutinas", {}).get("dictado", {})
             r_calculo = proyecto_info.get("rutinas_matutinas", {}).get("calculo_mental", {})
             r_problemas = proyecto_info.get("rutinas_matutinas", {}).get("problemas_razonados", {})
 
-            dictado_txt = r_dictados.get(nombre_dia, f"Palabras clave reflexivas para {nombre_dia} con desafío ortográfico.")
-            calculo_txt = r_calculo.get(nombre_dia, f"Operaciones de cálculo mental contextualizadas para {nombre_dia}.")
-            problema_txt = r_problemas.get(nombre_dia, f"Problema razonado de situaciones comunitarias en Durango.")
+            dictado_txt = rec_dia.get("dictado") or (r_dictados.get(nombre_dia) if isinstance(r_dictados, dict) else f"Palabras clave reflexivas para {nombre_dia} con desafío ortográfico.")
+            calculo_txt = rec_dia.get("calculo_mental") or (r_calculo.get(nombre_dia) if isinstance(r_calculo, dict) else f"Operaciones de cálculo mental contextualizadas para {nombre_dia}.")
+            problema_txt = rec_dia.get("problema_razonado") or (r_problemas.get(nombre_dia) if isinstance(r_problemas, dict) else f"Problema razonado de situaciones comunitarias en Durango.")
 
             rutinas_md += f"""
 ### Sesión {s} ({fecha_dia}):
 - **Dictado Ortográfico:** {dictado_txt}
+- **Velocidad y Fluidez Lectora:** 1 minuto cronometrado con modulación y registro de fluidez.
 - **Cálculo Mental:** {calculo_txt}
 - **Problema Razonado:** {problema_txt}
 """
             sec_dia = proyecto_info.get("secuencias_por_dia", {}).get(nombre_dia, {})
-            inicio_txt = sec_dia.get("inicio", f"Activación de conocimientos previos y planteamiento detonador para {nombre_dia}.")
-            desarrollo_txt = sec_dia.get("desarrollo", f"Indagación práctica, análisis en comunidades de aprendizaje y resolución del anexo de la sesión: {anexo_dia}.")
-            cierre_txt = sec_dia.get("cierre", "Puesta en común, balance de avances y reflexión comunitaria en asamblea de aula.")
+            inicio_txt = rec_dia.get("inicio") or sec_dia.get("inicio", f"Activación de conocimientos previos y planteamiento detonador para {nombre_dia}.")
+            desarrollo_txt = rec_dia.get("desarrollo") or sec_dia.get("desarrollo", f"Indagación práctica, análisis en comunidades de aprendizaje y resolución del anexo de la sesión: {anexo_dia}.")
+            cierre_txt = rec_dia.get("cierre") or sec_dia.get("cierre", "Puesta en común, balance de avances y reflexión comunitaria en asamblea de aula.")
             recursos_s = f"{libros_txt}, {anexo_dia} y libreta del alumno."
             evidencia_s = f"Ficha de trabajo completada: {anexo_dia}."
 
             secuencias_md += f"""
-### Sesión {s} (**Día: {fecha_dia}**) - {proyecto_info['proyecto']} ({nombre_dia})
+### Sesión {s} (**Día: {fecha_dia}**) - {proyecto_info.get('proyecto', 'Proyecto Integrador')} ({nombre_dia})
 - **Tiempo estimado:** 90 minutos
 - **Inicio (15-20 min):** {inicio_txt}
 - **Desarrollo (50-60 min):** {desarrollo_txt}
@@ -5327,6 +5400,29 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         prog_sintetico_contexto = st.session_state.programa_sintetico_texto
                         scraping_fallido = False
     
+                    # 2.5 BÚSQUEDA GLOBAL Y CRUZADA EN ARCHIVOS DE LA PLATAFORMA (PROGRAMA ANALÍTICO, CUADERNILLOS, LIBROS SEP Y ANEXOS)
+                    with st.status("🔍 Búsqueda Cruzada en Archivos de la Plataforma y Programa Analítico...", expanded=True) as status_cruzada:
+                        st.write("• Extrayendo Contenidos y PDA de los 4 Campos Formativos del Programa Analítico oficial...")
+                        st.write(f"• Leyendo Cuadernillo Didáctico SEP (Semana {semana_seleccionada} de 37) y fichas imprimibles...")
+                        st.write(f"• Cruzando Libros de Texto Gratuitos SEP ({grado_sel}) y Orientaciones de Consejo Técnico Escolar...")
+                        dossier_busqueda = busqueda_cruzada_archivos_plataforma(
+                            semana=semana_seleccionada,
+                            grado=grado_seleccionado,
+                            campos_formativos=campos_sel,
+                            dias_seleccionados=dias_seleccionados,
+                            directrices_docente=directrices_input,
+                            archivos_procesados=archivos_para_procesar,
+                            mes=cal_mes_actual,
+                            año=cal_año_actual,
+                            libros_seleccionados=libros_sel,
+                            guia_cte=guia_cte_sel
+                        )
+                        st.session_state["ultimo_dossier_busqueda"] = dossier_busqueda
+                        status_cruzada.update(
+                            label=f"✓ Búsqueda cruzada completada: {len(dossier_busqueda['archivos_consultados'])} fuentes alineadas y 4 Campos Formativos vinculados",
+                            state="complete"
+                        )
+
                     # 3. Enviar todo el bloque de información estructurada a la API de Gemini (modelo gemini-3.8-flash)
                     plan_generado, prompt_utilizado = generate_planeacion(
                         datos_escuela=datos_escuela_actual,
@@ -5354,6 +5450,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         busqueda_web=False,
                         contexto_url=contexto_url,
                         directriz_contexto_url_txt=directriz_contexto_url_txt,
+                        dossier_busqueda=dossier_busqueda,
                         vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
                     )
                     st.session_state.planeacion_generada = plan_generado
@@ -5463,6 +5560,29 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         prog_sintetico_contexto = st.session_state.programa_sintetico_texto
                         scraping_fallido = False
     
+                    # 2.5 BÚSQUEDA GLOBAL Y CRUZADA EN ARCHIVOS DE LA PLATAFORMA (PROGRAMA ANALÍTICO, CUADERNILLOS, LIBROS SEP Y ANEXOS)
+                    with st.status("🔍 Búsqueda Cruzada en Archivos de la Plataforma y Programa Analítico...", expanded=True) as status_cruzada_web:
+                        st.write("• Extrayendo Contenidos y PDA de los 4 Campos Formativos del Programa Analítico oficial...")
+                        st.write(f"• Leyendo Cuadernillo Didáctico SEP (Semana {semana_seleccionada} de 37) y fichas imprimibles...")
+                        st.write(f"• Cruzando Libros de Texto Gratuitos SEP ({grado_sel}) y Orientaciones de Consejo Técnico Escolar...")
+                        dossier_busqueda = busqueda_cruzada_archivos_plataforma(
+                            semana=semana_seleccionada,
+                            grado=grado_seleccionado,
+                            campos_formativos=campos_sel,
+                            dias_seleccionados=dias_seleccionados,
+                            directrices_docente=directrices_input,
+                            archivos_procesados=archivos_para_procesar,
+                            mes=cal_mes_actual,
+                            año=cal_año_actual,
+                            libros_seleccionados=libros_sel,
+                            guia_cte=guia_cte_sel
+                        )
+                        st.session_state["ultimo_dossier_busqueda"] = dossier_busqueda
+                        status_cruzada_web.update(
+                            label=f"✓ Búsqueda cruzada completada: {len(dossier_busqueda['archivos_consultados'])} fuentes alineadas y 4 Campos Formativos vinculados",
+                            state="complete"
+                        )
+
                     # 3. Enviar a Gemini con Google Search Grounding habilitado y parámetros dinámicos
                     plan_generado, prompt_utilizado = generate_planeacion(
                         datos_escuela=datos_escuela_actual,
@@ -5490,6 +5610,7 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         busqueda_web=True,
                         contexto_url=contexto_url,
                         directriz_contexto_url_txt=directriz_contexto_url_txt,
+                        dossier_busqueda=dossier_busqueda,
                         vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
                     )
                     st.session_state.planeacion_generada = plan_generado
@@ -5655,13 +5776,14 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         dias_para_mostrar = dias_seleccionados if dias_seleccionados else DIAS_HABIL_NOMBRES
 
         # Pestañas interactivas para revisar la planeación
-        tab_dias_ver, tab_completa, tab_dosificador, tab_evaluacion, tab_ajustes, tab_kempis = st.tabs([
+        tab_dias_ver, tab_completa, tab_dosificador, tab_evaluacion, tab_ajustes, tab_kempis, tab_cruzada = st.tabs([
             "📅 Vista Día por Día (Lunes a Viernes)",
             "📄 Documento Completo Oficial",
             "📋 Dosificador y Articulación",
             "📊 Instrumentos de Evaluación",
             "♿ Inclusión (BAP/DUA)",
-            "📘 Cuadernillo Profa Kempis"
+            "📘 Cuadernillo Profa Kempis",
+            "🔍 Búsqueda Cruzada y Trazabilidad"
         ])
 
         with tab_dias_ver:
@@ -5849,9 +5971,62 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
-    
-# ==========================================
-# PIE DE PÁGINA INSTITUCIONAL
+
+        with tab_cruzada:
+            dossier_v = st.session_state.get("ultimo_dossier_busqueda")
+            if not dossier_v:
+                try:
+                    dossier_v = busqueda_cruzada_archivos_plataforma(
+                        semana=semana_seleccionada,
+                        grado=grado_seleccionado,
+                        campos_formativos=campos_sel,
+                        dias_seleccionados=dias_seleccionados,
+                        directrices_docente=directrices_input,
+                        archivos_procesados=st.session_state.get("archivos_procesados"),
+                        mes=cal_mes_actual,
+                        libros_seleccionados=libros_sel,
+                        guia_cte=guia_cte_sel
+                    )
+                    st.session_state["ultimo_dossier_busqueda"] = dossier_v
+                except Exception:
+                    dossier_v = None
+
+            if dossier_v:
+                st.markdown("""
+                <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-left: 5px solid #3B82F6; border-radius: 8px; padding: 12px 18px; margin-bottom: 14px;">
+                    <span style="font-weight: 700; color: #1E40AF; font-size: 0.96rem;">🔍 Integración del Programa Analítico y Búsqueda Cruzada en Archivos</span><br>
+                    <span style="color: #1F2937; font-size: 0.88rem; line-height: 1.45;">
+                        Trazabilidad garantizada con el Programa Analítico oficial, Cuadernillos de 37 Semanas, Libros de Texto SEP (LTG), Guías de Consejo Técnico Escolar y anexos imprimibles.
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown("#### 🏛️ 1. Uso Obligatorio del Programa Analítico (4 Campos Formativos)")
+                st.caption("Extracción predeterminada y transversal de los 4 Campos Formativos de la NEM:")
+                for item_c in dossier_v.get("pda_4campos", []):
+                    st.markdown(f"""
+                    <div style="background: #FFFFFF; border: 1.5px solid #DDD6FE; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;">
+                        <span style="font-weight: 700; color: #7C3AED; font-size: 0.95rem;">📌 Campo Formativo: {item_c['campo']}</span><br>
+                        <span style="font-size: 0.86rem; color: #1E293B;"><b>Contenido Sintético:</b> {item_c['contenido']}</span><br>
+                        <span style="font-size: 0.84rem; color: #334155;"><b>PDA Oficial de 6° Grado:</b> {item_c['pda']}</span><br>
+                        <span style="font-size: 0.80rem; color: #64748B;"><b>Libros SEP Sugeridos:</b> {item_c.get('libro_vinculado', '')} | <b>Problemática Atendida:</b> {item_c.get('problematica_atendida', '')}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("<div style='height: 0.6rem;'></div>", unsafe_allow_html=True)
+                st.markdown("#### 📂 2. Archivos y Repositorios Consultados en la Plataforma")
+                for arc in dossier_v.get("archivos_consultados", []):
+                    st.markdown(f"- **{arc['fuente']}** (`{arc['tipo']}`): {arc['estado']}. {arc.get('detalles', '')}")
+
+                st.markdown("<div style='height: 0.6rem;'></div>", unsafe_allow_html=True)
+                st.markdown("#### 📅 3. Recursos Didácticos, Anexos y Consignas Alineadas Día por Día")
+                for d_nom, rec in dossier_v.get("recursos_por_dia", {}).items():
+                    with st.expander(f"Sesión {rec['sesion_num']} ({d_nom}): {rec['anexo']}", expanded=False):
+                        st.markdown(f"**Consigna Pedagógica Alineada:** {rec['consigna_alineada']}")
+                        st.markdown(f"**Rutina de Inicio del Día:** Dictado: {rec['dictado']} | Fluidez: {rec['velocidad_lectora']} | Cálculo: {rec['calculo_mental']} | Problema: {rec['problema_razonado']}")
+                        st.markdown(f"**Libros de Texto SEP:** {', '.join(rec.get('libros_sugeridos', []))}")
+            else:
+                st.info("No se han cargado datos de búsqueda cruzada en esta sesión.")
 # ==========================================
 st.markdown("---")
 st.markdown("""

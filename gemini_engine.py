@@ -41,6 +41,11 @@ except ImportError:
     obtener_anexos_por_semana_y_dia = lambda *args, **kwargs: []
     CATALOGO_PROYECTOS_SEP_37_SEMANAS = {}
 
+try:
+    from file_processor import busqueda_cruzada_archivos_plataforma
+except ImportError:
+    busqueda_cruzada_archivos_plataforma = None
+
 DEFAULT_MODEL = "gemini-3.8-flash"
 
 AVAILABLE_MODELS = [
@@ -132,6 +137,11 @@ REGLAS PEDAGÓGICAS INQUEBRANTABLES:
    - Cita explícitamente sugerencias de páginas de los libros: Proyectos de Aula / Escolares / Comunitarios, Nuestros Saberes y Múltiples Lenguajes.
 8. Evaluación formativa real: Evitar generalidades; describe criterios observables y diseña un instrumento concreto (como rúbrica analítica o lista de cotejo con indicadores claros de logro).
 9. Ajustes razonables / Inclusión: Estrategias de atención a la diversidad (DUA) y barreras para el aprendizaje y la participación (BAP).
+10. USO OBLIGATORIO DEL PROGRAMA ANALÍTICO (LOS 4 CAMPOS FORMATIVOS):
+    - Es mandatorio extraer y articular de manera predeterminada los contenidos y PDA correspondientes a los 4 Campos Formativos de la NEM (Lenguajes, Saberes y Pensamiento Científico, Ética, Naturaleza y Sociedades, De lo Humano y lo Comunitario) definidos en el Programa Analítico precargado. Queda prohibido omitir cualquiera de los 4 campos.
+11. BÚSQUEDA CRUZADA EN ARCHIVOS Y COHERENCIA CURRICULAR ESTRICTA:
+    - Realiza una lectura y búsqueda cruzada en todos los archivos de la plataforma (cuadernillos de 37 semanas, libros de texto SEP, guías CTE y anexos imprimibles) para alinear las actividades, recursos didácticos y consignas de acuerdo con lo solicitado por el docente.
+    - PROHIBICIÓN ESTRICTA DE ALUCINACIÓN: Queda terminantemente prohibido inventar asignaturas tradicionales independientes del plan anterior (como materias aisladas de Español, Matemáticas, Ciencias Naturales, Geografía o Historia por separado) o contenidos externos ajenos al Plan de Estudio 2022 de la NEM. Toda la planeación debe mantener una trazabilidad directa con las 4 problematizaciones oficiales y la ficha técnica institucional (Primaria Revolución Social de 1910, 26 alumnos, estilos Kinestésico y Visual, DUA).
 """
 
 def generate_planeacion(
@@ -154,11 +164,12 @@ def generate_planeacion(
     modelo: str = DEFAULT_MODEL,
     busqueda_web: bool = False,
     contexto_url: str = "",
+    dossier_busqueda: Optional[Dict[str, Any]] = None,
     **kwargs
 ) -> Tuple[str, str]:
     """
     Envía la solicitud a Gemini usando la SDK oficial de Google GenAI y retorna el texto generado,
-    articulando dinámicamente Libros de Texto SEP, Guía del CTE, Programa Sintético y contexto web.
+    articulando dinámicamente Libros de Texto SEP, Guía del CTE, Programa Sintético, Programa Analítico y búsqueda cruzada en archivos.
     
     Parámetros obligatorios enriquecidos:
         libros_seleccionados: Lista o texto de libros de texto SEP seleccionados.
@@ -169,6 +180,7 @@ def generate_planeacion(
         fase_seleccionada: Fase oficial de la Nueva Escuela Mexicana (ej. 'Fase 5' o '5').
         fallback_programa_sintetico: Booleano que indica si se debe usar la directriz de fallback si no hay archivo oficial.
         contexto_url: Texto extraído de una URL de referencia pedagógica mediante web scraping.
+        dossier_busqueda: Diccionario con la búsqueda cruzada en archivos de la plataforma.
     """
     # Verificación preventiva de conectividad a internet
     if not verificar_conexion_internet():
@@ -237,6 +249,53 @@ def generate_planeacion(
     fase_limpia = str(fase_seleccionada).replace("Fase", "").strip() or "5"
 
     grado_seleccionado = datos_escuela.get('grado', '6° de Primaria')
+
+    # 3.1 BÚSQUEDA GLOBAL Y CRUZADA EN ARCHIVOS DE LA PLATAFORMA (CUADERNILLOS, LIBROS, GUÍAS Y ANEXOS)
+    if dossier_busqueda is None:
+        dossier_busqueda = kwargs.get("dossier_busqueda")
+    if dossier_busqueda is None and busqueda_cruzada_archivos_plataforma:
+        try:
+            dossier_busqueda = busqueda_cruzada_archivos_plataforma(
+                semana=semana_seleccionada,
+                grado=grado_seleccionado,
+                campos_formativos=campos_formativos,
+                dias_seleccionados=dias_seleccionados,
+                directrices_docente=directrices_docente,
+                archivos_procesados=kwargs.get("archivos_procesados"),
+                mes=mes_seleccionado,
+                año=año_seleccionado,
+                libros_seleccionados=libros_seleccionados,
+                guia_cte=guia_cte
+            )
+        except Exception:
+            dossier_busqueda = None
+
+    # 3.2 USO OBLIGATORIO DEL PROGRAMA ANALÍTICO (LOS 4 CAMPOS FORMATIVOS)
+    # Garantizar que siempre estén presentes: Lenguajes, Saberes, Ética y De lo Humano
+    campos_4_obligatorios = [
+        "Lenguajes",
+        "Saberes y Pensamiento Científico",
+        "Ética, Naturaleza y Sociedades",
+        "De lo Humano y lo Comunitario"
+    ]
+    campos_en_pda = set()
+    for item in (contenidos_pda or []):
+        c_raw = (item.get("campo") or "").strip().lower()
+        for c_ob in campos_4_obligatorios:
+            if c_ob.lower() in c_raw or c_raw in c_ob.lower():
+                campos_en_pda.add(c_ob)
+
+    if len(campos_en_pda) < 4 and dossier_busqueda and "pda_4campos" in dossier_busqueda:
+        contenidos_pda_completos = list(contenidos_pda or [])
+        for item_d in dossier_busqueda["pda_4campos"]:
+            if item_d["campo"] not in campos_en_pda:
+                contenidos_pda_completos.append({
+                    "campo": item_d["campo"],
+                    "contenido": item_d["contenido"],
+                    "pda": item_d["pda"]
+                })
+                campos_en_pda.add(item_d["campo"])
+        contenidos_pda = contenidos_pda_completos
 
     # 4. PROGRAMA SINTÉTICO Y FUNCIÓN DE RESPALDO (WEB SCRAPING SEP CON PARÁMETROS DINÁMICOS)
     if programa_sintetico is None:
@@ -357,6 +416,8 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
 * DIRECTRIZ DE INTEGRACIÓN WEB: Incorpora pertinentemente las ideas clave, enfoques o dinámicas de esta fuente dentro del plano didáctico sin perder la alineación oficial NEM.
 """
 
+    dossier_busqueda_txt = dossier_busqueda.get("dossier_prompt", "") if dossier_busqueda else ""
+
     prompt = f"""{build_system_instruction()}
 
 Elabora la planeación didáctica completa, oficial y lista para aplicar, bajo las siguientes especificaciones:
@@ -446,6 +507,8 @@ REGLA ESTRICTA ADICIONAL: TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o in
 
 {directriz_programa_sintetico_txt}
 
+{dossier_busqueda_txt}
+
 === ARTICULACIÓN CURRICULAR (CONTENIDOS Y PDA PRIORIZADOS) ===
 {articulacion_txt}
 
@@ -467,7 +530,8 @@ ESTRUCTURA DE RESPUESTA EXIGIDA (Usa Markdown profesional, encabezados claros y 
 - Temporalidad: Semana {semana_seleccionada} de 37 del calendario escolar oficial de la SEP ({num_sesiones} sesiones didácticas).
 
 # II. ARTICULACIÓN CURRICULAR TRANSVERSAL (TABLA NEM - 4 CAMPOS FORMATIVOS)
-Articula transversalmente los Contenidos y PDA de los Campos Formativos involucrados (Lenguajes, Saberes y Pensamiento Científico, Ética Naturaleza y Sociedades, De lo Humano y lo Comunitario) atendiendo y cruzando las 4 problemáticas prioritarias del Programa Analítico.
+Articula transversalmente los Contenidos y PDA de los 4 Campos Formativos (Lenguajes, Saberes y Pensamiento Científico, Ética, Naturaleza y Sociedades, De lo Humano y lo Comunitario) extraídos obligatoriamente del Programa Analítico y la búsqueda cruzada en archivos.
+Es OBLIGATORIO que la tabla contenga al menos 4 filas, una para cada uno de los 4 Campos Formativos, atendiendo y cruzando las 4 problemáticas prioritarias del Programa Analítico sin omitir ningún campo ni inventar asignaturas tradicionales independientes.
 Genera una tabla con:
 | Campo Formativo | Contenido Sintético | Procesos de Desarrollo de Aprendizaje (PDA) | Vinculación con Libros SEP (LTG) | Problemática Analítica Atendida |
 
@@ -482,6 +546,7 @@ Para cada día en {dias_seleccionados}:
 
 # IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES: {', '.join(dias_seleccionados)})
 Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. No inventes días adicionales.
+Es OBLIGATORIO alinear cada sesión con el Anexo Didáctico específico de la plataforma, los libros SEP correspondientes y las consignas del dossier de búsqueda cruzada.
 Estructura la Secuencia Didáctica separando claramente cada día. Desarrolla detalladamente exactamente una sesión por cada día en {dias_seleccionados} (total: {num_sesiones} sesiones):
 ### Sesión N: [Día de la semana] [Fecha oficial 2026] - [Nombre de la Sesión / Momento del Proyecto: {proyecto_info.get('titulo_proyecto', '')}]
 - **Tiempo estimado:** (ej. 90 minutos)
@@ -692,14 +757,24 @@ def generate_sample_fallback(
         proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {semana_num} ({kempis_data.get('mes', '2026')}) a través del proyecto '{kempis_data.get('proyecto', 'Integrador')}', fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con dinámicas vivenciales y fichas prácticas."
         
         filas_art = []
+        campos_4_base = ["Lenguajes", "Saberes y Pensamiento Científico", "Ética, Naturaleza y Sociedades", "De lo Humano y lo Comunitario"]
+        campos_en_tabla = set()
         if k_campos:
             for c_n, c_v in k_campos:
+                for c_base in campos_4_base:
+                    if c_base.lower() in c_n.lower() or c_n.lower() in c_base.lower():
+                        campos_en_tabla.add(c_base)
                 pda_texto = c_v.get("pda_vinculado") or c_v.get("pda") or "Proceso de desarrollo de aprendizaje oficial NEM"
                 filas_art.append(
                     f"| **{c_n}** | {c_v.get('tema', kempis_data.get('proyecto', ''))} | {pda_texto} | Libros de Texto SEP y Anexos de la Semana {semana_num} | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
                 )
+            for c_faltante in campos_4_base:
+                if c_faltante not in campos_en_tabla:
+                    filas_art.append(
+                        f"| **{c_faltante}** | {kempis_data.get('proyecto', 'Proyecto Integrador')} | Procesos de desarrollo de aprendizaje oficiales acordes a la Fase 5 y la Semana {semana_num} | Libros de Texto SEP (LTG) | Comprensión lectora, velocidad, ortografía y cálculo contextualizado |"
+                    )
         else:
-            for c_n in ["Lenguajes", "Saberes y Pensamiento Científico", "Ética, Naturaleza y Sociedades", "De lo Humano y lo Comunitario"]:
+            for c_n in campos_4_base:
                 filas_art.append(
                     f"| **{c_n}** | {kempis_data.get('proyecto', 'Proyecto Integrador')} | Procesos de desarrollo de aprendizaje acordes a la Fase 5 y la Semana {semana_num} | Libros de Texto SEP (LTG) | Comprensión lectora, velocidad, ortografía y cálculo contextualizado |"
                 )
