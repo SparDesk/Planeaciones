@@ -2710,6 +2710,9 @@ if "resultados_busqueda_gratis" not in st.session_state:
 if "contexto_url" not in st.session_state:
     st.session_state.contexto_url = ""
 
+if "directriz_contexto_url_txt" not in st.session_state:
+    st.session_state.directriz_contexto_url_txt = ""
+
 MESES_2026 = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
@@ -2890,6 +2893,7 @@ def limpiar_estado_planeacion(nueva_semana=None, reset_completo=False):
     st.session_state.query_busqueda_gratis = ""
     st.session_state.query_busqueda_enriquecida = ""
     st.session_state.contexto_url = ""
+    st.session_state.directriz_contexto_url_txt = ""
 
     # 3. Limpieza de redacciones manuales y borradores
     st.session_state["contenidos"] = ""
@@ -3635,11 +3639,19 @@ if authentication_status:
             help="Ingresa la URL de una página educativa para extraer su contenido e incorporarlo a la planeación.",
             key=f"url_referencia_{st.session_state.widget_key}"
         )
+        directriz_contexto_url_txt = ""
         contexto_url = ""
         if url_referencia and url_referencia.strip():
             contexto_url = extraer_texto_url(url_referencia.strip())
             st.session_state.contexto_url = contexto_url
             if contexto_url:
+                directriz_contexto_url_txt = f"""
+=== CONTENIDO Y CONTEXTO PEDAGÓGICO EXTRAÍDO DE URL DE REFERENCIA ===
+El docente ha proporcionado la siguiente fuente de información web de referencia pedagógica para enriquecer la planeación didáctica:
+{str(contexto_url).strip()}
+* DIRECTRIZ DE INTEGRACIÓN WEB: Incorpora pertinentemente las ideas clave, enfoques o dinámicas de esta fuente dentro del plano didáctico sin perder la alineación oficial NEM.
+"""
+                st.session_state.directriz_contexto_url_txt = directriz_contexto_url_txt
                 st.success(f"✓ Contenido web extraído con éxito ({len(contexto_url):,} caracteres).")
                 with st.expander("Ver extracto de contenido web extraído", expanded=False):
                     st.text_area(
@@ -3650,9 +3662,11 @@ if authentication_status:
                         key="preview_contexto_url"
                     )
             else:
+                st.session_state.directriz_contexto_url_txt = ""
                 st.warning("⚠️ No se pudo extraer texto de la URL proporcionada o el enlace no contiene párrafos de texto accesibles.")
         else:
             st.session_state.contexto_url = ""
+            st.session_state.directriz_contexto_url_txt = ""
     
         col_btn_ej1, col_btn_ej2 = st.columns(2)
         with col_btn_ej1:
@@ -5211,9 +5225,22 @@ if authentication_status:
                     # 2. Combinar el texto extraído con las opciones seleccionadas en el formulario y directrices NEM
                     contexto_archivos_str = format_context_for_prompt(archivos_para_procesar)
     
+                    # Asegurar e inicializar directriz_contexto_url_txt antes de armar el prompt o verificar URLs
+                    directriz_contexto_url_txt = st.session_state.get("directriz_contexto_url_txt", "") or ""
+
                     # Extraer texto de la URL de referencia si no se ha extraído aún
                     if url_referencia and url_referencia.strip() and not contexto_url:
                         contexto_url = extraer_texto_url(url_referencia.strip())
+                        st.session_state.contexto_url = contexto_url
+
+                    if contexto_url and str(contexto_url).strip() and not directriz_contexto_url_txt:
+                        directriz_contexto_url_txt = f"""
+=== CONTENIDO Y CONTEXTO PEDAGÓGICO EXTRAÍDO DE URL DE REFERENCIA ===
+El docente ha proporcionado la siguiente fuente de información web de referencia pedagógica para enriquecer la planeación didáctica:
+{str(contexto_url).strip()}
+* DIRECTRIZ DE INTEGRACIÓN WEB: Incorpora pertinentemente las ideas clave, enfoques o dinámicas de esta fuente dentro del plano didáctico sin perder la alineación oficial NEM.
+"""
+                    st.session_state.directriz_contexto_url_txt = directriz_contexto_url_txt
     
                     # FUNCIÓN DE RESPALDO (WEB SCRAPING SEP):
                     # Si el usuario NO subió un archivo del Programa Sintético (file_uploader está vacío)
@@ -5270,6 +5297,7 @@ if authentication_status:
                         guia_cte_detalle=cte_info,
                         busqueda_web=False,
                         contexto_url=contexto_url,
+                        directriz_contexto_url_txt=directriz_contexto_url_txt,
                         vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
                     )
                     st.session_state.planeacion_generada = plan_generado
@@ -5333,9 +5361,22 @@ if authentication_status:
                     # 2. Combinar el texto extraído con las opciones seleccionadas en el formulario y directrices NEM
                     contexto_archivos_str = format_context_for_prompt(archivos_para_procesar)
     
+                    # Asegurar e inicializar directriz_contexto_url_txt antes de armar el prompt o verificar URLs
+                    directriz_contexto_url_txt = st.session_state.get("directriz_contexto_url_txt", "") or ""
+
                     # Extraer texto de la URL de referencia si no se ha extraído aún
                     if url_referencia and url_referencia.strip() and not contexto_url:
                         contexto_url = extraer_texto_url(url_referencia.strip())
+                        st.session_state.contexto_url = contexto_url
+
+                    if contexto_url and str(contexto_url).strip() and not directriz_contexto_url_txt:
+                        directriz_contexto_url_txt = f"""
+=== CONTENIDO Y CONTEXTO PEDAGÓGICO EXTRAÍDO DE URL DE REFERENCIA ===
+El docente ha proporcionado la siguiente fuente de información web de referencia pedagógica para enriquecer la planeación didáctica:
+{str(contexto_url).strip()}
+* DIRECTRIZ DE INTEGRACIÓN WEB: Incorpora pertinentemente las ideas clave, enfoques o dinámicas de esta fuente dentro del plano didáctico sin perder la alineación oficial NEM.
+"""
+                    st.session_state.directriz_contexto_url_txt = directriz_contexto_url_txt
     
                     # FUNCIÓN DE RESPALDO (WEB SCRAPING SEP):
                     # Si el usuario NO subió un archivo del Programa Sintético (file_uploader está vacío)
@@ -5392,6 +5433,7 @@ if authentication_status:
                         guia_cte_detalle=cte_info,
                         busqueda_web=True,
                         contexto_url=contexto_url,
+                        directriz_contexto_url_txt=directriz_contexto_url_txt,
                         vincular_cuadernillo_kempis=vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
                     )
                     st.session_state.planeacion_generada = plan_generado

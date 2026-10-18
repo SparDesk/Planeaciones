@@ -184,6 +184,9 @@ def generate_planeacion(
     if not contexto_url:
         contexto_url = kwargs.get("contexto_url", "")
 
+    # Declaración e inicialización preventiva de directriz_contexto_url_txt
+    directriz_contexto_url_txt = kwargs.get("directriz_contexto_url_txt", "") or ""
+
     # 1. REGLA DE DÍAS SELECCIONADOS
     if dias_seleccionados is None:
         dias_seleccionados = kwargs.get("dias_seleccionados") or kwargs.get("dias_planeados") or datos_escuela.get("dias_seleccionados") or datos_escuela.get("dias_planeados") or ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
@@ -327,6 +330,15 @@ DIRECTRICES DE BÚSQUEDA CONTEXTUAL OBLIGATORIA:
             mes=mes_seleccionado,
             año=año_seleccionado
         )
+
+    # DIRECTRIZ DE CONTEXTO WEB / URL DE REFERENCIA (ASEGURADA E INICIALIZADA)
+    if not directriz_contexto_url_txt and contexto_url and str(contexto_url).strip():
+        directriz_contexto_url_txt = f"""
+=== CONTENIDO Y CONTEXTO PEDAGÓGICO EXTRAÍDO DE URL DE REFERENCIA ===
+El docente ha proporcionado la siguiente fuente de información web de referencia pedagógica para enriquecer la planeación didáctica:
+{str(contexto_url).strip()}
+* DIRECTRIZ DE INTEGRACIÓN WEB: Incorpora pertinentemente las ideas clave, enfoques o dinámicas de esta fuente dentro del plano didáctico sin perder la alineación oficial NEM.
+"""
 
     prompt = f"""{build_system_instruction()}
 
