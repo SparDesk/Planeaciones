@@ -28,16 +28,37 @@ from planeaciones_storage import (
     sanitizar_nombre_ruta,
     guardar_archivo_fisico_json
 )
-from cuadernillo_kempis import (
-    CUADERNILLO_KEMPIS_DATA,
-    CATALOGO_PROYECTOS_SEP_37_SEMANAS,
-    detectar_relevancia_kempis,
-    obtener_recursos_kempis_por_semana,
-    obtener_proyecto_semana,
-    obtener_anexos_por_semana_y_dia,
-    formatear_kempis_para_prompt,
-    obtener_anexos_kempis_para_docx
-)
+try:
+    from cuadernillo_kempis import (
+        CUADERNILLO_KEMPIS_DATA,
+        CATALOGO_PROYECTOS_SEP_37_SEMANAS,
+        detectar_relevancia_kempis,
+        obtener_recursos_kempis_por_semana,
+        obtener_proyecto_semana,
+        obtener_anexos_por_semana_y_dia,
+        formatear_kempis_para_prompt,
+        obtener_anexos_kempis_para_docx
+    )
+except ImportError:
+    try:
+        import cuadernillo_kempis as _ck
+        CUADERNILLO_KEMPIS_DATA = getattr(_ck, "CUADERNILLO_KEMPIS_DATA", {})
+        CATALOGO_PROYECTOS_SEP_37_SEMANAS = getattr(_ck, "CATALOGO_PROYECTOS_SEP_37_SEMANAS", {})
+        detectar_relevancia_kempis = getattr(_ck, "detectar_relevancia_kempis", lambda *args, **kwargs: True)
+        obtener_recursos_kempis_por_semana = getattr(_ck, "obtener_recursos_kempis_por_semana", lambda *args, **kwargs: None)
+        obtener_proyecto_semana = getattr(_ck, "obtener_proyecto_semana", lambda *args, **kwargs: {})
+        obtener_anexos_por_semana_y_dia = getattr(_ck, "obtener_anexos_por_semana_y_dia", lambda *args, **kwargs: [])
+        formatear_kempis_para_prompt = getattr(_ck, "formatear_kempis_para_prompt", lambda *args, **kwargs: "")
+        obtener_anexos_kempis_para_docx = getattr(_ck, "obtener_anexos_kempis_para_docx", lambda *args, **kwargs: [])
+    except Exception:
+        CUADERNILLO_KEMPIS_DATA = {}
+        CATALOGO_PROYECTOS_SEP_37_SEMANAS = {}
+        detectar_relevancia_kempis = lambda *args, **kwargs: True
+        obtener_recursos_kempis_por_semana = lambda *args, **kwargs: None
+        obtener_proyecto_semana = lambda *args, **kwargs: {}
+        obtener_anexos_por_semana_y_dia = lambda *args, **kwargs: []
+        formatear_kempis_para_prompt = lambda *args, **kwargs: ""
+        obtener_anexos_kempis_para_docx = lambda *args, **kwargs: []
 
 
 # Cargar variables de entorno desde .env si existe

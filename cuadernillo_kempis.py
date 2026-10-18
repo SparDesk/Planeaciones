@@ -3430,3 +3430,38 @@ def obtener_anexos_kempis_para_docx(semana: Union[int, str]) -> List[Dict[str, A
         })
 
     return anexos
+
+
+# ==========================================
+# ALIASES Y COMPATIBILIDAD DE EXPORTACIÓN
+# ==========================================
+obtener_kempis_por_semana = obtener_recursos_kempis_por_semana
+obtener_anexos_kempis = obtener_anexos_kempis_para_docx
+obtener_anexos_semana = obtener_anexos_por_semana_y_dia
+obtener_proyecto = obtener_proyecto_semana
+formatear_kempis = formatear_kempis_para_prompt
+formatear_directrices_kempis = formatear_kempis_para_prompt
+detectar_kempis = detectar_relevancia_kempis
+
+# Exportaciones oficiales del módulo
+__all__ = [
+    # Diccionarios y Catálogos principales
+    "CUADERNILLO_KEMPIS_DATA",
+    "CATALOGO_PROYECTOS_SEP_37_SEMANAS",
+    "PALABRAS_CLAVE_KEMPIS",
+    # Funciones de consulta, filtrado y generación
+    "detectar_relevancia_kempis",
+    "obtener_recursos_kempis_por_semana",
+    "obtener_proyecto_semana",
+    "obtener_anexos_por_semana_y_dia",
+    "formatear_kempis_para_prompt",
+    "obtener_anexos_kempis_para_docx",
+    # Aliases de compatibilidad
+    "obtener_kempis_por_semana",
+    "obtener_anexos_kempis",
+    "obtener_anexos_semana",
+    "obtener_proyecto",
+    "formatear_kempis",
+    "formatear_directrices_kempis",
+    "detectar_kempis",
+]
