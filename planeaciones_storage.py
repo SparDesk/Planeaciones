@@ -124,7 +124,7 @@ def guardar_archivo_fisico_json(
 
         nom_clean = sanitizar_nombre_ruta(nombre_archivo)
         if not nom_clean:
-            sem = data.get("semana", 20)
+            sem = data.get("semana", 1)
             nom_clean = f"Planeacion_Semana_{sem}"
         if not nom_clean.lower().endswith(".json"):
             nom_clean += ".json"
@@ -155,7 +155,7 @@ def guardar_planeacion(
     fecha_str = now.strftime("%d/%m/%Y %H:%M:%S")
     timestamp = now.timestamp()
     
-    semana = int(data.get("semana", 20))
+    semana = int(data.get("semana", 1))
     periodo = str(data.get("periodo", f"Semana {semana} de 37"))
     grado = str(data.get("grado", '6° de Primaria'))
     grupo = str(data.get("grupo", 'A'))

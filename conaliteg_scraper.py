@@ -157,21 +157,43 @@ def obtener_libros_conaliteg() -> Tuple[Dict[str, List[str]], bool]:
     return dict(LIBROS_SEP_FALLBACK), False
 
 
-def buscar_programa_sintetico_sep(fase_seleccionada: str, max_resultados: int = 3) -> Tuple[str, bool]:
+from typing import Dict, List, Tuple, Optional, Union
+
+def buscar_programa_sintetico_sep(
+    fase_seleccionada: str = "Fase 5",
+    semana: Optional[Union[int, str]] = None,
+    mes: Optional[str] = None,
+    dia: Optional[str] = None,
+    proyecto: Optional[str] = None,
+    max_resultados: int = 3,
+    fase: Optional[str] = None,
+    **kwargs
+) -> Tuple[str, bool]:
     """
     Función auxiliar de búsqueda y web scraping de respaldo para el Programa Sintético oficial de la SEP
-    cuando el usuario NO subió un documento a través del file_uploader.
-
-    1. Utiliza librerías como googlesearch-python y requests/BeautifulSoup.
-    2. Búsqueda restringida con el término:
-       site:sep.gob.mx OR site:conaliteg.sep.gob.mx "Programa Sintético" "Fase {fase_seleccionada}"
-    3. Extrae un resumen del contenido de los primeros resultados y lo retorna como contexto.
-    4. Si el scraping falla, retorna ("", False) para que el prompt incluya la instrucción de fallback.
+    y lineamientos de la Nueva Escuela Mexicana (NEM).
+    Construye consultas dinámicas contextualmente enriquecidas con Fase, Semana (1 a 37), Mes del ciclo 2026-2027,
+    Día de la semana y Proyecto vinculante, eliminando cualquier valor estático o fijo.
     """
-    fase_limpia = str(fase_seleccionada).replace("Fase", "").strip() or "5"
+    fase_activa = fase or fase_seleccionada or "Fase 5"
+    fase_limpia = str(fase_activa).replace("Fase", "").strip() or "5"
     fase_termino = f"Fase {fase_limpia}"
 
-    query = f'site:sep.gob.mx OR site:conaliteg.sep.gob.mx "Programa Sintético" "{fase_termino}"'
+    componentes_busqueda = [f'"Programa Sintético"', f'"{fase_termino}"']
+    if semana is not None and str(semana).strip():
+        sem_str = str(semana).replace("Semana", "").strip()
+        if sem_str:
+            componentes_busqueda.append(f'"Semana {sem_str}"')
+    if mes and str(mes).strip():
+        componentes_busqueda.append(f'"{str(mes).strip()}"')
+    if dia and str(dia).strip():
+        componentes_busqueda.append(f'"{str(dia).strip()}"')
+    if proyecto and str(proyecto).strip():
+        proy_limpio = re.sub(r'["\n\r]', '', str(proyecto).strip())[:50]
+        if proy_limpio:
+            componentes_busqueda.append(f'"{proy_limpio}"')
+
+    query = f'site:sep.gob.mx OR site:conaliteg.sep.gob.mx {" ".join(componentes_busqueda)}'
     urls = []
 
     # 1. Utilizar googlesearch-python

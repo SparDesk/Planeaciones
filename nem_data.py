@@ -17,7 +17,7 @@ DATOS_PREDETERMINADOS = {
     "grupo": "A",
     "matricula": 26,
     "estilos_aprendizaje": "Kinestésico y Visual",
-    "periodo": "Semana 20 de 37",
+    "periodo": "Semana 1 de 37",
     "ciclo_escolar": "2026-2027",
     "turno": "Matutino"
 }
@@ -544,7 +544,10 @@ CONTENIDOS_PDA_POR_GRADO = {
 try:
     from cuadernillo_kempis import (
         CUADERNILLO_KEMPIS_DATA,
+        CATALOGO_PROYECTOS_SEP_37_SEMANAS,
         detectar_relevancia_kempis,
+        obtener_proyecto_semana,
+        obtener_anexos_por_semana_y_dia,
         obtener_recursos_kempis_por_semana,
         formatear_kempis_para_prompt,
         obtener_anexos_kempis_para_docx

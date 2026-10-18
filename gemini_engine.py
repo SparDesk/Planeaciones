@@ -24,12 +24,18 @@ try:
     from cuadernillo_kempis import (
         detectar_relevancia_kempis,
         formatear_kempis_para_prompt,
-        obtener_recursos_kempis_por_semana
+        obtener_recursos_kempis_por_semana,
+        obtener_proyecto_semana,
+        obtener_anexos_por_semana_y_dia,
+        CATALOGO_PROYECTOS_SEP_37_SEMANAS
     )
 except ImportError:
-    detectar_relevancia_kempis = lambda *args, **kwargs: False
+    detectar_relevancia_kempis = lambda *args, **kwargs: True
     formatear_kempis_para_prompt = lambda *args, **kwargs: ""
     obtener_recursos_kempis_por_semana = lambda *args, **kwargs: None
+    obtener_proyecto_semana = lambda *args, **kwargs: {}
+    obtener_anexos_por_semana_y_dia = lambda *args, **kwargs: []
+    CATALOGO_PROYECTOS_SEP_37_SEMANAS = {}
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 
@@ -186,7 +192,7 @@ def generate_planeacion(
 
     num_sesiones = len(dias_seleccionados)
 
-    # 2. REGLA DE TEMPORALIDAD (37 SEMANAS OFICIALES SEP)
+    # 2. REGLA DE TEMPORALIDAD DINÁMICA (37 SEMANAS OFICIALES SEP Y CALENDARIO 2026-2027)
     if semana_seleccionada is None:
         semana_seleccionada = (
             kwargs.get("semana_seleccionada") or
@@ -200,13 +206,22 @@ def generate_planeacion(
             if m:
                 semana_seleccionada = int(m.group())
         if not semana_seleccionada:
-            semana_seleccionada = 20
+            semana_seleccionada = 1
     try:
         semana_seleccionada = int(semana_seleccionada)
-        if semana_seleccionada > 37:
-            semana_seleccionada = 20
+        semana_seleccionada = max(1, min(37, semana_seleccionada))
     except (ValueError, TypeError):
-        semana_seleccionada = 20
+        semana_seleccionada = 1
+
+    mes_seleccionado = (
+        kwargs.get("mes_seleccionado") or
+        kwargs.get("mes") or
+        datos_escuela.get("mes_seleccionado") or
+        datos_escuela.get("mes") or
+        "Octubre"
+    )
+    año_seleccionado = kwargs.get("año_seleccionado") or datos_escuela.get("año", 2026)
+    proyecto_info = obtener_proyecto_semana(semana_seleccionada, mes=mes_seleccionado)
 
     # 3. FASE CURRICULAR (NEM)
     fase_correspondiente = datos_escuela.get('fase', 'Fase 5')
@@ -216,7 +231,7 @@ def generate_planeacion(
 
     grado_seleccionado = datos_escuela.get('grado', '6° de Primaria')
 
-    # 4. PROGRAMA SINTÉTICO Y FUNCIÓN DE RESPALDO (WEB SCRAPING SEP)
+    # 4. PROGRAMA SINTÉTICO Y FUNCIÓN DE RESPALDO (WEB SCRAPING SEP CON PARÁMETROS DINÁMICOS)
     if programa_sintetico is None:
         programa_sintetico = kwargs.get("programa_sintetico_destacado", "")
 
@@ -224,7 +239,14 @@ def generate_planeacion(
     if not programa_sintetico and not fallback_programa_sintetico:
         try:
             from conaliteg_scraper import buscar_programa_sintetico_sep
-            resumen_sep, exito_scraping = buscar_programa_sintetico_sep(fase_seleccionada)
+            dia_ref = dias_seleccionados[0] if dias_seleccionados else "Lunes"
+            resumen_sep, exito_scraping = buscar_programa_sintetico_sep(
+                fase_seleccionada=fase_seleccionada,
+                semana=semana_seleccionada,
+                mes=mes_seleccionado,
+                dia=dia_ref,
+                proyecto=proyecto_info.get("titulo_proyecto", "")
+            )
             if exito_scraping and resumen_sep:
                 programa_sintetico = resumen_sep
             else:
@@ -234,8 +256,8 @@ def generate_planeacion(
 
     if fallback_programa_sintetico or not programa_sintetico or not str(programa_sintetico).strip():
         directriz_programa_sintetico_txt = f"""=== PROGRAMA SINTÉTICO Y LINEAMIENTOS CURRICULARES (SEP - NEM) ===
-Como no se proporcionó un documento oficial, utiliza tu conocimiento interno y capacidad de búsqueda para acceder a los lineamientos de la Nueva Escuela Mexicana (SEP) para la Fase {fase_limpia} y Semana {semana_seleccionada}.
-* REGLA DE FIDELIDAD CURRICULAR: Fundamenta los Contenidos sintéticos y Procesos de Desarrollo de Aprendizaje (PDA) oficiales en el currículo nacional vigente de la Nueva Escuela Mexicana para la Fase {fase_limpia}."""
+Como no se proporcionó un documento oficial, utiliza tu conocimiento interno y capacidad de búsqueda para acceder a los lineamientos oficiales de la Nueva Escuela Mexicana (SEP) para la Fase {fase_limpia}, Semana {semana_seleccionada} de 37 y el mes de {mes_seleccionado} ({año_seleccionado}).
+* REGLA DE FIDELIDAD CURRICULAR: Fundamenta los Contenidos sintéticos y Procesos de Desarrollo de Aprendizaje (PDA) oficiales en el currículo nacional vigente de la Nueva Escuela Mexicana para la Fase {fase_limpia}, articulando de forma contextualizada la Semana {semana_seleccionada} y los días {', '.join(dias_seleccionados)}."""
     else:
         directriz_programa_sintetico_txt = f"""=== BASE DE DATOS PRINCIPAL Y OFICIAL: PROGRAMA SINTÉTICO FASE 5 (6° DE PRIMARIA - SEP) ===
 DOCUMENTO OFICIAL CARGADO: "Programa_Sintetico_Fase_5.pdf"
@@ -280,31 +302,31 @@ PROHIBICIÓN ESTRICTA: Queda terminantemente prohibido inventar, distorsionar o 
     busqueda_web = busqueda_web or kwargs.get("busqueda_web", False)
     directriz_busqueda_web_txt = ""
     if busqueda_web:
-        directriz_busqueda_web_txt = """
-=== BÚSQUEDA WEB EN TIEMPO REAL (GOOGLE SEARCH GROUNDING) ===
-Antes de estructurar la secuencia didáctica, utiliza tu herramienta de búsqueda en internet para encontrar ejemplos prácticos, noticias recientes o dinámicas interactivas modernas relacionadas con el Contenido y PDA seleccionado. Integra estos hallazgos web de forma natural dentro de las actividades de Inicio, Desarrollo y Cierre.
+        directriz_busqueda_web_txt = f"""
+=== BÚSQUEDA WEB EN TIEMPO REAL CON FILTRADO DINÁMICO POR FECHA, DÍA Y MES (GOOGLE SEARCH GROUNDING) ===
+Antes de estructurar la secuencia didáctica, utiliza tu herramienta de búsqueda en internet aplicando de forma obligatoria los siguientes parámetros dinámicos de fecha del ciclo escolar 2026-2027:
+- Semana Oficial de la SEP: Semana {semana_seleccionada} de 37 lectivas.
+- Mes correspondiente al Calendario 2026-2027: {mes_seleccionado} {año_seleccionado}.
+- Días de la semana seleccionados a planear: {', '.join(dias_seleccionados)}.
+- Proyecto integrador vinculado: {proyecto_info.get('titulo_proyecto', '')}.
+
+DIRECTRICES DE BÚSQUEDA CONTEXTUAL OBLIGATORIA:
+1. Realiza búsquedas específicas cruzando cada día específico seleccionado ({', '.join(dias_seleccionados)}) con los momentos del proyecto y los anexos de la Semana {semana_seleccionada} ({mes_seleccionado} {año_seleccionado}).
+2. PROHIBICIÓN ESTRICTA: Queda terminantemente prohibido utilizar consultas estáticas o valores fijos que fuercen siempre la misma semana o un único bloque predeterminado.
+3. Incorpora dinámicamente en las actividades de Inicio, Desarrollo y Cierre de cada día los hallazgos recientes, dinámicas interactivas y fichas de trabajo encontradas para esa fecha y semana exactas.
 """
 
-    # Detección e integración obligatoria del Cuadernillo Profa Kempis (Semanas 6 y 7)
-    vincular_kempis = kwargs.get("vincular_cuadernillo_kempis")
-    if vincular_kempis is None:
-        vincular_kempis = detectar_relevancia_kempis(
-            semana=semana_seleccionada,
-            contenidos_pda=contenidos_pda,
-            directrices_o_texto=directrices_docente,
-            campos=campos_formativos
-        )
-
+    # Detección e integración del proyecto y anexos didácticos
+    vincular_kempis = kwargs.get("vincular_cuadernillo_kempis", True)
     directriz_kempis_txt = ""
     if vincular_kempis:
-        sem_k = 6
-        try:
-            sem_k = int(semana_seleccionada)
-            if sem_k not in [6, 7]:
-                sem_k = 6
-        except Exception:
-            sem_k = 6
-        directriz_kempis_txt = formatear_kempis_para_prompt(sem_k, campos_formativos)
+        directriz_kempis_txt = formatear_kempis_para_prompt(
+            semana=semana_seleccionada,
+            campos_formativos=campos_formativos,
+            dias_seleccionados=dias_seleccionados,
+            mes=mes_seleccionado,
+            año=año_seleccionado
+        )
 
     prompt = f"""{build_system_instruction()}
 
@@ -356,14 +378,20 @@ Debes cruzar e incorporar de manera transversal y obligatoria las 4 problemátic
 
 === TEMPORALIDAD Y CALENDARIO ESCOLAR OFICIAL SEP (37 SEMANAS LECTIVAS) ===
 - Semana seleccionada: Semana {semana_seleccionada} de las 37 semanas lectivas del calendario escolar oficial de la SEP (Ciclo Escolar 2026-2027)
+- Mes oficial del Calendario 2026-2027: {mes_seleccionado} {año_seleccionado}
+- Proyecto Integrador Asignado: {proyecto_info.get('titulo_proyecto', '')}
 REGLA DE TEMPORALIDAD Y DOSIFICACIÓN ANUAL (37 SEMANAS OFICIALES DE LA SEP):
-Ajusta la profundidad, alcance y progresión de los Contenidos y los PDA para que correspondan con total fidelidad pedagógica a la Semana {semana_seleccionada} de las 37 semanas lectivas oficiales de la SEP. Modula la exigencia y complejidad de las secuencias didácticas y la evaluación formativa considerando el avance anual esperado dentro de las 37 semanas lectivas del ciclo escolar 2026-2027.
+Ajusta la profundidad, alcance y progresión de los Contenidos y los PDA para que correspondan con total fidelidad pedagógica a la Semana {semana_seleccionada} de las 37 semanas lectivas oficiales de la SEP y al mes de {mes_seleccionado} {año_seleccionado}. Modula la exigencia y complejidad de las secuencias didácticas y la evaluación formativa considerando el avance anual esperado dentro de las 37 semanas lectivas del ciclo escolar 2026-2027.
 
 === DÍAS DE LA SEMANA A PLANEAR Y CALENDARIO INTERACTIVO 2026 (OBLIGATORIO) ===
-- Días de la semana a planear: {dias_seleccionados}
+- Días de la semana a planear seleccionados en las pestañas: {dias_seleccionados}
 {fechas_txt}
-REGLA DE DÍAS SELECCIONADOS:
-Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. En los encabezados de cada sesión didáctica, indica el día y su fecha oficial del año 2026 (ejemplo: 'Sesión 1: Lunes 19 de Octubre de 2026'). No inventes días adicionales.
+REGLA DE CRUCE CONTEXTUAL POR DÍA DE LA SEMANA:
+Para cada día específico seleccionado en las pestañas ({', '.join(dias_seleccionados)}), debes cruzar de forma obligatoria:
+1) El día de la semana (Lunes, Martes, Miércoles, Jueves, Viernes) con su fecha oficial del año 2026.
+2) La fase metodológica del Proyecto '{proyecto_info.get('titulo_proyecto', '')}' que corresponde a ese día.
+3) El Anexo imprimible y ficha de trabajo específica correspondiente a ese día de la Semana {semana_seleccionada}.
+4) Las actividades de Inicio, Desarrollo y Cierre citando expresamente el material y el anexo del día.
 REGLA ESTRICTA ADICIONAL: TIENES ESTRICTAMENTE PROHIBIDO mencionar, planear o incluir tablas para cualquier otro día de la semana que no figure en {dias_seleccionados}.
 
 === CONFIGURACIÓN CURRICULAR (SEP - NEM) ===
@@ -423,17 +451,17 @@ Para cada día en {dias_seleccionados}:
 # IV. SECUENCIA DIDÁCTICA DETALLADA (PLANO DIDÁCTICO POR SESIONES: {', '.join(dias_seleccionados)})
 Genera la secuencia didáctica ÚNICAMENTE para estos días: {dias_seleccionados}. Distribuye los momentos (Inicio, Desarrollo, Cierre) respetando estos días exactos. No inventes días adicionales.
 Estructura la Secuencia Didáctica separando claramente cada día. Desarrolla detalladamente exactamente una sesión por cada día en {dias_seleccionados} (total: {num_sesiones} sesiones):
-### Sesión N: [Día de la semana] - [Nombre de la Sesión y Fase/Momento Metodológico correspondiente]
+### Sesión N: [Día de la semana] [Fecha oficial 2026] - [Nombre de la Sesión / Momento del Proyecto: {proyecto_info.get('titulo_proyecto', '')}]
 - **Tiempo estimado:** (ej. 90 minutos)
 - **Inicio (15-20 min):** Preguntas detonadoras, recuperación de conocimientos previos y activación del interés.
 - **Desarrollo (50-60 min):**
   * Actividades con estímulos KINESTÉSICOS vivenciales (manipulación de material concreto, dinámicas activas, dramatización, estaciones de trabajo colaborativo para los 26 alumnos).
   * Actividades con recursos VISUALES estructurados (elaboración de organizadores gráficos, esquemas ilustrados, infografías a color).
   * Articulación transversal de los 4 Campos Formativos y consulta de páginas sugeridas de libros SEP (Proyectos, Nuestros Saberes, Múltiples Lenguajes).
-  * Si se aborda la Semana 6 o 7, o los temas correspondientes, vincula e incorpora expresamente las actividades prácticas y anexos imprimibles del Cuadernillo Profa Kempis.
+  * Cruce obligatorio con el Anexo específico de la Semana {semana_seleccionada} asignado a este día.
 - **Cierre (15-20 min):** Socialización comunitaria, síntesis, conclusiones colectivas y metacognición.
-- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP, recursos del aula y cita explícita de Anexos del Cuadernillo Profa Kempis cuando aplique.
-- **Evidencia / Producto de la sesión:** Qué registrará o elaborará el estudiante.
+- **Recursos didácticos y materiales:** Materiales vivenciales, cuadernos, libros SEP, recursos del aula y cita explícita del Anexo correspondiente a este día.
+- **Evidencia / Producto de la sesión:** Qué registrará o elaborará el estudiante a partir del anexo del día.
 
 
 # V. INSTRUMENTO DE EVALUACIÓN FORMATIVA
@@ -555,65 +583,94 @@ def generate_sample_fallback(
     semana_num = kwargs.get('semana_seleccionada')
     if not semana_num and datos_escuela:
         semana_num = datos_escuela.get('semana') or datos_escuela.get('semana_seleccionada')
-    
+    try:
+        semana_num = int(semana_num or 1)
+        semana_num = max(1, min(37, semana_num))
+    except Exception:
+        semana_num = 1
+
+    periodo = datos_escuela.get('periodo') or f"Semana {semana_num} de 37"
+    kempis_data = obtener_proyecto_semana(semana_num)
     vincular_k = kwargs.get('vincular_cuadernillo_kempis', True)
-    sem_kempis = 7 if (semana_num == 7) else 6
-    kempis_data = obtener_recursos_kempis_por_semana(sem_kempis)
-    es_kempis = bool(vincular_k and kempis_data and (semana_num in [6, 7] or detectar_relevancia_kempis(semana_num, directrices_o_texto=str(datos_escuela))))
+    es_kempis = bool(vincular_k and kempis_data)
 
     if es_kempis and kempis_data:
-        r_dictados = kempis_data["rutinas_matutinas_sugeridas"]["dictado"]
-        r_calculo = kempis_data["rutinas_matutinas_sugeridas"]["calculo_mental"]
-        r_problemas = kempis_data["rutinas_matutinas_sugeridas"]["problemas_razonados"]
-        k_campos = list(kempis_data["campos"].items())
+        r_mat = kempis_data.get("rutinas_matutinas") or kempis_data.get("rutinas_matutinas_sugeridas") or {}
+        r_dictados = r_mat.get("dictado") or {}
+        r_calculo = r_mat.get("calculo_mental") or {}
+        r_problemas = r_mat.get("problemas_razonados") or {}
+        k_campos = list(kempis_data.get("campos", {}).items())
         ef_info = kempis_data.get("efemeride_principal", {})
+        sec_dias = kempis_data.get("secuencias_por_dia", {})
+        anexos_dia = kempis_data.get("anexos_por_dia", {})
 
         dias_rutinas_map = {}
         dias_sesiones_map = {}
         for idx, d_nom in enumerate(["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]):
-            dias_rutinas_map[d_nom] = (
-                f"- **Dictado Ortográfico (Cuadernillo Kempis):** {r_dictados[idx % len(r_dictados)]}\n"
-                f"- **Velocidad y Fluidez Lectora:** Lectura dramatizada y en voz alta (1 minuto) con modulación y registro de palabras por minuto.\n"
-                f"- **Cálculo Mental Contextualizado:** {r_calculo[idx % len(r_calculo)]}\n"
-                f"- **Problema Razonado (Gramos / IVA / Desperdicio):** {r_problemas[idx % len(r_problemas)]}"
-            )
-            if idx < len(k_campos):
-                cf_nom, cf_val = k_campos[idx]
-                dias_sesiones_map[d_nom] = f"""Fase de Intervención: {cf_nom} — {cf_val['tema']}
-- **Tiempo estimado:** 90 minutos.
-- **Inicio (15-20 min):**
-  * {cf_val['inicio']}
-- **Desarrollo (50-60 min):**
-  * {cf_val['desarrollo']}
-  * Aplicación del anexo imprimible del Cuadernillo Profa Kempis: `{cf_val['anexo_nombre']}`.
-- **Cierre (15-20 min):**
-  * {cf_val['cierre']}
-- **Recursos didácticos:** Libros de texto gratuitos SEP, Cuadernillo Profa Kempis ({cf_val['anexo_nombre']}) y libreta del alumno.
-- **Evidencia / Evaluación formativa:** Ficha de trabajo resuelta: {cf_val['anexo_nombre']} y registro en lista de cotejo."""
+            if isinstance(r_dictados, dict):
+                dict_txt = r_dictados.get(d_nom, f"Palabras clave reflexivas para {d_nom} sobre {kempis_data.get('proyecto', 'el proyecto')}.")
+            elif isinstance(r_dictados, list) and r_dictados:
+                dict_txt = r_dictados[idx % len(r_dictados)]
             else:
-                dias_sesiones_map[d_nom] = f"""Fase de Integración Cívico-Comunitaria: {ef_info.get('nombre', 'Efeméride Oficial')}
+                dict_txt = f"Palabras clave ortográficas para {d_nom}."
+
+            if isinstance(r_calculo, dict):
+                calc_txt = r_calculo.get(d_nom, f"Operaciones de cálculo mental contextualizadas para {d_nom}.")
+            elif isinstance(r_calculo, list) and r_calculo:
+                calc_txt = r_calculo[idx % len(r_calculo)]
+            else:
+                calc_txt = f"Cálculo mental contextualizado para {d_nom}."
+
+            if isinstance(r_problemas, dict):
+                prob_txt = r_problemas.get(d_nom, f"Problema razonado de situaciones comunitarias en Durango.")
+            elif isinstance(r_problemas, list) and r_problemas:
+                prob_txt = r_problemas[idx % len(r_problemas)]
+            else:
+                prob_txt = f"Problema razonado de aplicación para {d_nom}."
+
+            anexo_nom = anexos_dia.get(d_nom) or (k_campos[idx][1].get("anexo_nombre") if idx < len(k_campos) else f"Anexo {semana_num}.{idx+1}")
+
+            dias_rutinas_map[d_nom] = (
+                f"- **Dictado Ortográfico (Cuadernillo y Proyecto):** {dict_txt}\n"
+                f"- **Velocidad y Fluidez Lectora:** Lectura dramatizada y en voz alta (1 minuto) con modulación y registro de fluidez.\n"
+                f"- **Cálculo Mental Contextualizado:** {calc_txt}\n"
+                f"- **Problema Razonado Comunitario:** {prob_txt}"
+            )
+
+            s_info = sec_dias.get(d_nom, {})
+            inicio_s = s_info.get("inicio") or (k_campos[idx][1].get("inicio") if idx < len(k_campos) else "Activación colectiva y recuperación de saberes previos.")
+            desarrollo_s = s_info.get("desarrollo") or (k_campos[idx][1].get("desarrollo") if idx < len(k_campos) else "Indagación y aplicación práctica en comunidades de aprendizaje.")
+            cierre_s = s_info.get("cierre") or (k_campos[idx][1].get("cierre") if idx < len(k_campos) else "Puesta en común, síntesis y coevaluación grupal.")
+
+            dias_sesiones_map[d_nom] = f"""Fase de Intervención: {kempis_data.get('proyecto', 'Proyecto Escolar')} — {d_nom}
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (15-20 min):**
-  * Activación colectiva y recuperación de los aprendizajes de la semana en asamblea de aula.
+  * {inicio_s}
 - **Desarrollo (50-60 min):**
-  * {ef_info.get('actividad', 'Elaboración de cartel informativo colaborativo.')}
-  * Resolución del anexo complementario: `{ef_info.get('anexo_nombre', 'Anexo Cívico')}`.
+  * {desarrollo_s}
+  * Aplicación del anexo imprimible: `{anexo_nom}`.
 - **Cierre (15-20 min):**
-  * Exposición de acuerdos comunitarios, autoevaluación grupal y socialización con la comunidad escolar.
-- **Recursos didácticos:** Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}), cartulina y marcadores.
-- **Evidencia / Evaluación formativa:** Producto integrador `{ef_info.get('anexo_nombre', 'Cartel')}` evaluado con rúbrica."""
+  * {cierre_s}
+- **Recursos didácticos:** Libros de texto gratuitos SEP, Ficha de trabajo ({anexo_nom}) y libreta del alumno.
+- **Evidencia / Evaluación formativa:** Ficha de trabajo resuelta: `{anexo_nom}` y registro en rúbrica analítica."""
 
         sample_rutinas = dias_rutinas_map
         sample_sesiones = dias_sesiones_map
-        nombre_proyecto_fallback = f"{kempis_data['titulo_general']} — Proyecto Integrador de Saberes y Convivencia"
-        proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {sem_kempis} a través del Cuadernillo de Actividades Profa Kempis, fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con dinámicas vivenciales y fichas prácticas."
+        nombre_proyecto_fallback = f"{kempis_data.get('titulo_general', kempis_data.get('proyecto', 'Proyecto Integrador'))} — Proyecto Oficial SEP"
+        proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {semana_num} ({kempis_data.get('mes', '2026')}) a través del proyecto '{kempis_data.get('proyecto', 'Integrador')}', fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con dinámicas vivenciales y fichas prácticas."
         
         filas_art = []
-        for c_n, c_v in kempis_data["campos"].items():
-            pda_texto = c_v.get("pda_vinculado") or c_v.get("pda") or "Proceso de desarrollo de aprendizaje oficial NEM"
-            filas_art.append(
-                f"| **{c_n}** | {c_v['tema']} | {pda_texto} | Libros de Texto SEP y Cuadernillo Profa Kempis | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
-            )
+        if k_campos:
+            for c_n, c_v in k_campos:
+                pda_texto = c_v.get("pda_vinculado") or c_v.get("pda") or "Proceso de desarrollo de aprendizaje oficial NEM"
+                filas_art.append(
+                    f"| **{c_n}** | {c_v.get('tema', kempis_data.get('proyecto', ''))} | {pda_texto} | Libros de Texto SEP y Anexos de la Semana {semana_num} | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
+                )
+        else:
+            for c_n in ["Lenguajes", "Saberes y Pensamiento Científico", "Ética, Naturaleza y Sociedades", "De lo Humano y lo Comunitario"]:
+                filas_art.append(
+                    f"| **{c_n}** | {kempis_data.get('proyecto', 'Proyecto Integrador')} | Procesos de desarrollo de aprendizaje acordes a la Fase 5 y la Semana {semana_num} | Libros de Texto SEP (LTG) | Comprensión lectora, velocidad, ortografía y cálculo contextualizado |"
+                )
         tabla_articulacion_str = "\n".join(filas_art)
     else:
         nombre_proyecto_fallback = '"Voces Comunitarias en Acción: Lectura, Ortografía y Tecnologías para el Bienestar"'
@@ -791,3 +848,6 @@ def generate_sample_fallback(
 - **Seguimiento del Diario de Clase:** Registro diario de los avances individuales de los 26 alumnos en fluidez lectora, precisión ortográfica y participación activa en proyectos.
 - **Vinculación con el Programa Analítico Oficial (Ciclo 2026-2027):** Este plano didáctico atiende de forma directa los 4 ejes prioritarios identificados en el diagnóstico institucional de la Primaria “Revolución Social de 1910” (CCT: 10EPR0361N, Durango): comprensión lectora, velocidad lectora, ortografía y promoción de la lectura con acceso a tecnologías.
 """
+
+# Alias de compatibilidad para generación demo
+generar_planeacion_demo = generate_sample_fallback

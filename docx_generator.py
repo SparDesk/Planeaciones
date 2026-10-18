@@ -24,11 +24,15 @@ try:
     from cuadernillo_kempis import (
         detectar_relevancia_kempis,
         obtener_anexos_kempis_para_docx,
+        obtener_recursos_kempis_por_semana,
+        obtener_proyecto_semana,
         CUADERNILLO_KEMPIS_DATA
     )
 except ImportError:
     detectar_relevancia_kempis = lambda *args, **kwargs: False
     obtener_anexos_kempis_para_docx = lambda *args, **kwargs: []
+    obtener_recursos_kempis_por_semana = lambda *args, **kwargs: None
+    obtener_proyecto_semana = lambda *args, **kwargs: {}
     CUADERNILLO_KEMPIS_DATA = {}
 
 
@@ -335,7 +339,7 @@ def add_institutional_header_table(doc, datos_escuela: Dict[str, Any]):
     """
     nombre_escuela = datos_escuela.get("nombre_escuela", "Escuela Primaria “Revolución Social de 1910”") if datos_escuela else "Escuela Primaria “Revolución Social de 1910”"
     cct = datos_escuela.get("cct", "10EPR0361N") if datos_escuela else "10EPR0361N"
-    periodo = datos_escuela.get("periodo", "Semana 20 de 37") if datos_escuela else "Semana 20 de 37"
+    periodo = (datos_escuela.get("periodo") or f"Semana {datos_escuela.get('semana', 1)} de 37") if datos_escuela else "Semana 1 de 37"
     ciclo = datos_escuela.get("ciclo_escolar", "2026-2027") if datos_escuela else "2026-2027"
     grado = datos_escuela.get("grado", "6° de Primaria") if datos_escuela else "6° de Primaria"
     grupo = datos_escuela.get("grupo", "A") if datos_escuela else "A"
@@ -868,13 +872,11 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
     if not es_relevante and semana_num not in [6, 7]:
         return
 
-    # Determinar si es semana 6 o 7
-    if semana_num == 7 or any(k in raw_text for k in ["semana 7", "lectura dramatizada", "plato del bien comer", "jarra del buen", "calidad de vida", "16 de octubre", "alimentación"]):
-        sem_kempis = 7
-    else:
-        sem_kempis = 6
+    sem_kempis = semana_num or int(datos_escuela.get("semana", 1)) if datos_escuela else 1
 
-    kempis_meta = CUADERNILLO_KEMPIS_DATA.get(sem_kempis)
+    kempis_meta = obtener_recursos_kempis_por_semana(sem_kempis)
+    if not kempis_meta:
+        kempis_meta = CUADERNILLO_KEMPIS_DATA.get(sem_kempis)
     if not kempis_meta:
         return
 
@@ -894,13 +896,14 @@ def add_cuadernillo_kempis_section(doc, parsed_info: Dict[str, Any], datos_escue
     r_sub.font.size = Pt(10)
     r_sub.font.color.rgb = COLOR_MORADO_OSCURO
 
-    r_tit = p_hdr.add_run(f"CUADERNILLO DE ACTIVIDADES — SEMANA {sem_kempis} (PROFA KEMPIS)\n")
+    tit_banner = f"CUADERNILLO DE ACTIVIDADES — SEMANA {sem_kempis} (PROFA KEMPIS)\n" if sem_kempis in [6, 7] else f"ANEXOS IMPRIMIBLES DEL PROYECTO — SEMANA {sem_kempis} DE 37\n"
+    r_tit = p_hdr.add_run(tit_banner)
     r_tit.font.name = 'Arial'
     r_tit.font.bold = True
     r_tit.font.size = Pt(12)
     r_tit.font.color.rgb = COLOR_MORADO_INTENSO
 
-    r_desc = p_hdr.add_run(f"{kempis_meta.get('descripcion', '')} Fichas didácticas organizadas por Campo Formativo listas para fotocopiar.")
+    r_desc = p_hdr.add_run(f"{kempis_meta.get('descripcion', '')} Fichas didácticas organizadas por Campo Formativo y día listas para fotocopiar.")
     r_desc.font.name = 'Arial'
     r_desc.font.size = Pt(8.5)
     r_desc.font.italic = True
@@ -1228,7 +1231,7 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
             sem_val = int(m_s.group(1))
 
     es_kempis_activo = detectar_relevancia_kempis(semana=sem_val, directrices_o_texto=raw_text)
-    sem_kempis = 7 if (sem_val == 7 or any(k in raw_text for k in ["semana 7", "lectura dramatizada", "plato del bien comer", "jarra del buen", "calidad de vida", "16 de octubre", "alimentación"])) else 6
+    sem_kempis = sem_val or 1
 
     for dia in dias_seleccionados:
         dia_idx = dias_seleccionados.index(dia)

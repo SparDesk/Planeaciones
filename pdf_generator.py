@@ -67,7 +67,7 @@ class PlaneacionPDF(FPDF):
             grado = self.datos_escuela.get('grado', '6° de Primaria')
             grupo = self.datos_escuela.get('grupo', 'A')
             fase = self.datos_escuela.get('fase', 'Fase 5')
-            periodo = self.datos_escuela.get('periodo', 'Semana 20 de 37')
+            periodo = self.datos_escuela.get('periodo') or f"Semana {self.datos_escuela.get('semana', 1)} de 37"
             ciclo = self.datos_escuela.get('ciclo_escolar', '2026-2027')
             self.cell(0, 5, sanitize_latin1(f"C.C.T. {cct} | {zona} | {sector} | {grado} '{grupo}' ({fase}) | {periodo} | CICLO ESCOLAR {ciclo}"), new_x='LMARGIN', new_y='NEXT', align='C')
             
@@ -84,7 +84,7 @@ class PlaneacionPDF(FPDF):
             self.set_font('Helvetica', 'I', 7.5)
             self.set_text_color(100, 116, 139)
             escuela = self.datos_escuela.get('nombre_escuela', 'Escuela Primaria “Revolución Social de 1910”')
-            periodo = self.datos_escuela.get('periodo', 'Semana 20 de 37')
+            periodo = self.datos_escuela.get('periodo') or f"Semana {self.datos_escuela.get('semana', 1)} de 37"
             self.cell(0, 5, sanitize_latin1(f"{escuela} — Plano Didáctico ({periodo}) — Nueva Escuela Mexicana"), new_x='LMARGIN', new_y='NEXT', align='L')
             self.line(12, self.get_y(), 198, self.get_y())
             self.ln(2)

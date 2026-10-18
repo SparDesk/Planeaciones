@@ -30,8 +30,11 @@ from planeaciones_storage import (
 )
 from cuadernillo_kempis import (
     CUADERNILLO_KEMPIS_DATA,
+    CATALOGO_PROYECTOS_SEP_37_SEMANAS,
     detectar_relevancia_kempis,
     obtener_recursos_kempis_por_semana,
+    obtener_proyecto_semana,
+    obtener_anexos_por_semana_y_dia,
     formatear_kempis_para_prompt,
     obtener_anexos_kempis_para_docx
 )
@@ -59,7 +62,7 @@ DATOS_PREDETERMINADOS = {
     "grupo": "A",
     "matricula": 26,
     "estilos_aprendizaje": "Kinestésico y Visual",
-    "periodo": "Semana 20 de 37",
+    "periodo": "Semana 1 a 37 SEP (Oficial Ciclo 2026-2027)",
     "ciclo_escolar": "2026-2027",
     "turno": "Matutino"
 }
@@ -659,14 +662,19 @@ import re
 from urllib.parse import urlparse, parse_qs
 import streamlit.components.v1 as components
 
+# Lista de reproducción oficial predeterminada de YouTube para Educación Primaria / NEM
+URL_PLAYLIST_OFICIAL_YOUTUBE = "https://www.youtube.com/watch?v=AN8rqiS_H9Y&list=PLUMiCjvK3jNw"
+EMBED_PLAYLIST_OFICIAL_YOUTUBE = "https://www.youtube.com/embed/AN8rqiS_H9Y?list=PLUMiCjvK3jNw"
+
 def extraer_embed_youtube(url_o_id: str) -> str:
     """
     Convierte cualquier enlace o identificador de YouTube al formato oficial de inserción embebida (embed).
     Asegura que los enlaces de formato 'watch?v=', 'youtu.be/', '/live/', '/shorts/', listas de reproducción
     o códigos iframe se transformen rigurosamente a 'https://www.youtube.com/embed/...' sin errores de disponibilidad ni bloqueos.
+    Si el parámetro está vacío o no es válido, retorna la lista de reproducción oficial predeterminada.
     """
     if not url_o_id or not str(url_o_id).strip():
-        return "https://www.youtube.com/embed/jfKfPfyJRdk"
+        return EMBED_PLAYLIST_OFICIAL_YOUTUBE
     
     texto = str(url_o_id).strip()
     
@@ -746,8 +754,8 @@ def extraer_embed_youtube(url_o_id: str) -> str:
     elif list_id:
         return f"https://www.youtube.com/embed/videoseries?list={list_id}"
 
-    # Fallback predeterminado seguro
-    return "https://www.youtube.com/embed/jfKfPfyJRdk"
+    # Fallback predeterminado seguro hacia la lista de reproducción oficial
+    return EMBED_PLAYLIST_OFICIAL_YOUTUBE
 
 # ==========================================
 # CONFIGURACIÓN DE PÁGINA STREAMLIT
@@ -2803,28 +2811,39 @@ def construir_catalogo_sep_2026():
 
 CATALOGO_SEMANAS_SEP, CATALOGO_FECHAS_SEP = construir_catalogo_sep_2026()
 
+_hoy = datetime.date.today()
+_sem_detectada_hoy = (
+    CATALOGO_FECHAS_SEP.get((_hoy.year, _hoy.month, _hoy.day))
+    or CATALOGO_FECHAS_SEP.get((_hoy.month, _hoy.day))
+    or 8
+)
+_sem_init = max(1, min(37, int(_sem_detectada_hoy)))
+_info_init = CATALOGO_SEMANAS_SEP.get(_sem_init, CATALOGO_SEMANAS_SEP[1])
+_mes_init = _info_init["mes_nombre"]
+_dias_map = {0: "Lunes", 1: "Martes", 2: "Miércoles", 3: "Jueves", 4: "Viernes"}
+_dia_init = _dias_map.get(_hoy.weekday(), "Lunes")
+
 if "cal_mes_nombre" not in st.session_state:
-    st.session_state.cal_mes_nombre = "Octubre"
+    st.session_state.cal_mes_nombre = _mes_init
 
 if "cal_semana_escolar" not in st.session_state:
-    st.session_state.cal_semana_escolar = 20
+    st.session_state.cal_semana_escolar = _sem_init
 
 if "cal_sem_idx" not in st.session_state:
-    st.session_state.cal_sem_idx = 3
+    st.session_state.cal_sem_idx = 0
 
 if "semana_activa_previa" not in st.session_state:
-    st.session_state.semana_activa_previa = 20
+    st.session_state.semana_activa_previa = _sem_init
+
+if "dia_activo_pestaña" not in st.session_state:
+    st.session_state.dia_activo_pestaña = _dia_init
 
 if "dias_seleccionados" not in st.session_state or not st.session_state.dias_seleccionados:
     st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 
 if "dias_fechas" not in st.session_state or not st.session_state.dias_fechas:
     st.session_state.dias_fechas = {
-        "Lunes": "LUNES 19 DE OCTUBRE DE 2026",
-        "Martes": "MARTES 20 DE OCTUBRE DE 2026",
-        "Miércoles": "MIÉRCOLES 21 DE OCTUBRE DE 2026",
-        "Jueves": "JUEVES 22 DE OCTUBRE DE 2026",
-        "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
+        d["nombre_dia"]: d["fecha_completa"].upper() for d in _info_init["dias_habil"]
     }
 
 def limpiar_estado_planeacion(nueva_semana=None, reset_completo=False):
@@ -2870,23 +2889,28 @@ def limpiar_estado_planeacion(nueva_semana=None, reset_completo=False):
             ]:
                 if k.startswith(prefix) and k != "semana_activa_previa":
                     del st.session_state[k]
-        st.session_state.cal_mes_nombre = "Octubre"
-        st.session_state.cal_semana_escolar = 20
-        st.session_state.cal_sem_idx = 3
-        st.session_state.semana_activa_previa = 20
+        st.session_state.cal_mes_nombre = _mes_init
+        st.session_state.cal_semana_escolar = _sem_init
+        st.session_state.cal_sem_idx = 0
+        st.session_state.semana_activa_previa = _sem_init
+        st.session_state.dia_activo_pestaña = _dia_init
         st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
         st.session_state.dias_fechas = {
-            "Lunes": "LUNES 19 DE OCTUBRE DE 2026",
-            "Martes": "MARTES 20 DE OCTUBRE DE 2026",
-            "Miércoles": "MIÉRCOLES 21 DE OCTUBRE DE 2026",
-            "Jueves": "JUEVES 22 DE OCTUBRE DE 2026",
-            "Viernes": "VIERNES 23 DE OCTUBRE DE 2026"
+            d["nombre_dia"]: d["fecha_completa"].upper() for d in _info_init["dias_habil"]
         }
         st.session_state["aviso_nueva_planeacion"] = True
     elif nueva_semana is not None:
-        st.session_state.cal_semana_escolar = nueva_semana
-        st.session_state.semana_activa_previa = nueva_semana
+        sem_val = max(1, min(37, int(nueva_semana)))
+        st.session_state.cal_semana_escolar = sem_val
+        st.session_state.semana_activa_previa = sem_val
+        info_n = CATALOGO_SEMANAS_SEP.get(sem_val, CATALOGO_SEMANAS_SEP[1])
+        st.session_state.cal_mes_nombre = info_n["mes_nombre"]
         st.session_state.dias_seleccionados = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+        st.session_state.dias_fechas = {
+            d["nombre_dia"]: d["fecha_completa"].upper() for d in info_n["dias_habil"]
+        }
+        if "dia_activo_pestaña" not in st.session_state or st.session_state.dia_activo_pestaña not in st.session_state.dias_seleccionados:
+            st.session_state.dia_activo_pestaña = "Lunes"
         # Limpiar claves de widgets que guardan redacciones manuales, selecciones o archivos
         for k in list(st.session_state.keys()):
             for prefix in [
@@ -3379,9 +3403,10 @@ if authentication_status:
             )
 
         st.markdown("---")
-        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Sound', unsafe_allow_html=True)
+        st.markdown('### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> Recursos Multimedia y Música', unsafe_allow_html=True)
 
         CANALES_MUSICA_DEFAULT = {
+            "🎵 Lista Oficial NEM (Educación Primaria)": EMBED_PLAYLIST_OFICIAL_YOUTUBE,
             "Lo-Fi Hip Hop (Relax / Estudio)": "https://www.youtube.com/embed/jfKfPfyJRdk",
             "Piano Clásico Relajante": "https://www.youtube.com/embed/4xDzrJKXOOY",
             "Café Jazz Instrumental": "https://www.youtube.com/embed/DXUAyRRkI6k",
@@ -3391,18 +3416,18 @@ if authentication_status:
         }
 
         estilo_musica_sel = st.selectbox(
-            "Ambiente Musical:",
+            "Ambiente Musical y Videos:",
             options=list(CANALES_MUSICA_DEFAULT.keys()),
             index=0,
-            help="Selecciona una atmósfera musical relajante para concentrarte al diseñar tus planeaciones.",
+            help="Selecciona la lista oficial o una atmósfera musical relajante para acompañar el diseño de tus planeaciones.",
             key=f"musica_preset_{st.session_state.widget_key}"
         )
 
         url_custom_youtube = st.text_input(
             "Enlace personalizado de YouTube (opcional):",
             value="",
-            placeholder="https://www.youtube.com/watch?v=...",
-            help="Pega aquí el enlace de cualquier video o playlist de YouTube para reproducirlo.",
+            placeholder=URL_PLAYLIST_OFICIAL_YOUTUBE,
+            help="Pega aquí el enlace de cualquier video o playlist de YouTube para reproducirlo. Por defecto se reproduce la lista oficial.",
             key=f"musica_url_{st.session_state.widget_key}"
         )
 
@@ -3412,7 +3437,7 @@ if authentication_status:
         elif CANALES_MUSICA_DEFAULT.get(estilo_musica_sel):
             url_embed_activa = CANALES_MUSICA_DEFAULT[estilo_musica_sel]
         else:
-            url_embed_activa = "https://www.youtube.com/embed/jfKfPfyJRdk"
+            url_embed_activa = EMBED_PLAYLIST_OFICIAL_YOUTUBE
 
         # Garantizar que la URL activa sea estrictamente formato embed oficial
         url_embed_activa = extraer_embed_youtube(url_embed_activa)
@@ -3423,6 +3448,15 @@ if authentication_status:
             height=160,
             scrolling=False
         )
+
+        st.markdown(f"""
+        <div style="font-size: 0.78rem; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <a href="{URL_PLAYLIST_OFICIAL_YOUTUBE}" target="_blank" style="color: #A78BFA; text-decoration: none; font-weight: 600;">
+                ▶️ Abrir Lista Oficial en YouTube
+            </a>
+            <span style="color: #94A3B8; font-size: 0.72rem;">Predeterminada</span>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Empaquetar datos de escuela
     datos_escuela_actual = {
@@ -4029,9 +4063,9 @@ if authentication_status:
     """, unsafe_allow_html=True)
 
     # Variables de control inicial
-    semana_actual_init = int(st.session_state.get("cal_semana_escolar", 20))
+    semana_actual_init = int(st.session_state.get("cal_semana_escolar", _sem_init))
     if semana_actual_init not in CATALOGO_SEMANAS_SEP:
-        semana_actual_init = 20
+        semana_actual_init = max(1, min(37, semana_actual_init))
 
     # Layout de proporción minimalista: Selectores de dosificación (izq) y Calendario compacto (der)
     col_ctrls, col_visual = st.columns([1.18, 0.82])
@@ -4208,12 +4242,17 @@ if authentication_status:
         st.session_state.dias_seleccionados = dias_seleccionados
         st.session_state.dias_fechas = dias_fechas_calculadas
 
-        # Actualizar datos_escuela_actual
+        # Actualizar datos_escuela_actual y proyecto de la semana
+        proyecto_semana_actual = obtener_proyecto_semana(semana_seleccionada, mes=cal_mes_actual)
+        st.session_state["proyecto_semana_actual"] = proyecto_semana_actual
         datos_escuela_actual["dias_seleccionados"] = dias_seleccionados
         datos_escuela_actual["dias_planeados"] = dias_seleccionados
         datos_escuela_actual["dias_fechas"] = dias_fechas_calculadas
         datos_escuela_actual["semana"] = semana_seleccionada
         datos_escuela_actual["semana_seleccionada"] = semana_seleccionada
+        datos_escuela_actual["mes"] = cal_mes_actual
+        datos_escuela_actual["año"] = cal_año_actual
+        datos_escuela_actual["proyecto_semana"] = proyecto_semana_actual
         datos_escuela_actual["periodo"] = periodo_sel
 
     # Visualización gráfica compacta del mes actual en col_visual
@@ -4597,13 +4636,13 @@ if authentication_status:
     plan_guardado_actual = st.session_state.get("planeacion_generada")
     parsed_actual = parse_plan_sections(plan_guardado_actual) if plan_guardado_actual else {}
 
-    sem_kempis_act = 7 if (semana_seleccionada == 7) else 6
-    kempis_data_dia = CUADERNILLO_KEMPIS_DATA.get(sem_kempis_act)
-    kempis_campos_lista = list(kempis_data_dia["campos"].items()) if kempis_data_dia else []
+    proyecto_semana_actual = obtener_proyecto_semana(semana_seleccionada, mes=st.session_state.get('cal_mes_nombre'))
+    st.session_state["proyecto_semana_actual"] = proyecto_semana_actual
 
     for idx_dia, (tab_d, nom_dia) in enumerate(zip(tabs_dias_captura, dias_activos_tabs)):
         with tab_d:
             fecha_dia_label = dias_fechas_map.get(nom_dia, f"{nom_dia} (Semana {semana_seleccionada})")
+            anexo_del_dia = obtener_anexos_por_semana_y_dia(semana_seleccionada, nom_dia, mes=st.session_state.get('cal_mes_nombre'))
             
             # Obtener datos de rutina y sesión correspondientes a este día
             r_dia = parsed_actual.get("rutinas_por_dia", {}).get(nom_dia)
@@ -4614,53 +4653,55 @@ if authentication_status:
             if not s_dia and idx_dia < len(parsed_actual.get("sesiones", [])):
                 s_dia = parsed_actual["sesiones"][idx_dia]
 
-            # Si no hay planeación generada aún, pre-cargar con la plantilla oficial
+            # Pre-cargar con el catálogo dinámico de la semana si aún no hay planeación generada
             if not r_dia:
-                if kempis_data_dia and (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada)):
-                    r_dictados = kempis_data_dia["rutinas_matutinas_sugeridas"]["dictado"]
-                    r_calc = kempis_data_dia["rutinas_matutinas_sugeridas"]["calculo_mental"]
-                    r_prob = kempis_data_dia["rutinas_matutinas_sugeridas"]["problemas_razonados"]
-                    dictado_val = r_dictados[idx_dia % len(r_dictados)]
-                    calc_val = r_calc[idx_dia % len(r_calc)]
-                    prob_val = r_prob[idx_dia % len(r_prob)]
-                else:
-                    dictado_val = f"Palabras clave reflexivas para {nom_dia} con desafío ortográfico."
-                    calc_val = f"Operaciones de cálculo mental contextualizadas para {nom_dia}."
-                    prob_val = f"Problema razonado de situaciones comunitarias en Durango."
+                r_dictados = proyecto_semana_actual.get("rutinas_matutinas", {}).get("dictado", {})
+                r_calc = proyecto_semana_actual.get("rutinas_matutinas", {}).get("calculo_mental", {})
+                r_prob = proyecto_semana_actual.get("rutinas_matutinas", {}).get("problemas_razonados", {})
+                dictado_val = r_dictados.get(nom_dia, f"Palabras clave reflexivas para {nom_dia} sobre {proyecto_semana_actual['proyecto']}.")
+                calc_val = r_calc.get(nom_dia, f"Operaciones de cálculo mental contextualizadas para {nom_dia}.")
+                prob_val = r_prob.get(nom_dia, f"Problema razonado de situaciones comunitarias en Durango.")
             else:
                 dictado_val = r_dia.get("dictado", "")
                 calc_val = r_dia.get("calculo", "")
                 prob_val = r_dia.get("problema", "")
 
             if not s_dia:
-                if kempis_data_dia and idx_dia < len(kempis_campos_lista) and (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada)):
-                    cf_nom_k, cf_info_k = kempis_campos_lista[idx_dia]
-                    ini_val = cf_info_k['inicio']
-                    des_val = f"{cf_info_k['desarrollo']} (Anexo: {cf_info_k['anexo_nombre']})"
-                    cie_val = cf_info_k['cierre']
-                    rec_val = f"Libros de Texto Gratuitos (LTG), Cuadernillo Profa Kempis ({cf_info_k['anexo_nombre']}) y libreta del alumno."
-                else:
-                    ini_val = f"Activación de conocimientos previos y planteamiento de pregunta detonadora para {nom_dia}."
-                    des_val = f"Actividades de indagación colaborativa y resolución práctica con Libros de Texto Gratuitos."
-                    cie_val = f"Puesta en común, síntesis de aprendizajes y coevaluación en asamblea de aula."
-                    rec_val = f"Libros de Texto Gratuitos (LTG), cuaderno de notas y materiales del aula."
+                sec_dia = proyecto_semana_actual.get("secuencias_por_dia", {}).get(nom_dia, {})
+                ini_val = sec_dia.get("inicio", f"Activación diagnóstica y planteamiento de detonadores para el proyecto '{proyecto_semana_actual['proyecto']}'.")
+                des_val = sec_dia.get("desarrollo", f"Indagación práctica, análisis en comunidades de aprendizaje y resolución del {anexo_del_dia}.")
+                cie_val = sec_dia.get("cierre", f"Puesta en común, balance de avances y reflexión comunitaria en asamblea.")
+                rec_val = sec_dia.get("recursos", f"Libros de Texto Gratuitos (LTG), {anexo_del_dia}, libreta y materiales del aula.")
             else:
                 ini_val = s_dia.get("inicio", "")
                 des_val = s_dia.get("desarrollo", "")
                 cie_val = s_dia.get("cierre", "")
                 rec_val = s_dia.get("recursos", "")
 
-            # Header visual del día
+            # Header visual del día con vinculación al proyecto y anexo
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); border: 1px solid #DDD6FE; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <div style="font-weight: 700; color: #4C1D95; font-size: 0.92rem;">
-                    🗓️ <b>{fecha_dia_label}</b> — Sesión {idx_dia + 1} de {len(dias_activos_tabs)}
+            <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); border: 1.5px solid #DDD6FE; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <div style="font-weight: 700; color: #4C1D95; font-size: 0.94rem;">
+                        🗓️ <b>{fecha_dia_label}</b> — Sesión {idx_dia + 1} de {len(dias_activos_tabs)}
+                    </div>
+                    <div style="font-size: 0.8rem; color: #6D28D9; margin-top: 2px;">
+                        🎯 <b>Proyecto:</b> {proyecto_semana_actual['proyecto']} • 📑 <b>Anexo:</b> {anexo_del_dia}
+                    </div>
                 </div>
                 <div style="font-size: 0.76rem; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">
-                    90 min lectivos • 08:00 - 13:00
+                    Semana {semana_seleccionada} SEP • {st.session_state.get('cal_mes_nombre', 'Octubre')}
                 </div>
             </div>
             """, unsafe_allow_html=True)
+
+            col_fijar, _ = st.columns([0.45, 0.55])
+            with col_fijar:
+                es_activo = (st.session_state.get("dia_activo_pestaña") == nom_dia)
+                txt_btn = f"✓ Día Activo en Pestañas: {nom_dia}" if es_activo else f"🎯 Fijar {nom_dia} para Búsqueda Contextual"
+                if st.button(txt_btn, key=f"btn_fijar_dia_{nom_dia}_{st.session_state.widget_key}", disabled=es_activo, use_container_width=True):
+                    st.session_state.dia_activo_pestaña = nom_dia
+                    st.rerun()
 
             col_dia_rutina, col_dia_secuencia = st.columns([1, 1.35])
             with col_dia_rutina:
@@ -4781,7 +4822,7 @@ if authentication_status:
         grado = datos_escuela.get('grado', '6° de Primaria')
         fase = datos_escuela.get('fase', 'Fase 5')
         grupo = datos_escuela.get('grupo', 'A')
-        periodo = datos_escuela.get('periodo', 'Semana 20 de 37')
+        periodo = datos_escuela.get('periodo', f"Semana {semana_seleccionada} de 37")
         ciclo = datos_escuela.get('ciclo_escolar', '2026-2027')
         turno = datos_escuela.get('turno', 'Matutino')
     
@@ -4798,13 +4839,9 @@ if authentication_status:
         ejes_txt = ", ".join(ejes) if ejes else "Ejes articuladores por definir"
         problemica_txt = directrices.strip() if directrices and directrices.strip() else EJEMPLO_PROBLEMICA_ANALITICO
     
-        # Detección de Cuadernillo Profa Kempis
-        sem_kempis = 7 if (semana_seleccionada == 7) else 6
-        kempis_data = CUADERNILLO_KEMPIS_DATA.get(sem_kempis)
-        vincular_k = vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True
-        es_kempis_modo = bool(vincular_k and kempis_data and (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada, directrices_o_texto=problemica_txt)))
-
-        nombre_proyecto_def = f"{kempis_data['titulo_general']} — Proyecto Integrador de Saberes y Convivencia" if es_kempis_modo else "[Nombre del Proyecto de Intervención Docente]"
+        # Detección y vinculación dinámica del proyecto y anexos de la semana oficial SEP
+        proyecto_info = obtener_proyecto_semana(semana_seleccionada, mes=st.session_state.get('cal_mes_nombre'))
+        nombre_proyecto_def = f"{proyecto_info['proyecto']} — {proyecto_info.get('fase_metodologica', 'Proyecto Integrador Comunitario')}"
 
         # Preparar texto de contenidos y pda sintetizados para la tabla inicial
         if contenidos_pda:
@@ -4832,66 +4869,38 @@ if authentication_status:
         rutinas_md = ""
         secuencias_md = ""
 
-        kempis_campos_lista = list(kempis_data["campos"].items()) if es_kempis_modo else []
-
         for s, nombre_dia in enumerate(dias_seleccionados, 1):
             fecha_dia = dias_fechas.get(nombre_dia, nombre_dia)
-            if es_kempis_modo:
-                r_dictados = kempis_data["rutinas_matutinas_sugeridas"]["dictado"]
-                r_calculo = kempis_data["rutinas_matutinas_sugeridas"]["calculo_mental"]
-                r_problemas = kempis_data["rutinas_matutinas_sugeridas"]["problemas_razonados"]
-                
-                dictado_txt = r_dictados[(s - 1) % len(r_dictados)]
-                calculo_txt = r_calculo[(s - 1) % len(r_calculo)]
-                problema_txt = r_problemas[(s - 1) % len(r_problemas)]
-                
-                rutinas_md += f"""
+            anexo_dia = obtener_anexos_por_semana_y_dia(semana_seleccionada, nombre_dia, mes=st.session_state.get('cal_mes_nombre'))
+            r_dictados = proyecto_info.get("rutinas_matutinas", {}).get("dictado", {})
+            r_calculo = proyecto_info.get("rutinas_matutinas", {}).get("calculo_mental", {})
+            r_problemas = proyecto_info.get("rutinas_matutinas", {}).get("problemas_razonados", {})
+
+            dictado_txt = r_dictados.get(nombre_dia, f"Palabras clave reflexivas para {nombre_dia} con desafío ortográfico.")
+            calculo_txt = r_calculo.get(nombre_dia, f"Operaciones de cálculo mental contextualizadas para {nombre_dia}.")
+            problema_txt = r_problemas.get(nombre_dia, f"Problema razonado de situaciones comunitarias en Durango.")
+
+            rutinas_md += f"""
 ### Sesión {s} ({fecha_dia}):
 - **Dictado Ortográfico:** {dictado_txt}
 - **Cálculo Mental:** {calculo_txt}
 - **Problema Razonado:** {problema_txt}
 """
-                if s <= len(kempis_campos_lista):
-                    cf_nom, cf_info = kempis_campos_lista[s - 1]
-                    titulo_ses = f"{cf_nom} — {cf_info['tema']}"
-                    inicio_txt = cf_info['inicio']
-                    desarrollo_txt = f"{cf_info['desarrollo']} (Anexo imprimible: `{cf_info['anexo_nombre']}`)."
-                    cierre_txt = cf_info['cierre']
-                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({cf_info['anexo_nombre']}) y libreta de notas."
-                    evidencia_s = f"Ficha de trabajo completada: {cf_info['anexo_nombre']}."
-                else:
-                    ef_info = kempis_data.get("efemeride_principal", {})
-                    titulo_ses = f"Integración y Conmemoración — {ef_info.get('nombre', 'Proyecto Comunitario')}"
-                    inicio_txt = "Recuperación de aprendizajes de la semana mediante preguntas detonadoras en asamblea."
-                    desarrollo_txt = ef_info.get("actividad", "Elaboración de cartel colaborativo y síntesis de saberes.")
-                    cierre_txt = "Exposición de trabajos, autoevaluación grupal y acuerdos para la vida diaria."
-                    recursos_s = f"{libros_txt}, Cuadernillo Profa Kempis ({ef_info.get('anexo_nombre', 'Anexo Cívico')}) y cartulina para cartel."
-                    evidencia_s = f"Producto integrador: {ef_info.get('anexo_nombre', 'Cartel escolar')}."
+            sec_dia = proyecto_info.get("secuencias_por_dia", {}).get(nombre_dia, {})
+            inicio_txt = sec_dia.get("inicio", f"Activación de conocimientos previos y planteamiento detonador para {nombre_dia}.")
+            desarrollo_txt = sec_dia.get("desarrollo", f"Indagación práctica, análisis en comunidades de aprendizaje y resolución del anexo de la sesión: {anexo_dia}.")
+            cierre_txt = sec_dia.get("cierre", "Puesta en común, balance de avances y reflexión comunitaria en asamblea de aula.")
+            recursos_s = f"{libros_txt}, {anexo_dia} y libreta del alumno."
+            evidencia_s = f"Ficha de trabajo completada: {anexo_dia}."
 
-                secuencias_md += f"""
-### Sesión {s} (**Día: {fecha_dia}**) - {titulo_ses}
+            secuencias_md += f"""
+### Sesión {s} (**Día: {fecha_dia}**) - {proyecto_info['proyecto']} ({nombre_dia})
 - **Tiempo estimado:** 90 minutos
 - **Inicio (15-20 min):** {inicio_txt}
 - **Desarrollo (50-60 min):** {desarrollo_txt}
 - **Cierre (15-20 min):** {cierre_txt}
 - **Recursos didácticos y materiales:** {recursos_s}
 - **Evidencia / Producto de la sesión:** {evidencia_s}
-"""
-            else:
-                rutinas_md += f"""
-### Sesión {s} ({fecha_dia}):
-- **Dictado:** [Redactar 5 palabras clave para dictado reflexivo aquí]
-- **Cálculo Mental:** [Redactar 5 operaciones de cálculo mental aquí]
-- **Problema Razonado:** [Redactar situación problemática contextualizada aquí]
-"""
-                secuencias_md += f"""
-### Sesión {s} (**Día: {fecha_dia}**) - [Nombre de la Sesión y Momento Metodológico]
-- **Tiempo estimado:** 90 minutos
-- **Inicio (15-20 min):** [Redactar actividades de inicio aquí]
-- **Desarrollo (50-60 min):** [Redactar actividades de desarrollo aquí]
-- **Cierre (15-20 min):** [Redactar actividades de cierre aquí]
-- **Recursos didácticos y materiales:** {libros_txt}, libreta de apuntes y materiales del aula.
-- **Evidencia / Producto de la sesión:** [Redactar producto o evidencia de aprendizaje aquí]
 """
     
         dias_str = ", ".join(dias_fechas.get(d, d) for d in dias_seleccionados)
@@ -4965,11 +4974,39 @@ if authentication_status:
     """, unsafe_allow_html=True)
     st.caption("Herramienta de consulta libre y directa en internet. Encuentra material didáctico, dinámicas, lecturas y recursos pedagógicos sin consumir tokens de Gemini ni requerir API Key.")
     
-    query_tema = st.text_input(
-        "Tema, Contenido o PDA que deseas investigar:",
-        placeholder="Escribe aquí el tema, Contenido o PDA (Ej. Alimentos procesados y sellos NOM-051 6° primaria, cálculo mental lúdico...)",
-        key="query_busqueda"
-    )
+    dias_disponibles_busqueda = dias_seleccionados if dias_seleccionados else DIAS_HABIL_NOMBRES
+    dia_actual_pestaña = st.session_state.get("dia_activo_pestaña", dias_disponibles_busqueda[0])
+    dia_idx_sel = dias_disponibles_busqueda.index(dia_actual_pestaña) if dia_actual_pestaña in dias_disponibles_busqueda else 0
+
+    col_q_dia, col_q_txt = st.columns([0.38, 0.62])
+    with col_q_dia:
+        dia_busqueda_sel = st.selectbox(
+            "🗓️ Día para Búsqueda Contextual:",
+            options=dias_disponibles_busqueda,
+            index=dia_idx_sel,
+            key=f"sel_dia_busqueda_{st.session_state.widget_key}",
+            help="Selecciona el día específico para cruzarlo con el proyecto y el anexo correspondiente de la semana escolar 2026-2027."
+        )
+        st.session_state.dia_activo_pestaña = dia_busqueda_sel
+
+    with col_q_txt:
+        query_tema = st.text_input(
+            "Tema, Contenido o PDA que deseas investigar:",
+            placeholder="Escribe aquí el tema, Contenido o PDA (Ej. Alimentos procesados y sellos NOM-051, cálculo mental lúdico...)",
+            key="query_busqueda"
+        )
+
+    anexo_dia_busqueda = obtener_anexos_por_semana_y_dia(semana_seleccionada, dia_busqueda_sel, mes=cal_mes_actual)
+    # Badge dinámico contextual de fecha, proyecto y anexo
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 7px 12px; margin-bottom: 8px; font-size: 0.82rem; color: #334155; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <span>🏫 <b>Semana {semana_seleccionada} de 37 (SEP)</b></span>
+        <span>📅 <b>Mes: {cal_mes_actual} {cal_año_actual}</b></span>
+        <span>🗓️ <b>Día: {dia_busqueda_sel}</b></span>
+        <span>🎯 <b>Proyecto:</b> {proyecto_semana_actual['proyecto']}</span>
+        <span>📑 <b>Anexo Asignado:</b> {anexo_dia_busqueda}</span>
+    </div>
+    """, unsafe_allow_html=True)
     
     def limpiar_busqueda_callback():
         st.session_state.query_busqueda = ""
@@ -4989,8 +5026,13 @@ if authentication_status:
         else:
             campo_formativo = campos_sel[0] if (campos_sel and len(campos_sel) > 0) else ""
             pda_o_contenido = query_val.strip()
-            query_busqueda = f"actividades didácticas escolares primaria Nueva Escuela Mexicana {grado_seleccionado} {campo_formativo} {pda_o_contenido}"
-            with st.spinner("Buscando recursos educativos en la web (sin gastar tokens)..."):
+            # Búsqueda contextualizada sin consultas estáticas
+            query_busqueda = (
+                f"actividades didácticas primaria Nueva Escuela Mexicana {grado_seleccionado} {campo_formativo} "
+                f"Semana {semana_seleccionada} SEP {cal_mes_actual} {cal_año_actual} {dia_busqueda_sel} "
+                f"proyecto '{proyecto_semana_actual['proyecto']}' {anexo_dia_busqueda} {pda_o_contenido}"
+            )
+            with st.spinner(f"Buscando recursos para {dia_busqueda_sel} (Semana {semana_seleccionada} SEP - {proyecto_semana_actual['proyecto']})..."):
                 try:
                     try:
                         from duckduckgo_search import DDGS
@@ -5157,10 +5199,17 @@ if authentication_status:
                     prog_sintetico_contexto = ""
                     scraping_fallido = False
     
+                    dia_contexto_sep = st.session_state.get("dia_activo_pestaña", dias_seleccionados[0] if dias_seleccionados else "Lunes")
                     if not uploaded_prog:
-                        with st.status(f"🔍 Búsqueda de Respaldo SEP: Rastreando Programa Sintético oficial ({fase_correspondiente})...", expanded=True) as status_box:
-                            st.write("Buscando en portales oficiales de la SEP (`site:sep.gob.mx OR site:conaliteg.sep.gob.mx`)...")
-                            resumen_scraping, scraping_exitoso = buscar_programa_sintetico_sep(fase_correspondiente)
+                        with st.status(f"🔍 Búsqueda de Respaldo SEP: Rastreando Programa Sintético oficial ({fase_correspondiente} - Semana {semana_seleccionada} - {dia_contexto_sep})...", expanded=True) as status_box:
+                            st.write(f"Buscando en portales oficiales de la SEP para Semana {semana_seleccionada} ({cal_mes_actual} 2026), día {dia_contexto_sep}...")
+                            resumen_scraping, scraping_exitoso = buscar_programa_sintetico_sep(
+                                fase=fase_correspondiente,
+                                semana=semana_seleccionada,
+                                mes=cal_mes_actual,
+                                dia=dia_contexto_sep,
+                                proyecto=proyecto_semana_actual["proyecto"]
+                            )
                             if scraping_exitoso and resumen_scraping:
                                 status_box.update(label=f"✓ Contenido del Programa Sintético obtenido de la SEP ({len(resumen_scraping):,} caracteres)", state="complete")
                                 prog_sintetico_contexto = resumen_scraping
@@ -5188,6 +5237,10 @@ if authentication_status:
                         programa_sintetico=prog_sintetico_contexto,
                         dias_seleccionados=dias_seleccionados,
                         semana_seleccionada=semana_seleccionada,
+                        mes_seleccionado=cal_mes_actual,
+                        año_seleccionado=cal_año_actual,
+                        proyecto_semana=proyecto_semana_actual,
+                        dia_especifico_pestaña=dia_contexto_sep,
                         fase_seleccionada=fase_correspondiente,
                         fallback_programa_sintetico=scraping_fallido,
                         num_sesiones=num_sesiones,
@@ -5268,10 +5321,17 @@ if authentication_status:
                     prog_sintetico_contexto = ""
                     scraping_fallido = False
     
+                    dia_contexto_web = st.session_state.get("dia_activo_pestaña", dias_seleccionados[0] if dias_seleccionados else "Lunes")
                     if not uploaded_prog:
-                        with st.status(f"🔍 Búsqueda de Respaldo SEP: Rastreando Programa Sintético oficial ({fase_correspondiente})...", expanded=True) as status_box:
-                            st.write("Buscando en portales oficiales de la SEP (`site:sep.gob.mx OR site:conaliteg.sep.gob.mx`)...")
-                            resumen_scraping, scraping_exitoso = buscar_programa_sintetico_sep(fase_correspondiente)
+                        with st.status(f"🔍 Búsqueda de Respaldo SEP: Rastreando Programa Sintético oficial ({fase_correspondiente} - Semana {semana_seleccionada} - {dia_contexto_web})...", expanded=True) as status_box:
+                            st.write(f"Buscando en portales oficiales de la SEP para Semana {semana_seleccionada} ({cal_mes_actual} 2026), día {dia_contexto_web}...")
+                            resumen_scraping, scraping_exitoso = buscar_programa_sintetico_sep(
+                                fase=fase_correspondiente,
+                                semana=semana_seleccionada,
+                                mes=cal_mes_actual,
+                                dia=dia_contexto_web,
+                                proyecto=proyecto_semana_actual["proyecto"]
+                            )
                             if scraping_exitoso and resumen_scraping:
                                 status_box.update(label=f"✓ Contenido del Programa Sintético obtenido de la SEP ({len(resumen_scraping):,} caracteres)", state="complete")
                                 prog_sintetico_contexto = resumen_scraping
@@ -5285,7 +5345,7 @@ if authentication_status:
                         prog_sintetico_contexto = st.session_state.programa_sintetico_texto
                         scraping_fallido = False
     
-                    # 3. Enviar a Gemini con Google Search Grounding habilitado
+                    # 3. Enviar a Gemini con Google Search Grounding habilitado y parámetros dinámicos
                     plan_generado, prompt_utilizado = generate_planeacion(
                         datos_escuela=datos_escuela_actual,
                         campos_formativos=campos_sel,
@@ -5299,6 +5359,10 @@ if authentication_status:
                         programa_sintetico=prog_sintetico_contexto,
                         dias_seleccionados=dias_seleccionados,
                         semana_seleccionada=semana_seleccionada,
+                        mes_seleccionado=cal_mes_actual,
+                        año_seleccionado=cal_año_actual,
+                        proyecto_semana=proyecto_semana_actual,
+                        dia_especifico_pestaña=dia_contexto_web,
                         fase_seleccionada=fase_correspondiente,
                         fallback_programa_sintetico=scraping_fallido,
                         num_sesiones=num_sesiones,
@@ -5454,14 +5518,14 @@ if authentication_status:
     
         st.caption("✓ **Replicación exacta del formato:** Conserva el membrete, el Horario Escolar, el Dosificador General de Proyectos, las tablas diarias (Dictado, Cálculo, Problema, Inicio, Desarrollo, Cierre), Recursos, Evaluación y los espacios para las firmas oficiales de **Aday Domínguez Domínguez** (Docente) y **José Guillermo Borjas Díaz** (Director).")
 
-        sem_kempis_act = 7 if (semana_seleccionada == 7) else 6
-        kempis_activo_vista = (semana_seleccionada in [6, 7] or detectar_relevancia_kempis(semana_seleccionada, directrices_o_texto=st.session_state.planeacion_generada))
+        kempis_activo_vista = (vincular_kempis_sel if 'vincular_kempis_sel' in locals() else True)
         if kempis_activo_vista:
+            kempis_info_banner = obtener_recursos_kempis_por_semana(semana_seleccionada)
             st.markdown(f"""
             <div style="background: linear-gradient(135deg, #F3E8FF 0%, #EDE9FE 100%); border-left: 5px solid #7C3AED; border-radius: 8px; padding: 12px 18px; margin: 10px 0 16px 0;">
-                <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">📘 Cuadernillo Didáctico Profa Kempis Integrado (Semana {sem_kempis_act}):</span><br>
+                <span style="font-weight: 700; color: #4C1D95; font-size: 0.95rem;">📘 Proyecto y Cuadernillo Integrado (Semana {semana_seleccionada} de 37 SEP):</span><br>
                 <span style="color: #1F2937; font-size: 0.88rem; line-height: 1.45;">
-                    El archivo <b>Word (.docx)</b> descargable incluye la sección oficial de <b>Anexos Imprimibles y Fichas de Trabajo</b> listas para fotocopiar para los alumnos (organizador del cuento, semáforo de grasas y sellos NOM-051, múltiplos del gramo, cálculo de IVA, mediación de conflictos y efemérides), con orientaciones vivenciales y actividades estructuradas.
+                    El archivo <b>Word (.docx)</b> descargable incluye la sección oficial de <b>Anexos Imprimibles y Fichas de Trabajo</b> correspondientes al proyecto <b>"{kempis_info_banner.get('titulo_general', proyecto_semana_actual['proyecto'])}"</b> para la semana {semana_seleccionada} ({kempis_info_banner.get('periodo_sugerido', cal_mes_actual)}), con orientaciones vivenciales y actividades estructuradas.
                 </span>
             </div>
             """, unsafe_allow_html=True)
@@ -5581,17 +5645,16 @@ if authentication_status:
                     st.markdown("# " + p)
 
         with tab_kempis:
-            sem_kempis_act = 7 if (semana_seleccionada == 7) else 6
-            kempis_data_vista = obtener_recursos_kempis_por_semana(sem_kempis_act)
+            kempis_data_vista = obtener_recursos_kempis_por_semana(semana_seleccionada)
             if kempis_data_vista:
                 st.markdown(f"""
                 <div class="kempis-header-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
                         <div style="font-weight: 800; font-size: 1.05rem; color: #4C1D95; display: flex; align-items: center; gap: 8px;">
-                            📘 <b>Cuadernillo Didáctico de Actividades (Semana {sem_kempis_act} — Profa Kempis)</b>
+                            📘 <b>Cuadernillo Didáctico y Anexos de Actividades (Semana {semana_seleccionada} de 37 SEP)</b>
                         </div>
                         <span style="font-size: 0.78rem; background: #EDE9FE; color: #6D28D9; padding: 3px 10px; border-radius: 9999px; font-weight: 700;">
-                            {kempis_data_vista.get('periodo_sugerido', 'Octubre')} • Fase 5 (6° Primaria)
+                            {kempis_data_vista.get('periodo_sugerido', cal_mes_actual)} • Fase 5 (6° Primaria)
                         </span>
                     </div>
                     <div style="font-size: 0.88rem; font-weight: 700; color: #1F2937; margin-bottom: 4px;">

@@ -2,21 +2,36 @@ import re
 import urllib3
 import requests
 from bs4 import BeautifulSoup
-from typing import Tuple
+from typing import Tuple, Optional, Union
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-def buscar_programa_sintetico_sep(fase_seleccionada: str, max_resultados: int = 3) -> Tuple[str, bool]:
+def buscar_programa_sintetico_sep(
+    fase_seleccionada: str,
+    semana: Optional[Union[int, str]] = None,
+    mes: Optional[str] = None,
+    dia: Optional[str] = None,
+    proyecto: Optional[str] = None,
+    max_resultados: int = 3
+) -> Tuple[str, bool]:
     """
     Búsqueda auxiliar de respaldo para el Programa Sintético oficial de la SEP.
-    Utiliza googlesearch-python y requests/BeautifulSoup con el término:
-    site:sep.gob.mx OR site:conaliteg.sep.gob.mx "Programa Sintético" "Fase {fase_seleccionada}"
+    Utiliza googlesearch-python y requests/BeautifulSoup con parámetros dinámicos de Fase, Semana, Mes y Día.
     """
-    # Normalizar Fase (ej. "5" o "Fase 5")
-    fase_limpia = str(fase_seleccionada).replace("Fase", "").strip()
-    fase_termino = f"Fase {fase_limpia}" if fase_limpia else "Fase 5"
+    fase_limpia = str(fase_seleccionada).replace("Fase", "").strip() or "5"
+    fase_termino = f"Fase {fase_limpia}"
 
-    query = f'site:sep.gob.mx OR site:conaliteg.sep.gob.mx "Programa Sintético" "{fase_termino}"'
+    componentes = [f'"Programa Sintético"', f'"{fase_termino}"']
+    if semana:
+        componentes.append(f'"Semana {str(semana).replace("Semana", "").strip()}"')
+    if mes:
+        componentes.append(f'"{mes.strip()}"')
+    if dia:
+        componentes.append(f'"{dia.strip()}"')
+    if proyecto:
+        proy_clean = re.sub(r'["\n\r]', '', str(proyecto).strip())[:50]
+        if proy_clean:
+            componentes.append(f'"{proy_clean}"')
+
+    query = f'site:sep.gob.mx OR site:conaliteg.sep.gob.mx {" ".join(componentes)}'
     urls = []
 
     # 1. Intentar con googlesearch-python
@@ -34,7 +49,10 @@ def buscar_programa_sintetico_sep(fase_seleccionada: str, max_resultados: int = 
     # 2. Respaldo adicional si Google bloqueó o retornó 0 enlaces
     if not urls:
         try:
-            from duckduckgo_search import DDGS
+            try:
+                from ddgs import DDGS
+            except ImportError:
+                from duckduckgo_search import DDGS
             with DDGS() as ddgs:
                 ddg_res = list(ddgs.text(query, max_results=max_resultados))
                 for item in ddg_res:
@@ -77,11 +95,13 @@ def buscar_programa_sintetico_sep(fase_seleccionada: str, max_resultados: int = 
     return "", False
 
 if __name__ == "__main__":
-    res, ok = buscar_programa_sintetico_sep("Fase 5")
+    import datetime
+    hoy = datetime.date.today()
+    sem_actual = 8 if hoy.month == 10 and hoy.day >= 18 else 1
+    res, ok = buscar_programa_sintetico_sep("Fase 5", semana=sem_actual, mes="Octubre", dia="Lunes")
     print("Scraping exitoso:", ok)
     print("Longitud resumen:", len(res))
     if not ok:
-        semana = 20
         fase = "Fase 5".replace("Fase", "").strip()
-        fallback = f"Como no se proporcionó un documento oficial, utiliza tu conocimiento interno y capacidad de búsqueda para acceder a los lineamientos de la Nueva Escuela Mexicana (SEP) para la Fase {fase} y Semana {semana}."
+        fallback = f"Como no se proporcionó un documento oficial, utiliza tu conocimiento interno y capacidad de búsqueda para acceder a los lineamientos de la Nueva Escuela Mexicana (SEP) para la Fase {fase}, Semana {sem_actual} y el mes correspondiente al ciclo 2026-2027."
         print("Fallback prompt:", fallback)
