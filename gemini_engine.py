@@ -741,7 +741,22 @@ def generate_sample_fallback(
             desarrollo_s = s_info.get("desarrollo") or (k_campos[idx][1].get("desarrollo") if idx < len(k_campos) else "Indagación y aplicación práctica en comunidades de aprendizaje.")
             cierre_s = s_info.get("cierre") or (k_campos[idx][1].get("cierre") if idx < len(k_campos) else "Puesta en común, síntesis y coevaluación grupal.")
 
-            dias_sesiones_map[d_nom] = f"""Fase de Intervención: {kempis_data.get('proyecto', 'Proyecto Escolar')} — {d_nom}
+            proy_dia = s_info.get("proyecto") or (
+                "¡Mi comunidad se expresa!" if d_nom == "Lunes" else
+                "El poder de la alimentación" if d_nom == "Martes" else
+                "Contribuyo con los servicios de mi escuela" if d_nom == "Miércoles" else
+                "El club de las nutrias" if d_nom == "Jueves" else
+                ("Descubrimiento de América y Encuentro de Dos Mundos (12 de Octubre) e Integración Colegiada" if semana_num == 6 else "Día Mundial de la Alimentación (16 de Octubre) e Integración Colegiada")
+            )
+            campo_dia = s_info.get("campo") or (
+                "Lenguajes" if d_nom == "Lunes" else
+                "Saberes y Pensamiento Científico" if d_nom == "Martes" else
+                "Ética, Naturaleza y Sociedades" if d_nom == "Miércoles" else
+                "De lo Humano y lo Comunitario" if d_nom == "Jueves" else
+                "Conmemoración Cívica e Histórica / Cierre Colegiado"
+            )
+
+            dias_sesiones_map[d_nom] = f"""Fase de Intervención: {proy_dia} ({campo_dia}) — {d_nom}
 - **Tiempo estimado:** 90 minutos.
 - **Inicio (15-20 min):**
   * {inicio_s}
@@ -755,8 +770,19 @@ def generate_sample_fallback(
 
         sample_rutinas = dias_rutinas_map
         sample_sesiones = dias_sesiones_map
-        nombre_proyecto_fallback = f"{kempis_data.get('titulo_general', kempis_data.get('proyecto', 'Proyecto Integrador'))} — Proyecto Oficial SEP"
-        proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {semana_num} ({kempis_data.get('mes', '2026')}) a través del proyecto '{kempis_data.get('proyecto', 'Integrador')}', fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con dinámicas vivenciales y fichas prácticas."
+
+        if semana_num in [6, 7]:
+            nombre_proyecto_fallback = f"Proyectos Integradores de 6° Grado (¡Mi comunidad se expresa!, El poder de la alimentación, Contribuyo con los servicios de mi escuela, El club de las nutrias) — Semana {semana_num} (Del 5 al 16 de Octubre)"
+            proposito_fallback = (
+                f"Que las y los 26 alumnos de 6° Grado Grupo 'A' desarrollen transversalmente los 4 proyectos oficiales de la NEM "
+                f"para la Semana {semana_num} (bloque del 5 al 16 de octubre): '¡Mi comunidad se expresa!' (Lenguajes), "
+                f"'El poder de la alimentación' (Saberes y Pensamiento Científico), 'Contribuyo con los servicios de mi escuela' "
+                f"(Ética, Naturaleza y Sociedades) y 'El club de las nutrias' (De lo Humano y lo Comunitario), fortaleciendo la comprensión "
+                f"lectora, el cálculo contextualizado y la convivencia pacífica con los anexos del Cuadernillo Profa. Kempis."
+            )
+        else:
+            nombre_proyecto_fallback = f"{kempis_data.get('titulo_general', kempis_data.get('proyecto', 'Proyecto Integrador'))} — Proyecto Oficial SEP"
+            proposito_fallback = f"Que las y los 26 alumnos de 6° Grado Grupo 'A' integren y apliquen los aprendizajes de la Semana {semana_num} ({kempis_data.get('mes', '2026')}) a través del proyecto '{kempis_data.get('proyecto', 'Integrador')}', fortaleciendo la comprensión lectora, velocidad lectora, ortografía y resolución de problemas comunitarios con dinámicas vivenciales y fichas prácticas."
         
         filas_art = []
         campos_4_base = ["Lenguajes", "Saberes y Pensamiento Científico", "Ética, Naturaleza y Sociedades", "De lo Humano y lo Comunitario"]
@@ -767,8 +793,11 @@ def generate_sample_fallback(
                     if c_base.lower() in c_n.lower() or c_n.lower() in c_base.lower():
                         campos_en_tabla.add(c_base)
                 pda_texto = c_v.get("pda_vinculado") or c_v.get("pda") or "Proceso de desarrollo de aprendizaje oficial NEM"
+                proy_campo = c_v.get("proyecto_oficial", "")
+                tema_completo = f"{c_v.get('tema', kempis_data.get('proyecto', ''))}" + (f" (Proyecto: '{proy_campo}')" if proy_campo else "")
+                libro_campo = c_v.get("libro_sep") or f"Libros de Texto SEP y Anexos de la Semana {semana_num}"
                 filas_art.append(
-                    f"| **{c_n}** | {c_v.get('tema', kempis_data.get('proyecto', ''))} | {pda_texto} | Libros de Texto SEP y Anexos de la Semana {semana_num} | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
+                    f"| **{c_n}** | {tema_completo} | {pda_texto} | {libro_campo} | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
                 )
             for c_faltante in campos_4_base:
                 if c_faltante not in campos_en_tabla:

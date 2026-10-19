@@ -438,11 +438,16 @@ def busqueda_cruzada_archivos_plataforma(
         if not pda_val:
             pda_val = f"Proceso de desarrollo de aprendizaje oficial de 6° grado en {campo_nom} vinculado a la comprensión lectora y el razonamiento lógico."
 
+        # Enriquecer con libro_sep y proyecto oficial si están disponibles en k_info
+        libro_vinc = (k_info.get("libro_sep") if 'k_info' in locals() and isinstance(k_info, dict) and k_info.get("libro_sep") else None) or libros_por_campo_def.get(campo_nom, "Libros de Texto Gratuitos SEP")
+        proy_nom = (k_info.get("proyecto_oficial") if 'k_info' in locals() and isinstance(k_info, dict) else None) or ""
+
         pda_4campos.append({
             "campo": campo_nom,
+            "proyecto": proy_nom,
             "contenido": cont_val,
             "pda": pda_val,
-            "libro_vinculado": libros_por_campo_def.get(campo_nom, "Libros de Texto Gratuitos SEP"),
+            "libro_vinculado": libro_vinc,
             "problematica_atendida": problematicas_por_campo_def.get(campo_nom, "Comprensión lectora, ortografía y comunidad"),
             "fuente_curricular": fuente_val
         })
@@ -479,6 +484,7 @@ def busqueda_cruzada_archivos_plataforma(
 
         # Obtener o construir secuencia didáctica y consigna
         sec_info = secuencias_semana.get(dia_nom, {}) if isinstance(secuencias_semana, dict) else {}
+        proy_dia = sec_info.get("proyecto") or proyecto_semana.get("proyecto", "Proyecto Institucional")
         inicio_txt = sec_info.get("inicio", f"Activación colectiva, preguntas detonadoras y recuperación de conocimientos previos para {dia_nom}.")
         desarrollo_txt = sec_info.get("desarrollo", f"Indagación práctica, análisis en comunidades de aprendizaje y resolución del anexo de la sesión: {anexo_dia}.")
         cierre_txt = sec_info.get("cierre", f"Socialización comunitaria, conclusiones colectivas y metacognición en asamblea de aula.")
@@ -490,6 +496,7 @@ def busqueda_cruzada_archivos_plataforma(
 
         recursos_por_dia[dia_nom] = {
             "sesion_num": idx_dia,
+            "proyecto": proy_dia,
             "anexo": anexo_dia,
             "dictado": dict_txt,
             "velocidad_lectora": "1 minuto cronometrado con registro de fluidez, modulación y dicción.",

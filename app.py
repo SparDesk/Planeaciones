@@ -110,6 +110,7 @@ except Exception:
     sincronizar_planeacion_con_remoto = getattr(_ps, "sincronizar_planeacion_con_remoto", lambda *a, **k: {"estado": "ok"})
 try:
     from cuadernillo_kempis import (
+        PROYECTOS_OFICIALES_6TO_GRADO,
         CUADERNILLO_KEMPIS_DATA,
         CATALOGO_PROYECTOS_SEP_37_SEMANAS,
         detectar_relevancia_kempis,
@@ -122,6 +123,7 @@ try:
 except ImportError:
     try:
         import cuadernillo_kempis as _ck
+        PROYECTOS_OFICIALES_6TO_GRADO = getattr(_ck, "PROYECTOS_OFICIALES_6TO_GRADO", {})
         CUADERNILLO_KEMPIS_DATA = getattr(_ck, "CUADERNILLO_KEMPIS_DATA", {})
         CATALOGO_PROYECTOS_SEP_37_SEMANAS = getattr(_ck, "CATALOGO_PROYECTOS_SEP_37_SEMANAS", {})
         detectar_relevancia_kempis = getattr(_ck, "detectar_relevancia_kempis", lambda *args, **kwargs: True)
@@ -131,6 +133,7 @@ except ImportError:
         formatear_kempis_para_prompt = getattr(_ck, "formatear_kempis_para_prompt", lambda *args, **kwargs: "")
         obtener_anexos_kempis_para_docx = getattr(_ck, "obtener_anexos_kempis_para_docx", lambda *args, **kwargs: [])
     except Exception:
+        PROYECTOS_OFICIALES_6TO_GRADO = {}
         CUADERNILLO_KEMPIS_DATA = {}
         CATALOGO_PROYECTOS_SEP_37_SEMANAS = {}
         detectar_relevancia_kempis = lambda *args, **kwargs: True
@@ -4435,7 +4438,8 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                 def format_sem_sep_label(s: int) -> str:
                     inf = CATALOGO_SEMANAS_SEP[s]
                     cte_tag = f" [📌 CTE]" if inf["tiene_cte"] else ""
-                    return f"Semana {s} de 37 — {inf['rango_str']} ({inf['mes_nombre'][:3]} {inf['año']}){cte_tag}"
+                    bloque_tag = " [Bloque Sincronizado: 5 al 16 de Octubre]" if s in [6, 7] else ""
+                    return f"Semana {s} de 37 — {inf['rango_str']} ({inf['mes_nombre'][:3]} {inf['año']}){bloque_tag}{cte_tag}"
 
                 semana_sep_sel = st.selectbox(
                     "🏫 Semana Escolar SEP (1 a 37):",
@@ -4491,11 +4495,12 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                     )
                     tiene_cte = any(d in FECHAS_CTE_OFICIALES for d in w_d[:5])
                     cte_tag = " [📌 CTE]" if tiene_cte else ""
+                    bloque_tag = " [Bloque Sincronizado: 5 al 16 de Octubre]" if (sem_num in [6, 7]) else ""
                     if vac_info:
                         vac = es_fecha_vacaciones(lun)
                         return f"🏖️ {vac['nombre']} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]} {lun.year})"
                     elif sem_num:
-                        return f"Semana {sem_num} de 37 ({lun.day} al {vie.day} {MESES_2026[lun.month-1][:3]} {lun.year}){cte_tag}"
+                        return f"Semana {sem_num} de 37 ({lun.day} al {vie.day} {MESES_2026[lun.month-1][:3]} {lun.year}){bloque_tag}{cte_tag}"
                     else:
                         return f"Bloque {idx_w + 1} ({lun.day}-{vie.day} {MESES_2026[lun.month-1][:3]} {lun.year}){cte_tag}"
 
@@ -4533,10 +4538,15 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         semana_previa = st.session_state.get("semana_activa_previa")
         if semana_previa is not None and semana_previa != semana_sep_sel:
             limpiar_estado_planeacion(nueva_semana=semana_sep_sel, reset_completo=False)
+            if semana_sep_sel in [6, 7]:
+                st.session_state.pop("pda_cargados", None)
             st.session_state["aviso_cambio_semana"] = f"Semana {semana_sep_sel} de 37"
             st.rerun()
         else:
             st.session_state["semana_activa_previa"] = semana_sep_sel
+            if semana_sep_sel in [6, 7] and not st.session_state.get(f"_bloque_6_7_init_{st.session_state.widget_key}"):
+                st.session_state.pop("pda_cargados", None)
+                st.session_state[f"_bloque_6_7_init_{st.session_state.widget_key}"] = True
 
         fechas_bloque = {
             nom: active_week_dates[i] for i, nom in enumerate(DIAS_HABIL_NOMBRES)
@@ -4673,6 +4683,31 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
         """,
         unsafe_allow_html=True
     )
+
+    if semana_seleccionada in [6, 7]:
+        anexo_vie_txt = "Anexo 6.5: Encuentro de Dos Mundos (12 de Octubre)" if semana_seleccionada == 6 else "Anexo 7.5: Día Mundial de la Alimentación (16 de Octubre)"
+        st.markdown(
+            f"""
+            <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 2px solid #3B82F6; border-radius: 10px; padding: 14px 18px; margin-top: 0.8rem; margin-bottom: 0.8rem; box-shadow: 0 2px 4px rgba(37,99,235,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.25rem;">🎯</span>
+                        <span style="font-size: 1.02rem; font-weight: 800; color: #1E40AF;">Bloque Curricular Sincronizado: Semanas 6 y 7 (Del 5 al 16 de Octubre de 2026)</span>
+                    </div>
+                    <span style="background: #2563EB; color: #FFFFFF; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700;">6° de Primaria — Fase 5</span>
+                </div>
+                <div style="font-size: 0.86rem; color: #1E3A8A; line-height: 1.5;">
+                    <b>Proyectos Oficiales de 6° Grado y Cuadernillo Profa. Kempis asignados día por día:</b><br>
+                    • <b>Lunes:</b> Lenguajes ➔ <i>¡Mi comunidad se expresa!</i> (Anexo {'6.1' if semana_seleccionada == 6 else '7.1'}: Estructura del cuento / Lectura dramatizada)<br>
+                    • <b>Martes:</b> Saberes y Pensamiento Científico ➔ <i>El poder de la alimentación</i> (Anexo {'6.2' if semana_seleccionada == 6 else '7.2'}: Sellos NOM-051, gramos y Plato del Bien Comer)<br>
+                    • <b>Miércoles:</b> Ética, Naturaleza y Sociedades ➔ <i>Contribuyo con los servicios de mi escuela</i> (Anexo {'6.3' if semana_seleccionada == 6 else '7.3'}: Servicios públicos, IVA 16% y calidad de vida)<br>
+                    • <b>Jueves:</b> De lo Humano y lo Comunitario ➔ <i>El club de las nutrias</i> (Anexo {'6.4' if semana_seleccionada == 6 else '7.4'}: Mediación escolar, cultura de paz y circuitos motrices)<br>
+                    • <b>Viernes:</b> Efeméride Cívica y Cierre Colegiado ({anexo_vie_txt})
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
 
@@ -4836,6 +4871,23 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                 return cf
         return c_str
 
+    # Inyección prioritaria de Contenidos y PDA oficiales para el bloque del 5 al 16 de Octubre (Semanas 6 y 7)
+    es_bloque_6_7 = (semana_seleccionada in [6, 7] and "6" in str(grado_seleccionado))
+    if es_bloque_6_7 and semana_seleccionada in CUADERNILLO_KEMPIS_DATA:
+        k_campos_dict = CUADERNILLO_KEMPIS_DATA[semana_seleccionada].get("campos", {})
+        for campo in CAMPOS_FORMATIVOS:
+            if campo in k_campos_dict:
+                k_c_info = k_campos_dict[campo]
+                proy_t = k_c_info.get("proyecto_oficial") or PROYECTOS_OFICIALES_6TO_GRADO.get(campo, {}).get("proyecto", "")
+                sugerencias_pda.append({
+                    "campo": campo,
+                    "proyecto": proy_t,
+                    "contenido": f"{k_c_info['tema']} (Proyecto: '{proy_t}')",
+                    "pda": k_c_info["pda_vinculado"],
+                    "grado": grado_seleccionado,
+                    "origen": "Programa Analítico Oficial (Bloque 5 al 16 de Octubre)"
+                })
+
     # 1. Integración de Contenidos y PDA del Programa Sintético Subido (Base de Datos Oficial Fase 5 - 5° y 6° Grado)
     pda_doc_subido = st.session_state.get("pda_extraidos_programa", [])
     if pda_doc_subido:
@@ -4862,7 +4914,14 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         "origen": "Banco Curricular SEP"
                     })
 
-    if st.session_state.get("programa_sintetico_subido"):
+    if es_bloque_6_7:
+        st.markdown(
+            f"<div style='background: #EFF6FF; border: 1.5px solid #3B82F6; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.8rem; color: #1E40AF; font-weight: 600; font-size: 0.92rem;'>"
+            f"🎯 <b>Sincronización Estricta de Semanas y Programa Analítico (Bloque 5 al 16 de Octubre):</b> Se han extraído e incrustado obligatoriamente los 4 proyectos oficiales de 6° Grado (<i>¡Mi comunidad se expresa!</i>, <i>El poder de la alimentación</i>, <i>Contribuyo con los servicios de mi escuela</i> y <i>El club de las nutrias</i>), ignorando cualquier caché previa."
+            f"</div>",
+            unsafe_allow_html=True
+        )
+    elif st.session_state.get("programa_sintetico_subido"):
         nom_db = st.session_state.get("nombre_archivo_programa") or "Programa_Sintetico_Fase_5.pdf"
         st.markdown(
             f"<div style='background-color: #ECFDF5; border: 1.5px solid #10B981; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.8rem; color: #065F46; font-weight: 600; font-size: 0.95rem;'>"
@@ -4881,14 +4940,27 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
     if sugerencias_pda:
         opciones_display = []
         for item in sugerencias_pda:
-            if "Programa Sintético Fase 5" in item.get("origen", ""):
+            if "Bloque 5 al 16 de Octubre" in item.get("origen", ""):
+                opciones_display.append(f"🎯 [Bloque Oficial 6° - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
+            elif "Programa Sintético Fase 5" in item.get("origen", ""):
                 opciones_display.append(f"⭐ [Oficial {grado_seleccionado[:2]} - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
             else:
                 opciones_display.append(f"[{item['campo']}] {item['contenido'][:60]}... — PDA: {item['pda'][:70]}...")
 
         # Predeterminar OBLIGATORIAMENTE un PDA de cada uno de los 4 Campos Formativos del Programa Analítico
         default_indices_pda = []
-        pda_guardados = st.session_state.get("pda_cargados")
+        if es_bloque_6_7:
+            # En semanas 6 y 7 ignorar cualquier caché o valor predeterminado anterior
+            pda_guardados = None
+            for c_target in campos_4_analitico:
+                for idx_s, sug_item in enumerate(sugerencias_pda):
+                    if sug_item.get("campo") == c_target and "Bloque 5 al 16 de Octubre" in sug_item.get("origen", ""):
+                        if idx_s not in default_indices_pda:
+                            default_indices_pda.append(idx_s)
+                        break
+        else:
+            pda_guardados = st.session_state.get("pda_cargados")
+
         if pda_guardados:
             matched_indices = []
             for item_p in pda_guardados:

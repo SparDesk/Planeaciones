@@ -12,6 +12,46 @@ los Cuadernillos de la Profa Kempis (Semanas 6 y 7).
 
 from typing import Dict, List, Any, Optional, Union
 
+# Mapeo Oficial de Proyectos Institucionales de 6° de Primaria (Fase 5 - Ciclo 2026-2027)
+PROYECTOS_OFICIALES_6TO_GRADO: Dict[str, Dict[str, Any]] = {
+    "Lenguajes": {
+        "proyecto": "¡Mi comunidad se expresa!",
+        "campo": "Lenguajes",
+        "escenario": "Aula / Comunitario",
+        "libro_sep": "Proyectos de Aula (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
+        "dia_sugerido": "Lunes",
+        "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+        "descripcion": "Reconocimiento y producción de textos literarios (cuentos) y lecturas dramatizadas para fortalecer la expresión oral, modulación de voz y comunicación comunitaria."
+    },
+    "Saberes y Pensamiento Científico": {
+        "proyecto": "El poder de la alimentación",
+        "campo": "Saberes y Pensamiento Científico",
+        "escenario": "Aula / Escolar",
+        "libro_sep": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
+        "dia_sugerido": "Martes",
+        "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
+        "descripcion": "Análisis de alimentos ultraprocesados, sellos NOM-051, múltiplos y submúltiplos del gramo, y diseño de menús basados en el Plato del Bien Comer y balance calórico."
+    },
+    "Ética, Naturaleza y Sociedades": {
+        "proyecto": "Contribuyo con los servicios de mi escuela",
+        "campo": "Ética, Naturaleza y Sociedades",
+        "escenario": "Escolar / Comunitario",
+        "libro_sep": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
+        "dia_sugerido": "Miércoles",
+        "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
+        "descripcion": "Diagnóstico de los servicios públicos, recaudación tributaria e impacto del IVA (16%), y valoración de las dimensiones de la calidad de vida en la comunidad de Durango."
+    },
+    "De lo Humano y lo Comunitario": {
+        "proyecto": "El club de las nutrias",
+        "campo": "De lo Humano y lo Comunitario",
+        "escenario": "Aula / Comunitario",
+        "libro_sep": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)",
+        "dia_sugerido": "Jueves",
+        "metodologia": "Aprendizaje Servicio (AS)",
+        "descripcion": "Resolución pacífica de controversias escolares mediante la mediación y negociación dialógica, acompañada de circuitos motrices y estilos de vida activos."
+    }
+}
+
 # Diccionario especializado para Semanas 6 y 7 (Profa Kempis)
 CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
     6: {
@@ -19,10 +59,13 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
         "titulo_general": "Cuadernillo de Actividades Didácticas — Semana 6 (Profa Kempis)",
         "titulo_proyecto": "Cuadernillo Profa Kempis: Alimentos Procesados, Sellos y Textos Literarios",
         "periodo_sugerido": "Semana 6 de 37 (Octubre - Ciclo 2026-2027)",
+        "bloque_fechas": "Del 5 al 16 de Octubre (Semanas 6 y 7)",
+        "rango_fechas": "5 al 9 de Octubre de 2026",
         "mes_correspondiente": "Octubre",
         "año": 2026,
         "trimestre": 1,
-        "descripcion": "Recursos didácticos, anexos imprimibles y fichas de trabajo para el desarrollo de proyectos en Lenguajes, Ciencias, Formación Ética y Convivencia.",
+        "descripcion": "Recursos didácticos, anexos imprimibles y fichas de trabajo para el desarrollo de los 4 proyectos oficiales de 6° grado articulados día por día con la Profa. Kempis.",
+        "proyectos_oficiales_6to": PROYECTOS_OFICIALES_6TO_GRADO,
         "efemeride_principal": {
             "nombre": "Descubrimiento de América y Encuentro de Dos Mundos (12 de Octubre)",
             "fecha": "12 de Octubre",
@@ -32,6 +75,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
         },
         "campos": {
             "Lenguajes": {
+                "proyecto_oficial": "¡Mi comunidad se expresa!",
+                "dia_asignado": "Lunes",
+                "escenario": "Aula / Comunitario",
+                "libro_sep": "Proyectos de Aula (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
                 "tema": "Textos literarios: El cuento y sus partes (planteamiento, nudo, desenlace y tipos de narrador)",
                 "pda_vinculado": "Lee y analiza textos literarios e identifica la estructura de la narración, las relaciones de causalidad y temporalidad, y describe personajes y escenarios.",
                 "inicio": "Presentar una caja sorpresa con títulos de cuentos clásicos y contemporáneos. Recuperar saberes previos: ¿Qué distingue a un cuento de una noticia o un texto informativo?",
@@ -42,6 +89,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "anexo_descripcion": "Ficha imprimible para esquematizar inicio, nudo, desenlace, caracterización de personajes principales/secundarios y tipo de narrador."
             },
             "Saberes y Pensamiento Científico": {
+                "proyecto_oficial": "El poder de la alimentación",
+                "dia_asignado": "Martes",
+                "escenario": "Aula / Escolar",
+                "libro_sep": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
                 "tema": "Alimentos procesados, grasas, sellos de advertencia (NOM-051) y múltiplos y submúltiplos del gramo",
                 "pda_vinculado": "Analiza etiquetas de alimentos empaquetados e interpreta sellos de advertencia; resuelve situaciones problemáticas que implican conversiones con múltiplos y submúltiplos del gramo.",
                 "inicio": "Exhibir 4 empaques reales de alimentos ultraprocesados. Preguntar: ¿Qué significan los octágonos negros en el empaque y por qué indican exceso de grasas o azúcares?",
@@ -52,6 +103,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "anexo_descripcion": "Ficha práctica de conversión de unidades de masa (kg, g, mg) con problemas de aplicación en empaques comerciales y tabla de sellos NOM-051."
             },
             "Ética, Naturaleza y Sociedades": {
+                "proyecto_oficial": "Contribuyo con los servicios de mi escuela",
+                "dia_asignado": "Miércoles",
+                "escenario": "Escolar / Comunitario",
+                "libro_sep": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
                 "tema": "Servicios públicos, recaudación de impuestos y cálculo del IVA (16%)",
                 "pda_vinculado": "Comprende la función de los servicios públicos en la satisfacción de necesidades colectivas, la responsabilidad ciudadana en el pago de impuestos y el cálculo de porcentajes aplicados al IVA.",
                 "inicio": "Lluvia de ideas guiada: ¿De dónde proviene el agua potable, el alumbrado y quién limpia los parques en Durango? ¿Quién financia esos servicios?",
@@ -62,6 +117,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "anexo_descripcion": "Actividad de vinculación comunitaria: mapa de servicios públicos y ejercicios matemáticos de cálculo y desglose del 16% de IVA."
             },
             "De lo Humano y lo Comunitario": {
+                "proyecto_oficial": "El club de las nutrias",
+                "dia_asignado": "Jueves",
+                "escenario": "Aula / Comunitario",
+                "libro_sep": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)",
                 "tema": "Resolución pacífica de conflictos y convivencia escolar sana y pacífica",
                 "pda_vinculado": "Aplica estrategias de mediación, negociación y diálogo reflexivo para resolver desacuerdos en el aula y promover una cultura de paz.",
                 "inicio": "Dinámica kinestésica 'El nudo humano': los 26 alumnos forman un círculo tomados de las manos y deben desatarse usando exclusivamente el diálogo pacífico.",
@@ -73,11 +132,11 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             }
         },
         "anexos": [
-            {"dia": "Lunes", "nombre": "Anexo 6.1: Organizador Gráfico de Textos Literarios y Partes del Cuento", "campo": "Lenguajes", "descripcion": "Ficha para esquematizar inicio, nudo y desenlace, tipos de narrador y personajes.", "tema": "Textos literarios: Cuento y narración", "actividad": "Lectura guiada y clasificación de la estructura narrativa con adjetivos y nexos temporales."},
-            {"dia": "Martes", "nombre": "Anexo 6.2: Laboratorio de Etiquetas y Conversión de Múltiplos del Gramo", "campo": "Saberes y Pensamiento Científico", "descripcion": "Conversión de unidades de masa (kg, g, mg) y análisis de sellos NOM-051.", "tema": "Alimentos ultraprocesados y múltiplos del gramo", "actividad": "Análisis nutrimental de empaques y conversión mediante método de la escalera."},
-            {"dia": "Miércoles", "nombre": "Anexo 6.3: Ficha de Servicios Públicos y Práctica Financiera del IVA (16%)", "campo": "Ética, Naturaleza y Sociedades", "descripcion": "Cálculo y desglose del 16% de IVA en compras cotidianas y mapa de servicios comunitarios.", "tema": "Servicios públicos y recaudación de impuestos", "actividad": "Desglose de subtotal, IVA y total en compras cotidianas y reflexión cívica."},
-            {"dia": "Jueves", "nombre": "Anexo 6.4: Taller de Mediación Escolar y Acuerdos de Paz", "campo": "De lo Humano y lo Comunitario", "descripcion": "Tarjetas de casos prácticos y técnicas de negociación, mediación y conciliación.", "tema": "Resolución pacífica de conflictos", "actividad": "Dramatización vivencial de controversias y aplicación de mediación dialógica."},
-            {"dia": "Viernes", "nombre": "Anexo 6.5: Línea del Tiempo y Análisis Crítico del 12 de Octubre", "campo": "Conmemoración Cívica e Histórica", "descripcion": "Línea temporal ilustrada y reflexión sobre el respeto a los pueblos originarios.", "tema": "Descubrimiento de América y Encuentro de Dos Mundos", "actividad": "Línea del tiempo de los viajes de Colón y asamblea reflexiva de diversidad cultural."}
+            {"dia": "Lunes", "proyecto": "¡Mi comunidad se expresa!", "nombre": "Anexo 6.1: Organizador Gráfico de Textos Literarios y Partes del Cuento", "campo": "Lenguajes", "descripcion": "Ficha para esquematizar inicio, nudo y desenlace, tipos de narrador y personajes.", "tema": "Textos literarios: Cuento y narración", "actividad": "Lectura guiada y clasificación de la estructura narrativa con adjetivos y nexos temporales."},
+            {"dia": "Martes", "proyecto": "El poder de la alimentación", "nombre": "Anexo 6.2: Laboratorio de Etiquetas y Conversión de Múltiplos del Gramo", "campo": "Saberes y Pensamiento Científico", "descripcion": "Conversión de unidades de masa (kg, g, mg) y análisis de sellos NOM-051.", "tema": "Alimentos ultraprocesados y múltiplos del gramo", "actividad": "Análisis nutrimental de empaques y conversión mediante método de la escalera."},
+            {"dia": "Miércoles", "proyecto": "Contribuyo con los servicios de mi escuela", "nombre": "Anexo 6.3: Ficha de Servicios Públicos y Práctica Financiera del IVA (16%)", "campo": "Ética, Naturaleza y Sociedades", "descripcion": "Cálculo y desglose del 16% de IVA en compras cotidianas y mapa de servicios comunitarios.", "tema": "Servicios públicos y recaudación de impuestos", "actividad": "Desglose de subtotal, IVA y total en compras cotidianas y reflexión cívica."},
+            {"dia": "Jueves", "proyecto": "El club de las nutrias", "nombre": "Anexo 6.4: Taller de Mediación Escolar y Acuerdos de Paz", "campo": "De lo Humano y lo Comunitario", "descripcion": "Tarjetas de casos prácticos y técnicas de negociación, mediación y conciliación.", "tema": "Resolución pacífica de conflictos", "actividad": "Dramatización vivencial de controversias y aplicación de mediación dialógica."},
+            {"dia": "Viernes", "proyecto": "Descubrimiento de América y Encuentro de Dos Mundos (12 de Octubre) e Integración Colegiada", "nombre": "Anexo 6.5: Línea del Tiempo y Análisis Crítico del 12 de Octubre", "campo": "Conmemoración Cívica e Histórica", "descripcion": "Línea temporal ilustrada y reflexión sobre el respeto a los pueblos originarios.", "tema": "Descubrimiento de América y Encuentro de Dos Mundos", "actividad": "Línea del tiempo de los viajes de Colón y asamblea reflexiva de diversidad cultural."}
         ],
         "rutinas_matutinas_sugeridas": {
             "dictado": [
@@ -105,10 +164,13 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
         "titulo_general": "Cuadernillo de Actividades Didácticas — Semana 7 (Profa Kempis)",
         "titulo_proyecto": "Cuadernillo Profa Kempis: Plato del Bien Comer y Lectura Dramatizada",
         "periodo_sugerido": "Semana 7 de 37 (Octubre - Ciclo 2026-2027)",
+        "bloque_fechas": "Del 5 al 16 de Octubre (Semanas 6 y 7)",
+        "rango_fechas": "12 al 16 de Octubre de 2026",
         "mes_correspondiente": "Octubre",
         "año": 2026,
         "trimestre": 1,
-        "descripcion": "Especialización en lectura dramatizada, Plato del Bien Comer actualizado, calidad de vida comunitaria y conmemoración del Día Mundial de la Alimentación.",
+        "descripcion": "Recursos didácticos, anexos imprimibles y fichas de trabajo para la consolidación de los 4 proyectos oficiales de 6° grado articulados día por día con la Profa. Kempis.",
+        "proyectos_oficiales_6to": PROYECTOS_OFICIALES_6TO_GRADO,
         "efemeride_principal": {
             "nombre": "Día Mundial de la Alimentación (16 de Octubre)",
             "fecha": "16 de Octubre",
@@ -118,6 +180,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
         },
         "campos": {
             "Lenguajes": {
+                "proyecto_oficial": "¡Mi comunidad se expresa!",
+                "dia_asignado": "Lunes",
+                "escenario": "Aula / Comunitario",
+                "libro_sep": "Proyectos de Aula (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
                 "tema": "La lectura dramatizada y el guión teatral (acotaciones, parlamentos y modulación)",
                 "pda_vinculado": "Interpreta y representa lecturas dramatizadas empleando adecuadamente acotaciones, volumen, tono y modulación de la voz.",
                 "inicio": "Juego de modulación de voz: leer la misma frase ('¡Ya llegaron los libros!') con distintas emociones (alegría, misterio, enojo). Analizar la importancia de las acotaciones.",
@@ -128,6 +194,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "anexo_descripcion": "Texto dramático adaptado para educación primaria con acotaciones visuales y guía de modulación expresiva de la voz."
             },
             "Saberes y Pensamiento Científico": {
+                "proyecto_oficial": "El poder de la alimentación",
+                "dia_asignado": "Martes",
+                "escenario": "Aula / Escolar",
+                "libro_sep": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
                 "tema": "El Plato del Bien Comer actualizado, la Jarra del Buen Beber y balance calórico",
                 "pda_vinculado": "Diseña menús basados en el Plato del Bien Comer y la Jarra del Buen Beber, relacionando la masa en gramos de las porciones con los requerimientos energéticos saludables.",
                 "inicio": "Presentar silueta del nuevo Plato del Bien Comer. Preguntar: ¿Cuáles son los 3 grupos principales y por qué las verduras y frutas deben ocupar la mitad del plato?",
@@ -138,6 +208,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "anexo_descripcion": "Esquema interactivo a color para recortar y armar porciones nutricionales en gramos y niveles de hidratación de la Jarra del Buen Beber."
             },
             "Ética, Naturaleza y Sociedades": {
+                "proyecto_oficial": "Contribuyo con los servicios de mi escuela",
+                "dia_asignado": "Miércoles",
+                "escenario": "Escolar / Comunitario",
+                "libro_sep": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
                 "tema": "Calidad de vida: Factores determinantes, justicia social y desigualdades en la comunidad",
                 "pda_vinculado": "Analiza los factores que influyen en la calidad de vida de las familias en su comunidad y entidad (Durango), reconociendo brechas de equidad y propuestas de mejora.",
                 "inicio": "¿Qué necesita una familia para vivir bien? Lluvia de respuestas: salud, casa, trabajo, seguridad, áreas verdes, agua potable.",
@@ -148,6 +222,10 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "anexo_descripcion": "Instrumento de indagación comunitaria para evaluar acceso a servicios, salud y medio ambiente en el entorno escolar."
             },
             "De lo Humano y lo Comunitario": {
+                "proyecto_oficial": "El club de las nutrias",
+                "dia_asignado": "Jueves",
+                "escenario": "Aula / Comunitario",
+                "libro_sep": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)",
                 "tema": "Estilos de vida activos, prevención de enfermedades crónicas y bienestar compartido",
                 "pda_vinculado": "Organiza y participa en circuitos motrices y dinámicas de actividad física para valorar el impacto del ejercicio continuo en el bienestar integral.",
                 "inicio": "Toma de pulso cardíaco en reposo. Breve calentamiento motriz en el aula para activar la oxigenación cerebral y el entusiasmo kinestésico.",
@@ -159,11 +237,11 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
             }
         },
         "anexos": [
-            {"dia": "Lunes", "nombre": "Anexo 7.1: Guión Teatral Didáctico y Rúbrica de Lectura Dramatizada", "campo": "Lenguajes", "descripcion": "Texto dramático adaptado con acotaciones visuales y rúbrica de entonación.", "tema": "Lectura dramatizada y teatro escolar", "actividad": "Lectura en atril de guiones teatrales con identificación de acotaciones y modulación de voz."},
-            {"dia": "Martes", "nombre": "Anexo 7.2: Taller Interactivo del Plato del Bien Comer y Menú Semanal", "campo": "Saberes y Pensamiento Científico", "descripcion": "Esquema interactivo recortable con registro de gramos y Jarra del Buen Beber.", "tema": "Plato del Bien Comer y balance calórico", "actividad": "Diseño y cálculo de porciones en gramos para un almuerzo escolar balanceado."},
-            {"dia": "Miércoles", "nombre": "Anexo 7.3: Diagnóstico Comunitario de Indicadores de Calidad de Vida", "campo": "Ética, Naturaleza y Sociedades", "descripcion": "Encuesta comunitaria de acceso a servicios básicos y medio ambiente en Durango.", "tema": "Dimensiones de la calidad de vida comunitaria", "actividad": "Aplicación de instrumento de indagación comunitaria y elaboración del mural de calidad de vida."},
-            {"dia": "Jueves", "nombre": "Anexo 7.4: Bitácora del Circuito de Actividad Física y Bienestar Integral", "campo": "De lo Humano y lo Comunitario", "descripcion": "Registro de circuito motriz de 4 estaciones, pulsaciones cardíacas y minutos activos.", "tema": "Estilos de vida activos y circuitos motrices", "actividad": "Estaciones de salto, zigzag, lanzamiento y equilibrio en el patio cívico con toma de pulso."},
-            {"dia": "Viernes", "nombre": "Anexo 7.5: Campaña 'Cero Desperdicio de Alimentos' y Decálogo Saludable", "campo": "Conmemoración Cívica e Histórica", "descripcion": "Ficha y organizador para carteles sobre el derecho humano a la alimentación adecuada.", "tema": "Día Mundial de la Alimentación (16 de Octubre)", "actividad": "Elaboración de carteles y compromisos comunitarios para evitar el desperdicio de alimentos."}
+            {"dia": "Lunes", "proyecto": "¡Mi comunidad se expresa!", "nombre": "Anexo 7.1: Guión Teatral Didáctico y Rúbrica de Lectura Dramatizada", "campo": "Lenguajes", "descripcion": "Texto dramático adaptado con acotaciones visuales y rúbrica de entonación.", "tema": "Lectura dramatizada y teatro escolar", "actividad": "Lectura en atril de guiones teatrales con identificación de acotaciones y modulación de voz."},
+            {"dia": "Martes", "proyecto": "El poder de la alimentación", "nombre": "Anexo 7.2: Taller Interactivo del Plato del Bien Comer y Menú Semanal", "campo": "Saberes y Pensamiento Científico", "descripcion": "Esquema interactivo recortable con registro de gramos y Jarra del Buen Beber.", "tema": "Plato del Bien Comer y balance calórico", "actividad": "Diseño y cálculo de porciones en gramos para un almuerzo escolar balanceado."},
+            {"dia": "Miércoles", "proyecto": "Contribuyo con los servicios de mi escuela", "nombre": "Anexo 7.3: Diagnóstico Comunitario de Indicadores de Calidad de Vida", "campo": "Ética, Naturaleza y Sociedades", "descripcion": "Encuesta comunitaria de acceso a servicios básicos y medio ambiente en Durango.", "tema": "Dimensiones de la calidad de vida comunitaria", "actividad": "Aplicación de instrumento de indagación comunitaria y elaboración del mural de calidad de vida."},
+            {"dia": "Jueves", "proyecto": "El club de las nutrias", "nombre": "Anexo 7.4: Bitácora del Circuito de Actividad Física y Bienestar Integral", "campo": "De lo Humano y lo Comunitario", "descripcion": "Registro de circuito motriz de 4 estaciones, pulsaciones cardíacas y minutos activos.", "tema": "Estilos de vida activos y circuitos motrices", "actividad": "Estaciones de salto, zigzag, lanzamiento y equilibrio en el patio cívico con toma de pulso."},
+            {"dia": "Viernes", "proyecto": "Día Mundial de la Alimentación (16 de Octubre) e Integración Colegiada", "nombre": "Anexo 7.5: Campaña 'Cero Desperdicio de Alimentos' y Decálogo Saludable", "campo": "Conmemoración Cívica e Histórica", "descripcion": "Ficha y organizador para carteles sobre el derecho humano a la alimentación adecuada.", "tema": "Día Mundial de la Alimentación (16 de Octubre)", "actividad": "Elaboración de carteles y compromisos comunitarios para evitar el desperdicio de alimentos."}
         ],
         "rutinas_matutinas_sugeridas": {
             "dictado": [
@@ -3289,13 +3367,21 @@ def obtener_proyecto_semana(semana: Union[int, str], mes: Optional[str] = None) 
 
     data["secuencias_por_dia"] = {
         a["dia"]: {
-            "inicio": f"Activación colectiva y recuperación de saberes para {a.get('tema', data['proyecto'])}.",
+            "proyecto": a.get("proyecto") or data["proyecto"],
+            "campo": a.get("campo") or "Campo Formativo",
+            "inicio": f"Activación colectiva, preguntas detonadoras y recuperación de saberes para el proyecto '{a.get('proyecto', data['proyecto'])}' ({a.get('campo', 'Campo Formativo')}).",
             "desarrollo": a.get("actividad", f"Indagación práctica y aplicación de {a.get('nombre')}."),
             "cierre": "Puesta en común, balance de avances y evaluación formativa en asamblea.",
             "recursos": f"Libros de Texto Gratuitos (LTG), {a.get('nombre')} y libreta del alumno."
         }
         for a in anexos if "dia" in a
     }
+
+    if s_num in [6, 7]:
+        data["proyectos_oficiales_6to"] = PROYECTOS_OFICIALES_6TO_GRADO
+        data["bloque_sincronizado"] = "Del 5 al 16 de Octubre (Semanas 6 y 7)"
+        data["bloque_fechas"] = "Del 5 al 16 de Octubre (Semanas 6 y 7)"
+        data["rango_fechas"] = "5 al 9 de Octubre de 2026" if s_num == 6 else "12 al 16 de Octubre de 2026"
 
     return data
 
@@ -3358,16 +3444,28 @@ def formatear_kempis_para_prompt(
         "CRUCE OBLIGATORIO DÍA POR DÍA CON EL PROYECTO Y SUS ANEXOS:"
     ]
 
+    if sem_num in [6, 7]:
+        lineas.insert(2, "BLOQUE CURRICULAR SINCRONIZADO: Semanas 6 y 7 (Del 5 al 16 de Octubre de 2026)")
+        lineas.insert(3, "ASIGNACIÓN OBLIGATORIA DE LOS 4 PROYECTOS OFICIALES DE 6° GRADO (DÍA POR DÍA):")
+        lineas.insert(4, "  • Lunes: Lenguajes -> Proyecto '¡Mi comunidad se expresa!'")
+        lineas.insert(5, "  • Martes: Saberes y Pensamiento Científico -> Proyecto 'El poder de la alimentación'")
+        lineas.insert(6, "  • Miércoles: Ética, Naturaleza y Sociedades -> Proyecto 'Contribuyo con los servicios de mi escuela'")
+        lineas.insert(7, "  • Jueves: De lo Humano y lo Comunitario -> Proyecto 'El club de las nutrias'")
+        lineas.insert(8, "  • Viernes: Conmemoración Cívica y Cierre Colegiado de los 4 proyectos oficiales.")
+        lineas.insert(9, "")
+
     anexos_semana = data.get("anexos", [])
     anexos_por_dia = {a.get("dia"): a for a in anexos_semana if a.get("dia")}
 
     for dia_nom in dias_activos:
         anexo_info = anexos_por_dia.get(dia_nom)
         if anexo_info:
+            proy_asig = anexo_info.get("proyecto", data.get("titulo_proyecto", ""))
             lineas.append(f"• Día {dia_nom}:")
+            lineas.append(f"  - Proyecto Oficial asignado: {proy_asig}")
+            lineas.append(f"  - Campo formativo rector: {anexo_info.get('campo', 'Lenguajes')}")
             lineas.append(f"  - Momento/Tema: {anexo_info.get('tema', anexo_info.get('nombre'))}")
             lineas.append(f"  - Anexo Imprimible asignado: {anexo_info.get('nombre')} ({anexo_info.get('descripcion')})")
-            lineas.append(f"  - Campo formativo rector: {anexo_info.get('campo', 'Lenguajes')}")
             lineas.append(f"  - Actividad vinculada: {anexo_info.get('actividad', '')}")
             lineas.append("")
 
@@ -3448,6 +3546,7 @@ detectar_kempis = detectar_relevancia_kempis
 # Exportaciones oficiales del módulo
 __all__ = [
     # Diccionarios y Catálogos principales
+    "PROYECTOS_OFICIALES_6TO_GRADO",
     "CUADERNILLO_KEMPIS_DATA",
     "CATALOGO_PROYECTOS_SEP_37_SEMANAS",
     "PALABRAS_CLAVE_KEMPIS",
