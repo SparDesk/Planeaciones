@@ -29,7 +29,21 @@ from planeaciones_storage import (
     CATEGORIAS_RUTAS_DEFAULT,
     CATEGORIAS_RUTAS,
     sanitizar_nombre_ruta,
-    guardar_archivo_fisico_json
+    guardar_archivo_fisico_json,
+    obtener_estado_bd_centralizada,
+    obtener_planeaciones_compartidas,
+    cambiar_visibilidad_planeacion,
+    duplicar_planeacion_para_usuario,
+    registrar_latido_presencia,
+    obtener_colaboradores_activos,
+    limpiar_presencia_usuario,
+    agregar_comentario_colaborativo,
+    listar_comentarios_colaborativos,
+    eliminar_comentario_colaborativo,
+    obtener_historial_colaboracion,
+    obtener_o_crear_usuario,
+    listar_usuarios,
+    sincronizar_planeacion_con_remoto
 )
 try:
     from cuadernillo_kempis import (
@@ -3064,6 +3078,14 @@ def cargar_planeacion_guardada(planeacion_id: int) -> bool:
     st.session_state["nombre_archivo_actual"] = nom_arch
     st.session_state["categoria_ruta_actual"] = cat_arch
 
+    # Metadatos para Control de Concurrencia Optimista y Colaboración Multi-Usuario
+    st.session_state["planeacion_actual_id"] = plan["id"]
+    st.session_state["planeacion_base_version"] = plan.get("version", 1)
+    st.session_state["planeacion_base_editor"] = plan.get("ultimo_editor", plan.get("username"))
+    st.session_state["planeacion_base_editor_nombre"] = plan.get("ultimo_editor_nombre", plan.get("username"))
+    st.session_state["planeacion_es_compartida"] = plan.get("es_compartida", True)
+    st.session_state["planeacion_autor"] = plan.get("username")
+
     # 7. Asignar valores cargados a los widgets con la nueva widget_key
     st.session_state[f"modo_cal_sel_{wk}"] = "Semana SEP (1 a 37)"
     st.session_state[f"sel_semana_sep_{wk}"] = sem
@@ -3140,13 +3162,42 @@ def cargar_credenciales():
             cookie_config["key"] = cookie_sec.get("key", cookie_config["key"])
             cookie_config["expiry_days"] = float(cookie_sec.get("expiry_days", cookie_config["expiry_days"]))
 
-    # Fallback de respaldo por si no se han cargado secrets aún
-    if not credentials["usernames"]:
-        credentials["usernames"]["docente"] = {
-            "name": "Aday Domínguez Domínguez",
+    # Cuentas institucionales base para colaboración multi-usuario y colectivo escolar
+    usuarios_colectivo = {
+        "docente": {
+            "name": "Maestra Aday Domínguez Domínguez",
             "email": "docente@escuela.gob.mx",
             "password": "$2b$12$Ma3bauQBClsLcIEaCIJHLu/LiGJg3NrGbfGgBbMlfck3TV5o6KVWC"
+        },
+        "aday": {
+            "name": "Maestra Aday Domínguez Domínguez",
+            "email": "docente@escuela.gob.mx",
+            "password": "$2b$12$Ma3bauQBClsLcIEaCIJHLu/LiGJg3NrGbfGgBbMlfck3TV5o6KVWC"
+        },
+        "director": {
+            "name": "Prof. Guillermo Gerardo Borjas Díaz",
+            "email": "director@escuela.gob.mx",
+            "password": "$2b$12$Ma3bauQBClsLcIEaCIJHLu/LiGJg3NrGbfGgBbMlfck3TV5o6KVWC"
+        },
+        "apoyo_pedagogico": {
+            "name": "Mtra. Claudia Elena Morales",
+            "email": "atp@escuela.gob.mx",
+            "password": "$2b$12$Ma3bauQBClsLcIEaCIJHLu/LiGJg3NrGbfGgBbMlfck3TV5o6KVWC"
+        },
+        "maestro_educacion_fisica": {
+            "name": "Prof. Carlos Mendoza",
+            "email": "ed_fisica@escuela.gob.mx",
+            "password": "$2b$12$Ma3bauQBClsLcIEaCIJHLu/LiGJg3NrGbfGgBbMlfck3TV5o6KVWC"
+        },
+        "maestro_ingles": {
+            "name": "Prof. Roberto Sandoval",
+            "email": "ingles@escuela.gob.mx",
+            "password": "$2b$12$Ma3bauQBClsLcIEaCIJHLu/LiGJg3NrGbfGgBbMlfck3TV5o6KVWC"
         }
+    }
+    for u_k, u_v in usuarios_colectivo.items():
+        if u_k not in credentials["usernames"]:
+            credentials["usernames"][u_k] = u_v
 
     return credentials, cookie_config
 
@@ -3199,9 +3250,38 @@ if authentication_status:
     # BARRA LATERAL (CONFIGURACIÓN INSTITUCIONAL Y GEMINI)
     # ==========================================
     with st.sidebar:
+        # Registrar / asegurar usuario activo en base de datos centralizada
+        curr_user_id = st.session_state.get('username', 'docente')
+        curr_user_nom = st.session_state.get('name', 'Docente')
+        curr_user_email = st.session_state.get('email', 'docente@escuela.gob.mx')
+        u_info = obtener_o_crear_usuario(username=curr_user_id, nombre=curr_user_nom, email=curr_user_email)
+
         # Información del docente y botón de cerrar sesión
-        st.markdown(f'### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> **{st.session_state.get("name", "Docente")}**', unsafe_allow_html=True)
-        st.caption(f"Usuario activo: @{st.session_state.get('username', '')}")
+        st.markdown(f'### <span style="color: #7C3AED; font-size: 1.2rem;">•</span> **{curr_user_nom}**', unsafe_allow_html=True)
+        st.caption(f"Usuario activo: @{curr_user_id} • Rol: {u_info.get('rol', 'Docente')}")
+        
+        # Conmutador rápido de identidad de colaborador (Modo Colectivo Escolar)
+        with st.expander("👥 Identidad de Colaborador (Modo Colectivo)", expanded=False):
+            st.caption("Permite identificarte como otro docente o directivo para colaborar concurrentemente sin cerrar sesión:")
+            lista_usrs_db = listar_usuarios()
+            opciones_usrs = {u["username"]: f"{u['nombre']} (@{u['username']}) - {u['rol']}" for u in lista_usrs_db}
+            sel_switch_usr = st.selectbox(
+                "Colaborar como:",
+                options=list(opciones_usrs.keys()),
+                index=list(opciones_usrs.keys()).index(curr_user_id) if curr_user_id in opciones_usrs else 0,
+                format_func=lambda u: opciones_usrs.get(u, u),
+                key="sel_switch_colaborador"
+            )
+            if st.button("🔄 Cambiar a esta Identidad", key="btn_apply_switch_user", use_container_width=True):
+                if sel_switch_usr != curr_user_id:
+                    target_u = next((u for u in lista_usrs_db if u["username"] == sel_switch_usr), None)
+                    if target_u:
+                        st.session_state["username"] = target_u["username"]
+                        st.session_state["name"] = target_u["nombre"]
+                        st.session_state["email"] = target_u.get("email", "")
+                        st.success(f"✓ Ahora estás colaborando como: {target_u['nombre']}")
+                        st.rerun()
+
         authenticator.logout('Cerrar sesión', 'sidebar', use_container_width=True)
         st.markdown('---')
         st.button(
@@ -3213,6 +3293,17 @@ if authentication_status:
             help="Reinicia todos los campos, documentos cargados, búsquedas y selecciones para comenzar una nueva planeación desde cero."
         )
 
+        # Estado del Motor de Base de Datos Centralizada y Persistente
+        status_bd = obtener_estado_bd_centralizada()
+        st.markdown(
+            f"<div style='background: #1E1B4B; border: 1px solid #6366F1; border-radius: 6px; padding: 6px 10px; font-size: 0.76rem; color: #E0E7FF; margin: 6px 0;'>"
+            f"🗄️ <b>Base de Datos Centralizada:</b><br>"
+            f"<span style='color: #A5B4FC; font-weight: 600;'>{status_bd['motor']}</span><br>"
+            f"<span style='font-size: 0.70rem; color: #C7D2FE;'>{status_bd.get('soporte', 'Persistente')} ({status_bd.get('tamanio_kb', 0)} KB)</span>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
         # Estado de Autoguardado en tiempo real (SQLite)
         user_actual_sb = st.session_state.get("username", "docente")
         stats_cubiertas_sb = obtener_resumen_semanas_cubiertas(user_actual_sb)
@@ -3222,35 +3313,44 @@ if authentication_status:
             st.markdown(
                 f"<div style='background: #ECFDF5; border: 1px solid #10B981; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #065F46; margin: 6px 0;'>"
                 f"🟢 <b>Autoguardado:</b> {hora_auto_sb} (Sem. {sem_auto_sb})<br>"
-                f"<span style='font-size: 0.71rem; color: #047857;'>Cambios asegurados en SQLite en tiempo real.</span>"
+                f"<span style='font-size: 0.71rem; color: #047857;'>Asegurado en BD centralizada con control de versiones.</span>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
                 f"<div style='background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #475569; margin: 6px 0;'>"
-                f"💾 <b>Autoguardado activo:</b> Registra en tiempo real en SQLite."
+                f"💾 <b>Autoguardado activo:</b> Registra en tiempo real en BD persistente."
                 f"</div>",
                 unsafe_allow_html=True
             )
 
-        # Gestor de Archivos / Historial en la barra lateral
-        with st.expander("📂 Gestor de Archivos y Planeaciones", expanded=False):
+        # Gestor de Archivos / Repositorio Compartido en la barra lateral
+        with st.expander("📂 Repositorio y Gestor Colegiado", expanded=False):
+            tipo_vista_sb = st.radio(
+                "Ver planeaciones:",
+                ["🌐 Colectivo Escolar (Compartidas)", "👤 Mis Planeaciones"],
+                index=0,
+                key=f"rad_repo_tipo_{st.session_state.widget_key}"
+            )
+            solo_usuario_sb = (tipo_vista_sb == "👤 Mis Planeaciones")
+            lista_historial_sb = listar_planeaciones(user_actual_sb, solo_usuario=solo_usuario_sb, incluir_compartidas=True)
+            
             st.markdown(
-                f"<div style='font-size: 0.78rem; margin-bottom: 6px; color: #E0E7FF; font-weight: 500;'>"
-                f"📊 <b>Cobertura:</b> {stats_cubiertas_sb['semanas_completas']} de 37 semanas ({stats_cubiertas_sb['porcentaje_avance']}%)"
+                f"<div style='font-size: 0.76rem; margin-bottom: 6px; color: #E0E7FF; font-weight: 500;'>"
+                f"📊 <b>Total mostradas:</b> {len(lista_historial_sb)} planeaciones"
                 f"</div>",
                 unsafe_allow_html=True
             )
-            lista_historial_sb = listar_planeaciones(user_actual_sb)
+
             if not lista_historial_sb:
                 st.markdown(
                     "<div class='empty-history-box' style='background: #2D1B4E; border: 1.5px solid #8B5CF6; border-left: 4px solid #C084FC; border-radius: 8px; padding: 10px 12px; margin: 8px 0;'>"
                     "<div class='empty-history-title' style='color: #FFFFFF; font-weight: 700; font-size: 0.82rem; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;'>"
-                    "<span>📁</span> <span style='color: #FFFFFF;'>No hay planeaciones guardadas aún</span>"
+                    "<span>📁</span> <span style='color: #FFFFFF;'>No hay planeaciones disponibles</span>"
                     "</div>"
                     "<div class='empty-history-text' style='color: #F3E8FF; font-size: 0.77rem; font-weight: 500; line-height: 1.45;'>"
-                    "Se guardarán automáticamente con su nombre de archivo al configurar o generar cualquier semana."
+                    "Las planeaciones guardadas se sincronizan automáticamente en el repositorio centralizado."
                     "</div>"
                     "</div>",
                     unsafe_allow_html=True
@@ -3261,7 +3361,7 @@ if authentication_status:
                 sel_sb_pid = st.selectbox(
                     "Selecciona un archivo guardado:",
                     options=list(dict_sb_planes.keys()),
-                    format_func=lambda pid: f"📄 {dict_sb_planes[pid]['nombre_archivo']} (Sem. {dict_sb_planes[pid]['semana']})",
+                    format_func=lambda pid: f"📄 {dict_sb_planes[pid]['nombre_archivo']} (Sem. {dict_sb_planes[pid]['semana']} • v{dict_sb_planes[pid].get('version', 1)})",
                     key=f"sel_sb_plan_{st.session_state.widget_key}",
                     label_visibility="collapsed"
                 )
@@ -3271,26 +3371,33 @@ if authentication_status:
                         st.rerun()
 
                 st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #4C1D95;'>", unsafe_allow_html=True)
-                st.markdown("<div style='font-size:0.73rem; font-weight:700; color:#C7D2FE; margin-bottom:4px;'>Historial de Archivos Guardados:</div>", unsafe_allow_html=True)
+                st.markdown("<div style='font-size:0.73rem; font-weight:700; color:#C7D2FE; margin-bottom:4px;'>Repositorio de Archivos:</div>", unsafe_allow_html=True)
                 for p_item in lista_historial_sb:
                     p_id = p_item["id"]
                     tag_estado = "🟢 Lista" if p_item["tiene_plan"] else "📝 Borrador"
-                    ver_tag = f" [{p_item['version_nombre']}]" if not p_item["es_autoguardado"] else ""
+                    badge_compartida = "🌐 Compartida" if p_item.get("es_compartida") else "🔒 Privada"
+                    ver_num = p_item.get("version", 1)
+                    autor_tag = f"@{p_item['autor']}" if not p_item.get("es_propia") else "Mía"
                     st.markdown(
                         f"<div style='font-size:0.78rem; font-weight:600; margin-top:4px; color:#FFFFFF;'>"
-                        f"📄 {p_item['nombre_archivo']}<br>"
+                        f"📄 {p_item['nombre_archivo']} <span style='font-size:0.68rem; background:#4338CA; padding:1px 5px; border-radius:3px;'>v{ver_num}</span><br>"
                         f"<span style='font-size:0.7rem; color:#DDD6FE; font-weight:bold;'>📁 {p_item['categoria_ruta']}</span> • "
-                        f"<span style='font-size:0.7rem; color:#34D399;'>Sem. {p_item['semana']}{ver_tag} ({tag_estado})</span>"
+                        f"<span style='font-size:0.7rem; color:#34D399;'>Sem. {p_item['semana']} ({tag_estado})</span><br>"
+                        f"<span style='font-size:0.68rem; color:#A5B4FC;'>Autor: {autor_tag} • {badge_compartida}</span>"
                         f"</div>"
-                        f"<div style='font-size:0.68rem; color:#CBD5E1;'>Guardado: {p_item['fecha_guardado']}</div>",
+                        f"<div style='font-size:0.68rem; color:#CBD5E1;'>Última edición: {p_item['fecha_guardado']} por @{p_item.get('ultimo_editor', '')}</div>",
                         unsafe_allow_html=True
                     )
-                    col_h1, col_h2 = st.columns([2.2, 1])
+                    col_h1, col_h2, col_h3 = st.columns([2, 1, 1])
                     with col_h1:
                         if st.button("📂 Abrir", key=f"btn_sb_load_{p_id}_{st.session_state.widget_key}", use_container_width=True, help=f"Cargar {p_item['nombre_archivo']}"):
                             cargar_planeacion_guardada(p_id)
                             st.rerun()
                     with col_h2:
+                        if st.button("👥", key=f"btn_sb_fork_{p_id}_{st.session_state.widget_key}", use_container_width=True, help="Duplicar para mi grupo"):
+                            duplicar_planeacion_para_usuario(p_id, user_actual_sb)
+                            st.rerun()
+                    with col_h3:
                         if st.button("🗑️", key=f"btn_sb_del_{p_id}_{st.session_state.widget_key}", use_container_width=True, help="Eliminar planeación"):
                             eliminar_planeacion_por_id(p_id)
                             st.rerun()
@@ -3812,27 +3919,105 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
     # ==========================================
     docente_usuario_main = st.session_state.get("username", "docente")
     stats_cubiertas_main = obtener_resumen_semanas_cubiertas(docente_usuario_main)
-    lista_guardadas_main = listar_planeaciones(docente_usuario_main)
+    lista_guardadas_main = listar_planeaciones(docente_usuario_main, solo_usuario=True)
+    lista_compartidas_main = obtener_planeaciones_compartidas()
 
-    with st.expander(f"🗂️ Gestor de Archivos y Planeaciones Guardadas ({len(lista_guardadas_main)} registradas • {stats_cubiertas_main['semanas_completas']} de 37 semanas completas)", expanded=False):
+    with st.expander(f"🗂️ Gestor de Archivos y Repositorio Colegiado ({len(lista_guardadas_main)} propias • {len(lista_compartidas_main)} colectivas • {stats_cubiertas_main['semanas_completas']} de 37 semanas)", expanded=False):
         c_m1, c_m2, c_m3, c_m4 = st.columns(4)
         with c_m1:
-            st.metric("Total Guardadas", len(lista_guardadas_main))
+            st.metric("Mis Planeaciones", len(lista_guardadas_main))
         with c_m2:
-            st.metric("Semanas con Plan", f"{stats_cubiertas_main['semanas_completas']} / 37")
+            st.metric("🌐 Colectivo Escolar", len(lista_compartidas_main))
         with c_m3:
-            st.metric("Avance del Ciclo", f"{stats_cubiertas_main['porcentaje_avance']}%")
+            st.metric("Semanas con Plan", f"{stats_cubiertas_main['semanas_completas']} / 37")
         with c_m4:
-            hora_act = st.session_state.get("ultimo_autoguardado_hora", "En vivo")
-            st.metric("Autoguardado", hora_act)
+            st.metric("Base Centralizada", "🟢 WAL Persistente")
 
-        tab_g_archivos, tab_g_sem, tab_g_fecha, tab_g_campo, tab_g_backup = st.tabs([
+        tab_g_colectivo, tab_g_archivos, tab_g_sem, tab_g_fecha, tab_g_campo, tab_g_backup = st.tabs([
+            "🌐 Colectivo Escolar (Compartidas)",
             "📂 Por Nombre y Carpeta / Ruta",
             "📅 Por Semana (1 a 37)",
             "🕒 Por Fecha de Guardado",
             "🎨 Por Campo Formativo / Asignatura",
             "💾 Respaldos y Versiones"
         ])
+
+        with tab_g_colectivo:
+            st.markdown("#### 🌐 Repositorio Colegiado y Colaboración Escolar")
+            st.caption("Accede a las planeaciones compartidas por tus colegas docentes y directivos. Consúltalas, co-diseña en tiempo real o duplícalas para tu propio grupo.")
+            
+            if not lista_compartidas_main:
+                st.markdown(
+                    "<div class='empty-history-box' style='background-color: #F8FAFC; border: 1.5px solid #CBD5E1; border-left: 4px solid #7C3AED; border-radius: 8px; padding: 12px 14px; margin: 10px 0;'>"
+                    "<div class='empty-history-title' style='color: #111827; font-weight: 700; font-size: 0.86rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;'>"
+                    "<span>🌐</span> <span style='color: #111827;'>Aún no hay planeaciones compartidas en el repositorio colegiado</span>"
+                    "</div>"
+                    "<div class='empty-history-text' style='color: #374151; font-size: 0.82rem; font-weight: 500;'>"
+                    "Para compartir una de tus planeaciones con tus compañeros, cárgala y en la <b>Sección 4 > Pestaña '👥 Co-diseño y Colaboración Colegiada'</b> activa el interruptor de visibilidad compartida."
+                    "</div>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
+            else:
+                c_fc1, c_fc2 = st.columns([2, 1])
+                with c_fc1:
+                    grados_disp = ["Todos los Grados"] + sorted(list(set(str(p.get("grado", "")) for p in lista_compartidas_main if p.get("grado"))))
+                    filtro_grado_colab = st.selectbox("Filtrar por Grado Escolar:", options=grados_disp, key=f"flt_grado_colectivo_{st.session_state.widget_key}")
+                with c_fc2:
+                    busq_colectivo = st.text_input("🔍 Buscar por docente o tema:", key=f"busq_colectivo_{st.session_state.widget_key}", placeholder="Ej. Aday, Matemáticas...")
+
+                compartidas_filtradas = lista_compartidas_main
+                if filtro_grado_colab != "Todos los Grados":
+                    compartidas_filtradas = [p for p in compartidas_filtradas if str(p.get("grado", "")) == filtro_grado_colab]
+                if busq_colectivo.strip():
+                    term_b = busq_colectivo.strip().lower()
+                    compartidas_filtradas = [
+                        p for p in compartidas_filtradas
+                        if term_b in str(p.get("autor", "")).lower()
+                        or term_b in str(p.get("nombre_archivo", "")).lower()
+                        or term_b in str(p.get("ultimo_editor_nombre", "")).lower()
+                        or any(term_b in str(c).lower() for c in p.get("campos_formativos", []))
+                    ]
+
+                st.markdown(f"<div style='font-size:0.82rem; color:#475569; margin-bottom:8px;'>Mostrando <b>{len(compartidas_filtradas)}</b> planeaciones compartidas disponibles:</div>", unsafe_allow_html=True)
+
+                for p_colab in compartidas_filtradas:
+                    p_id = p_colab["id"]
+                    is_mine = p_colab.get("username") == docente_usuario_main
+                    autor_badge = f"👤 {p_colab.get('autor', p_colab.get('username', 'Docente'))}"
+                    if is_mine:
+                        autor_badge += " *(Tuya)*"
+                    editor_str = f" • Último editor: {p_colab.get('ultimo_editor_nombre', 'Docente')} (v{p_colab.get('version', 1)})"
+
+                    col_co1, col_co2, col_co3 = st.columns([2.8, 1, 1.4])
+                    with col_co1:
+                        c_str = ", ".join(p_colab.get("campos_formativos", [])[:2]) + ("..." if len(p_colab.get("campos_formativos", [])) > 2 else "")
+                        st.markdown(
+                            f"**🌐 {p_colab.get('nombre_archivo', 'Planeación Compartida')}**<br>"
+                            f"<span style='font-size:0.75rem; color:#7C3AED; font-weight:700;'>{autor_badge}</span>"
+                            f"<span style='font-size:0.72rem; color:#64748B;'>{editor_str}</span><br>"
+                            f"<span style='font-size:0.75rem; color:#1F2937;'>Semana {p_colab.get('semana')} ({p_colab.get('grado', '')} {p_colab.get('grupo', '')}) • {c_str}</span>",
+                            unsafe_allow_html=True
+                        )
+                    with col_co2:
+                        if p_colab.get("tiene_plan"):
+                            st.markdown("<span style='background:#DCFCE7; color:#15803D; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;'>🟢 Lista</span>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<span style='background:#FEF3C7; color:#B45309; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;'>📝 Borrador</span>", unsafe_allow_html=True)
+                    with col_co3:
+                        c_sub1, c_sub2 = st.columns([1.2, 1.2])
+                        with c_sub1:
+                            if st.button("📂 Abrir", key=f"btn_colab_open_{p_id}_{st.session_state.widget_key}", use_container_width=True):
+                                cargar_planeacion_guardada(p_id)
+                                st.rerun()
+                        with c_sub2:
+                            if st.button("👥 Duplicar", key=f"btn_colab_dup_{p_id}_{st.session_state.widget_key}", use_container_width=True, help="Crear una copia para tu grupo"):
+                                new_dup_id = duplicar_planeacion_para_usuario(p_id, docente_usuario_main)
+                                if new_dup_id:
+                                    cargar_planeacion_guardada(new_dup_id)
+                                    st.success("✓ ¡Planeación duplicada y cargada para tu grupo!")
+                                    st.rerun()
+                    st.markdown("<hr style='margin: 4px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
 
         with tab_g_archivos:
             st.markdown("#### 📂 Gestor de Archivos por Nombre y Carpeta / Destino")
@@ -4057,12 +4242,19 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         "prompt_enviado": st.session_state.get("prompt_enviado") or "",
                         "url_referencia": st.session_state.get("url_referencia", "")
                     }
-                    guardar_planeacion(
+                    res_ver = guardar_planeacion(
                         username=docente_usuario_main,
                         data=data_version_save,
                         es_autoguardado=False,
-                        version_nombre=ver_nombre_custom
+                        version_nombre=ver_nombre_custom,
+                        base_version=st.session_state.get("planeacion_base_version"),
+                        planeacion_id=st.session_state.get("planeacion_actual_id"),
+                        nombre_editor=st.session_state.get("name", docente_usuario_main),
+                        return_details=True
                     )
+                    if isinstance(res_ver, dict) and res_ver.get("status") == "success":
+                        st.session_state["planeacion_actual_id"] = res_ver["id"]
+                        st.session_state["planeacion_base_version"] = res_ver["version"]
                     st.success(f"✓ ¡Versión '{ver_nombre_custom}' guardada exitosamente!")
                     st.rerun()
 
@@ -4926,16 +5118,32 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
     datos_escuela_actual["campos_formativos"] = campos_sel
     hash_actual_form = calcular_hash_planeacion(data_actual_para_guardar)
     if hash_actual_form != st.session_state.get("ultimo_hash_guardado"):
-        guardar_planeacion(
+        res_auto = guardar_planeacion(
             username=docente_usuario_act,
             data=data_actual_para_guardar,
             es_autoguardado=True,
             nombre_archivo=nombre_archivo_actual,
-            categoria_ruta=categoria_ruta_actual
+            categoria_ruta=categoria_ruta_actual,
+            base_version=st.session_state.get("planeacion_base_version"),
+            planeacion_id=st.session_state.get("planeacion_actual_id"),
+            nombre_editor=st.session_state.get("name", docente_usuario_act),
+            return_details=True
         )
-        st.session_state["ultimo_hash_guardado"] = hash_actual_form
-        st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
-        st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
+        if isinstance(res_auto, dict):
+            if res_auto.get("status") == "conflict":
+                st.session_state["conflicto_concurrencia"] = res_auto
+            elif res_auto.get("status") == "success":
+                st.session_state["planeacion_actual_id"] = res_auto["id"]
+                st.session_state["planeacion_base_version"] = res_auto["version"]
+                st.session_state["conflicto_concurrencia"] = None
+                st.session_state["ultimo_hash_guardado"] = hash_actual_form
+                st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+                st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
+        elif res_auto:
+            st.session_state["planeacion_actual_id"] = res_auto
+            st.session_state["ultimo_hash_guardado"] = hash_actual_form
+            st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
+            st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
     
     # ==========================================
     # FUNCIÓN DE MODO DE RESPALDO: PLANTILLA BASE SIN IA
@@ -5343,16 +5551,30 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
     if btn_save_named:
         data_actual_para_guardar["nombre_archivo"] = nombre_archivo_input
         data_actual_para_guardar["categoria_ruta"] = categoria_ruta_input
-        guardar_planeacion(
+        res_named = guardar_planeacion(
             username=docente_usuario_act,
             data=data_actual_para_guardar,
             es_autoguardado=False,
             version_nombre=nombre_archivo_input,
             nombre_archivo=nombre_archivo_input,
-            categoria_ruta=categoria_ruta_input
+            categoria_ruta=categoria_ruta_input,
+            base_version=st.session_state.get("planeacion_base_version"),
+            planeacion_id=st.session_state.get("planeacion_actual_id"),
+            nombre_editor=st.session_state.get("name", docente_usuario_act),
+            return_details=True
         )
-        st.success(f"✓ ¡Planeación guardada como '{nombre_archivo_input}' en '{categoria_ruta_input}'!")
-        st.rerun()
+        if isinstance(res_named, dict):
+            if res_named.get("status") == "conflict":
+                st.session_state["conflicto_concurrencia"] = res_named
+            elif res_named.get("status") == "success":
+                st.session_state["planeacion_actual_id"] = res_named["id"]
+                st.session_state["planeacion_base_version"] = res_named["version"]
+                st.session_state["conflicto_concurrencia"] = None
+                st.success(f"✓ ¡Planeación guardada como '{nombre_archivo_input}' (v{res_named['version']}) en '{categoria_ruta_input}'!")
+                st.rerun()
+        else:
+            st.success(f"✓ ¡Planeación guardada como '{nombre_archivo_input}' en '{categoria_ruta_input}'!")
+            st.rerun()
     
     if btn_generar:
         if not verificar_conexion_internet():
@@ -5482,7 +5704,18 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                     data_gen_save = dict(data_actual_para_guardar)
                     data_gen_save["planeacion_generada"] = plan_generado
                     data_gen_save["prompt_enviado"] = prompt_utilizado
-                    guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+                    res_gen = guardar_planeacion(
+                        username=docente_usuario_act,
+                        data=data_gen_save,
+                        es_autoguardado=True,
+                        base_version=st.session_state.get("planeacion_base_version"),
+                        planeacion_id=st.session_state.get("planeacion_actual_id"),
+                        nombre_editor=st.session_state.get("name", docente_usuario_act),
+                        return_details=True
+                    )
+                    if isinstance(res_gen, dict) and res_gen.get("status") == "success":
+                        st.session_state["planeacion_actual_id"] = res_gen["id"]
+                        st.session_state["planeacion_base_version"] = res_gen["version"]
                     st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
                     st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
                     st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
@@ -5642,7 +5875,18 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                     data_gen_save = dict(data_actual_para_guardar)
                     data_gen_save["planeacion_generada"] = plan_generado
                     data_gen_save["prompt_enviado"] = prompt_utilizado
-                    guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+                    res_web = guardar_planeacion(
+                        username=docente_usuario_act,
+                        data=data_gen_save,
+                        es_autoguardado=True,
+                        base_version=st.session_state.get("planeacion_base_version"),
+                        planeacion_id=st.session_state.get("planeacion_actual_id"),
+                        nombre_editor=st.session_state.get("name", docente_usuario_act),
+                        return_details=True
+                    )
+                    if isinstance(res_web, dict) and res_web.get("status") == "success":
+                        st.session_state["planeacion_actual_id"] = res_web["id"]
+                        st.session_state["planeacion_base_version"] = res_web["version"]
                     st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
                     st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
                     st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
@@ -5692,7 +5936,18 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             data_gen_save = dict(data_actual_para_guardar)
             data_gen_save["planeacion_generada"] = plantilla_base_text
             data_gen_save["prompt_enviado"] = st.session_state.prompt_enviado
-            guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+            res_base = guardar_planeacion(
+                username=docente_usuario_act,
+                data=data_gen_save,
+                es_autoguardado=True,
+                base_version=st.session_state.get("planeacion_base_version"),
+                planeacion_id=st.session_state.get("planeacion_actual_id"),
+                nombre_editor=st.session_state.get("name", docente_usuario_act),
+                return_details=True
+            )
+            if isinstance(res_base, dict) and res_base.get("status") == "success":
+                st.session_state["planeacion_actual_id"] = res_base["id"]
+                st.session_state["planeacion_base_version"] = res_base["version"]
             st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
             st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
             st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
@@ -5713,7 +5968,18 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             st.session_state.planeacion_generada = demo_plan
             data_gen_save = dict(data_actual_para_guardar)
             data_gen_save["planeacion_generada"] = demo_plan
-            guardar_planeacion(username=docente_usuario_act, data=data_gen_save, es_autoguardado=True)
+            res_demo = guardar_planeacion(
+                username=docente_usuario_act,
+                data=data_gen_save,
+                es_autoguardado=True,
+                base_version=st.session_state.get("planeacion_base_version"),
+                planeacion_id=st.session_state.get("planeacion_actual_id"),
+                nombre_editor=st.session_state.get("name", docente_usuario_act),
+                return_details=True
+            )
+            if isinstance(res_demo, dict) and res_demo.get("status") == "success":
+                st.session_state["planeacion_actual_id"] = res_demo["id"]
+                st.session_state["planeacion_base_version"] = res_demo["version"]
             st.session_state["ultimo_hash_guardado"] = calcular_hash_planeacion(data_gen_save)
             st.session_state["ultimo_autoguardado_hora"] = datetime.datetime.now().strftime("%H:%M:%S")
             st.session_state["ultimo_autoguardado_semana"] = semana_seleccionada
@@ -5794,20 +6060,77 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             </div>
             """, unsafe_allow_html=True)
     
+        # 1. Alerta interactiva de Conflicto de Concurrencia (si otro docente guardó cambios mientras tanto)
+        if st.session_state.get("conflicto_concurrencia"):
+            conf = st.session_state["conflicto_concurrencia"]
+            st.error(
+                f"⚠️ **¡Aviso de Concurrencia Colaborativa!**\n\n"
+                f"El usuario **@{conf['ultimo_editor']}** ({conf['ultimo_editor_nombre']}) guardó la versión **v{conf['version_actual']}** el {conf['fecha_guardado']}.\n\n"
+                f"Tus cambios locales están en la versión base **v{conf['base_version']}**. Para evitar sobrescribir el trabajo de tu colega, selecciona una acción:"
+            )
+            c_conf1, c_conf2, c_conf3 = st.columns(3)
+            with c_conf1:
+                if st.button("🔄 Cargar Versión del Colega", key="btn_conf_reload", use_container_width=True, type="primary"):
+                    cargar_planeacion_guardada(conf["id"])
+                    st.session_state["conflicto_concurrencia"] = None
+                    st.rerun()
+            with c_conf2:
+                if st.button("📑 Guardar como Copia Mía", key="btn_conf_copy", use_container_width=True):
+                    duplicar_planeacion_para_usuario(conf["id"], docente_usuario_act)
+                    st.session_state["conflicto_concurrencia"] = None
+                    st.success("✓ Copia independiente guardada.")
+                    st.rerun()
+            with c_conf3:
+                if st.button("⚠️ Forzar Sobrescritura", key="btn_conf_force", use_container_width=True):
+                    guardar_planeacion(
+                        username=docente_usuario_act,
+                        data=data_actual_para_guardar,
+                        planeacion_id=conf["id"],
+                        force_overwrite=True
+                    )
+                    st.session_state["conflicto_concurrencia"] = None
+                    st.warning("⚠️ Cambios sobrescritos con tu versión.")
+                    st.rerun()
+
+        # 2. Banner de Presencia y Colaboradores en Tiempo Real
+        active_plan_id = st.session_state.get("planeacion_actual_id")
+        if active_plan_id:
+            colabs_en_vivo = registrar_latido_presencia(
+                planeacion_id=active_plan_id,
+                username=docente_usuario_act,
+                nombre_usuario=st.session_state.get("name", docente_usuario_act),
+                rol=u_info.get("rol", "Docente"),
+                seccion_actual="Plano Didáctico"
+            )
+            colab_badges = []
+            for c in colabs_en_vivo:
+                es_yo = (c["username"] == docente_usuario_act)
+                yo_tag = " (Tú)" if es_yo else ""
+                colab_badges.append(f"<span style='background:#10B981; color:#FFFFFF; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; margin-right:4px;'>🟢 {c['nombre_usuario']} [{c['rol']}]{yo_tag}</span>")
+            
+            st.markdown(
+                f"<div style='background: #ECFDF5; border: 1.5px solid #10B981; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;'>"
+                f"<div><b>👥 Colaboradores Activos en Vivo:</b> {''.join(colab_badges)}</div>"
+                f"<div style='font-size:0.75rem; color:#065F46;'>Versión actual: <b>v{st.session_state.get('planeacion_base_version', 1)}</b> • BD Centralizada Sincronizada</div>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
         st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
     
         parsed_resultado = parse_plan_sections(st.session_state.planeacion_generada)
         dias_para_mostrar = dias_seleccionados if dias_seleccionados else DIAS_HABIL_NOMBRES
 
         # Pestañas interactivas para revisar la planeación
-        tab_dias_ver, tab_completa, tab_dosificador, tab_evaluacion, tab_ajustes, tab_kempis, tab_cruzada = st.tabs([
+        tab_dias_ver, tab_completa, tab_dosificador, tab_evaluacion, tab_ajustes, tab_kempis, tab_cruzada, tab_colaboracion = st.tabs([
             "📅 Vista Día por Día (Lunes a Viernes)",
             "📄 Documento Completo Oficial",
             "📋 Dosificador y Articulación",
             "📊 Instrumentos de Evaluación",
             "♿ Inclusión (BAP/DUA)",
             "📘 Cuadernillo Profa Kempis",
-            "🔍 Búsqueda Cruzada y Trazabilidad"
+            "🔍 Búsqueda Cruzada y Trazabilidad",
+            "👥 Co-diseño y Colaboración Colegiada"
         ])
 
         with tab_dias_ver:
@@ -6051,6 +6374,106 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                         st.markdown(f"**Libros de Texto SEP:** {', '.join(rec.get('libros_sugeridos', []))}")
             else:
                 st.info("No se han cargado datos de búsqueda cruzada en esta sesión.")
+
+        with tab_colaboracion:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%); border-left: 5px solid #7C3AED; border-radius: 8px; padding: 12px 18px; margin-bottom: 14px;">
+                <span style="font-weight: 700; color: #4C1D95; font-size: 0.96rem;">👥 Co-diseño Pedagógico y Colaboración Colegiada en Tiempo Real</span><br>
+                <span style="color: #1F2937; font-size: 0.88rem; line-height: 1.45;">
+                    Permite a directivos, asesores técnicos pedagógicos (ATP) y docentes de apoyo co-crear, dejar observaciones didácticas, revisar versiones y validar acuerdos sin sobrescribir el trabajo de los demás.
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+
+            col_colab_left, col_colab_right = st.columns([1.1, 1])
+            plan_id_actual = st.session_state.get("planeacion_actual_id")
+
+            with col_colab_left:
+                st.markdown("#### 📜 1. Auditoría de Versiones y Colectivo Escolar")
+                if plan_id_actual:
+                    hist_info = obtener_historial_colaboracion(plan_id_actual)
+                    if hist_info:
+                        st.markdown(f"""
+                        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                            <b style="color: #4338CA;">Autor original:</b> @{hist_info.get('autor_original', 'docente')}<br>
+                            <b style="color: #4338CA;">Versión actual en BD:</b> <span style="background:#4338CA; color:#FFF; padding:1px 6px; border-radius:4px; font-weight:700;">v{hist_info.get('version_actual', 1)}</span><br>
+                            <b style="color: #4338CA;">Última edición:</b> @{hist_info.get('ultimo_editor', '')} ({hist_info.get('ultimo_editor_nombre', '')})<br>
+                            <b style="color: #4338CA;">Docentes participantes:</b> {', '.join(f'@{u}' for u in hist_info.get('colaboradores', []))}
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                        with st.expander("📝 Registro Histórico de Cambios (Audit Trail)", expanded=False):
+                            cambios_regs = hist_info.get("registro_cambios", [])
+                            if cambios_regs:
+                                for cm in reversed(cambios_regs):
+                                    st.markdown(f"• **v{cm.get('version', 1)}** ({cm.get('fecha', '')}) por **{cm.get('nombre', cm.get('usuario', ''))}**: {cm.get('descripcion', '')}")
+                            else:
+                                st.caption("No hay cambios adicionales registrados en el historial.")
+                    else:
+                        st.info("Información de auditoría no disponible.")
+                else:
+                    st.info("Guarda la planeación para habilitar el historial de auditoría y versiones colaborativas.")
+
+                # Acciones de visibilidad y duplicación
+                st.markdown("#### ⚙️ 2. Acciones Colegiadas")
+                if plan_id_actual:
+                    es_comp_act = st.session_state.get("planeacion_es_compartida", True)
+                    txt_vis = "🔒 Hacer Privada (Solo yo)" if es_comp_act else "🌐 Compartir con Colectivo Escolar"
+                    if st.button(txt_vis, key="btn_toggle_vis_tab", use_container_width=True):
+                        cambiar_visibilidad_planeacion(plan_id_actual, not es_comp_act)
+                        st.session_state["planeacion_es_compartida"] = not es_comp_act
+                        st.success(f"✓ Visibilidad actualizada: {'Compartida con escuela' if not es_comp_act else 'Privada'}")
+                        st.rerun()
+
+                    if st.button("👥 Duplicar esta Planeación para mi Grupo", key="btn_fork_tab", use_container_width=True):
+                        new_fork_id = duplicar_planeacion_para_usuario(plan_id_actual, docente_usuario_act)
+                        if new_fork_id:
+                            cargar_planeacion_guardada(new_fork_id)
+                            st.success(f"✓ Planeación clonada exitosamente para @{docente_usuario_act}.")
+                            st.rerun()
+
+            with col_colab_right:
+                st.markdown("#### 💬 3. Notas y Acuerdos de Co-diseño Pedagógico")
+                if plan_id_actual:
+                    # Formulario para publicar nuevo comentario
+                    with st.form(key=f"form_nuevo_comentario_{plan_id_actual}"):
+                        sec_com = st.selectbox(
+                            "Apartado a retroalimentar:",
+                            ["General", "Rutinas Matutinas", "Inicio y Activación", "Desarrollo y Estaciones Kinestésicas", "Cierre y Evaluación Formativa", "Ajustes Razonables (DUA / BAP)"],
+                            key="sel_sec_com"
+                        )
+                        texto_com = st.text_area("Nota didáctica, sugerencia o acuerdo colegiado:", placeholder="Ej. Sugiero incorporar el uso de balanza real en el aula para la sesión de múltiplos del gramo...", height=90)
+                        btn_post_com = st.form_submit_button("💬 Publicar Nota Didáctica", use_container_width=True)
+                        if btn_post_com and texto_com.strip():
+                            agregar_comentario_colaborativo(
+                                planeacion_id=plan_id_actual,
+                                username=docente_usuario_act,
+                                nombre_usuario=st.session_state.get("name", docente_usuario_act),
+                                rol=u_info.get("rol", "Docente"),
+                                seccion=sec_com,
+                                comentario=texto_com
+                            )
+                            st.success("✓ Nota publicada exitosamente.")
+                            st.rerun()
+
+                    # Lista de comentarios existentes
+                    comms_lista = listar_comentarios_colaborativos(plan_id_actual)
+                    if comms_lista:
+                        st.markdown(f"**Notas registradas ({len(comms_lista)}):**")
+                        for cm_item in reversed(comms_lista):
+                            st.markdown(f"""
+                            <div style="background: #FFFFFF; border-left: 4px solid #7C3AED; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                <span style="font-weight:700; color:#4C1D95; font-size:0.84rem;">👤 {cm_item['nombre_usuario']}</span> 
+                                <span style="font-size:0.74rem; background:#EDE9FE; color:#5B21B6; padding:1px 5px; border-radius:3px;">{cm_item.get('rol', 'Docente')}</span> 
+                                <span style="font-size:0.74rem; color:#64748B;">• {cm_item['fecha_str']}</span><br>
+                                <span style="font-size:0.76rem; color:#0369A1; font-weight:600;">🏷️ {cm_item['seccion']}</span><br>
+                                <span style="font-size:0.84rem; color:#1E293B;">{cm_item['comentario']}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                    else:
+                        st.caption("Aún no se han registrado notas ni sugerencias en esta planeación. ¡Sé el primero en colaborar!")
+                else:
+                    st.info("Guarda o genera la planeación para habilitar el muro de notas pedagógicas y co-diseño.")
 # ==========================================
 st.markdown("---")
 st.markdown("""
