@@ -16,7 +16,37 @@ import time
 import hashlib
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
-from nem_data import parsear_metodologia_lista, formatear_metodologia_str
+try:
+    from nem_data import parsear_metodologia_lista, formatear_metodologia_str
+except Exception:
+    def parsear_metodologia_lista(metodologia: Any) -> List[str]:
+        if not metodologia:
+            return ["Aprendizaje Basado en Proyectos Comunitarios"]
+        if isinstance(metodologia, list):
+            items = [str(m).strip() for m in metodologia if str(m).strip()]
+            return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        if isinstance(metodologia, (tuple, set)):
+            items = [str(m).strip() for m in metodologia if str(m).strip()]
+            return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        if isinstance(metodologia, str):
+            val = metodologia.strip()
+            if val.startswith("[") and val.endswith("]"):
+                try:
+                    parsed = json.loads(val)
+                    if isinstance(parsed, list):
+                        items = [str(m).strip() for m in parsed if str(m).strip()]
+                        return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+                except Exception:
+                    pass
+            if "," in val:
+                items = [m.strip() for m in val.split(",") if m.strip()]
+                return items if items else ["Aprendizaje Basado en Proyectos Comunitarios"]
+            return [val] if val else ["Aprendizaje Basado en Proyectos Comunitarios"]
+        return [str(metodologia)]
+
+    def formatear_metodologia_str(metodologia: Any) -> str:
+        lista = parsear_metodologia_lista(metodologia)
+        return ", ".join(lista)
 
 DB_FILENAME = "planeaciones_storage.db"
 DIR_GUARDADOS_DEFAULT = "guardados"
