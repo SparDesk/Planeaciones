@@ -796,6 +796,9 @@ def generate_sample_fallback(
                 proy_campo = c_v.get("proyecto_oficial", "")
                 tema_completo = f"{c_v.get('tema', kempis_data.get('proyecto', ''))}" + (f" (Proyecto: '{proy_campo}')" if proy_campo else "")
                 libro_campo = c_v.get("libro_sep") or f"Libros de Texto SEP y Anexos de la Semana {semana_num}"
+                ns_campo = c_v.get("nuestros_saberes")
+                if ns_campo and ns_campo not in libro_campo:
+                    libro_campo = f"{libro_campo} | {ns_campo}"
                 filas_art.append(
                     f"| **{c_n}** | {tema_completo} | {pda_texto} | {libro_campo} | Comprensión lectora, velocidad lectora, ortografía y cálculo contextualizado |"
                 )

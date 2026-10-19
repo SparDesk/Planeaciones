@@ -386,10 +386,16 @@ def busqueda_cruzada_archivos_plataforma(
     # 6. Extracción y garantía de los 4 CAMPOS FORMATIVOS (Uso Obligatorio del Programa Analítico)
     # Mapeo de libros SEP asociados por campo
     libros_por_campo_def = {
-        "Lenguajes": "Proyectos Comunitarios (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
-        "Saberes y Pensamiento Científico": "Nuestros Saberes (págs. 68-76) y Proyectos de Aula (págs. 82-95)",
-        "Ética, Naturaleza y Sociedades": "Proyectos Escolares (págs. 80-92) y Nuestros Saberes (págs. 140-149)",
-        "De lo Humano y lo Comunitario": "Proyectos Comunitarios (págs. 50-63) y Proyectos de Aula (págs. 110-125)"
+        "Lenguajes": "Proyectos de Aula (págs. 20-35 / 34-49) y Múltiples Lenguajes (págs. 40-47)",
+        "Saberes y Pensamiento Científico": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
+        "Ética, Naturaleza y Sociedades": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
+        "De lo Humano y lo Comunitario": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)"
+    }
+    nuestros_saberes_por_campo_def = {
+        "Lenguajes": "Nuestros Saberes (págs. 28-35): Recursos literarios, la narración y estructura del cuento",
+        "Saberes y Pensamiento Científico": "Nuestros Saberes (págs. 68-76): El sistema digestivo, nutrición, sellos NOM-051 y múltiplos del gramo",
+        "Ética, Naturaleza y Sociedades": "Nuestros Saberes (págs. 140-149): Servicios públicos, satisfacción de necesidades, cultura contributiva e IVA",
+        "De lo Humano y lo Comunitario": "Nuestros Saberes (págs. 202-211): Mediación dialógica, cultura de paz, estilos de vida activos y circuitos motrices"
     }
     problematicas_por_campo_def = {
         "Lenguajes": "Comprensión lectora profunda inferencial, velocidad lectora (1 min) y ortografía en redacción autónoma.",
@@ -438,8 +444,9 @@ def busqueda_cruzada_archivos_plataforma(
         if not pda_val:
             pda_val = f"Proceso de desarrollo de aprendizaje oficial de 6° grado en {campo_nom} vinculado a la comprensión lectora y el razonamiento lógico."
 
-        # Enriquecer con libro_sep y proyecto oficial si están disponibles en k_info
+        # Enriquecer con libro_sep, nuestros_saberes y proyecto oficial si están disponibles
         libro_vinc = (k_info.get("libro_sep") if 'k_info' in locals() and isinstance(k_info, dict) and k_info.get("libro_sep") else None) or libros_por_campo_def.get(campo_nom, "Libros de Texto Gratuitos SEP")
+        ns_vinc = (k_info.get("nuestros_saberes") if 'k_info' in locals() and isinstance(k_info, dict) and k_info.get("nuestros_saberes") else None) or nuestros_saberes_por_campo_def.get(campo_nom, "Nuestros Saberes (6° grado)")
         proy_nom = (k_info.get("proyecto_oficial") if 'k_info' in locals() and isinstance(k_info, dict) else None) or ""
 
         pda_4campos.append({
@@ -448,6 +455,7 @@ def busqueda_cruzada_archivos_plataforma(
             "contenido": cont_val,
             "pda": pda_val,
             "libro_vinculado": libro_vinc,
+            "nuestros_saberes": ns_vinc,
             "problematica_atendida": problematicas_por_campo_def.get(campo_nom, "Comprensión lectora, ortografía y comunidad"),
             "fuente_curricular": fuente_val
         })

@@ -504,78 +504,264 @@ CONTENIDOS_PDA_POR_GRADO = {
     "6° de Primaria": {
         "Lenguajes": [
             {
-                "contenido": "Comprensión y producción de textos argumentativos sobre temas polémicos.",
-                "pda": "Lee textos sobre temas polémicos e identifica los argumentos sustentados; escribe textos argumentativos con postura fundamentada."
+                "contenido": "Análisis y representación de textos literarios: el cuento y la lectura dramatizada.",
+                "pda": "Lee, analiza y recrea cuentos reconociendo planteamiento, nudo y desenlace; interpreta guiones teatrales en lectura dramatizada empleando acotaciones, modulación de voz y expresión corporal.",
+                "proyecto_ltg": "¡Mi comunidad se expresa!",
+                "libro_ltg": "Proyectos de Aula (págs. 20-35 / 34-49) y Múltiples Lenguajes (págs. 40-47)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 28-35): Recursos literarios, la narración, el cuento y la lectura dramatizada",
+                "escenario": "Aula / Comunitario",
+                "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                "problematicas_atendidas": "Comprensión lectora inferencial, velocidad y fluidez lectora (1 min), ortografía y redacción autónoma."
             },
             {
-                "contenido": "Análisis y representación de textos literarios: el cuento y la lectura dramatizada.",
-                "pda": "Lee, analiza y recrea cuentos reconociendo planteamiento, nudo y desenlace; interpreta guiones teatrales en lectura dramatizada empleando acotaciones, modulación de voz y expresión corporal."
+                "contenido": "Comprensión y producción de textos argumentativos sobre temas polémicos.",
+                "pda": "Lee textos sobre temas polémicos e identifica los argumentos sustentados; escribe textos argumentativos con postura fundamentada.",
+                "proyecto_ltg": "Debates con causa y argumentos",
+                "libro_ltg": "Proyectos Comunitarios (págs. 10-25)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 42-49): El debate, tipos de argumentos, premisas y conclusiones",
+                "escenario": "Comunitario",
+                "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                "problematicas_atendidas": "Comprensión lectora, velocidad lectora y ortografía."
+            },
+            {
+                "contenido": "Narración de sucesos autobiográficos.",
+                "pda": "Lee textos autobiográficos e identifica las relaciones temporales de secuencia, simultaneidad y duración. Usa reflexivamente adverbios, frases adverbiales y nexos temporales para indicar secuencia.",
+                "proyecto_ltg": "La cápsula del tiempo",
+                "libro_ltg": "Proyectos de Aula (págs. 10-23)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 18-24): Textos autobiográficos, adverbios y nexos temporales",
+                "escenario": "Aula",
+                "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                "problematicas_atendidas": "Comprensión lectora, ortografía y redacción reflexiva."
             },
             {
                 "contenido": "Elaboración de un manual de juegos de patio o de mesa para favorecer la convivencia.",
-                "pda": "Diseña un manual de juegos colectivos con instrucciones claras, reglas consensuadas y materiales para fomentar la inclusión en el recreo."
+                "pda": "Diseña un manual de juegos colectivos con instrucciones claras, reglas consensuadas y materiales para fomentar la inclusión en el recreo.",
+                "proyecto_ltg": "Jugamos y convivimos en armonía",
+                "libro_ltg": "Proyectos Escolares (págs. 26-39)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 50-57): Textos instructivos, verbos en infinitivo e imperativo",
+                "escenario": "Escolar",
+                "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                "problematicas_atendidas": "Convivencia armónica, redacción de instrucciones y ortografía."
             },
             {
                 "contenido": "Producción y envío de cartas personales y correos electrónicos con distintos propósitos.",
-                "pda": "Escribe y envía cartas y correos respetando las convenciones formales, adaptando el tono según el destinatario y la intención comunicativa."
+                "pda": "Escribe y envía cartas y correos respetando las convenciones formales, adaptando el tono según el destinatario y la intención comunicativa.",
+                "proyecto_ltg": "Mensajes que unen comunidades",
+                "libro_ltg": "Proyectos Comunitarios (págs. 26-41)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 58-65): Medios de comunicación epistolar y digital",
+                "escenario": "Comunitario",
+                "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+                "problematicas_atendidas": "Uso ético y reflexivo de tecnologías y producción escrita."
             }
         ],
         "Saberes y Pensamiento Científico": [
             {
                 "contenido": "Alimentación saludable: alimentos procesados, sellos de advertencia NOM-051, Plato del Bien Comer y múltiplos y submúltiplos del gramo.",
-                "pda": "Analiza etiquetas y sellos de advertencia en alimentos ultraprocesados; diseña menús balanceados con el Plato del Bien Comer y resuelve situaciones problemáticas con conversiones de múltiplos y submúltiplos del gramo."
-            },
-            {
-                "contenido": "Estructura y funcionamiento del cuerpo humano: sistemas circulatorio, nervioso y endocrino en la pubertad.",
-                "pda": "Explica los cambios físicos y emocionales durante la pubertad y su relación con el sistema endocrino; propone acciones de autocuidado integral."
+                "pda": "Analiza etiquetas y sellos de advertencia en alimentos ultraprocesados; diseña menús balanceados con el Plato del Bien Comer y resuelve situaciones problemáticas con conversiones de múltiplos y submúltiplos del gramo.",
+                "proyecto_ltg": "El poder de la alimentación",
+                "libro_ltg": "Proyectos de Aula (págs. 140-153)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 68-76): El sistema digestivo, nutrición, alimentos ultraprocesados, sellos NOM-051 y unidades de masa: múltiplos del gramo",
+                "escenario": "Aula / Escolar",
+                "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
+                "problematicas_atendidas": "Cálculo mental contextualizado, resolución de problemas y vida saludable."
             },
             {
                 "contenido": "Relaciones de proporcionalidad: cálculo de porcentajes y aplicación comercial (descuentos e IVA).",
-                "pda": "Resuelve situaciones problemáticas que implican calcular porcentajes (descuentos, intereses e IVA del 16%) en compras cotidianas y finanzas familiares."
+                "pda": "Resuelve situaciones problemáticas que implican calcular porcentajes (descuentos, intereses e IVA del 16%) en compras cotidianas y finanzas familiares.",
+                "proyecto_ltg": "El dinero de la comunidad: porcentajes, descuentos e IVA",
+                "libro_ltg": "Proyectos Comunitarios (págs. 110-125)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 90-99): Proporcionalidad directa, cálculo de porcentajes y el 16% de IVA",
+                "escenario": "Comunitario",
+                "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
+                "problematicas_atendidas": "Cálculo mental contextualizado y resolución de problemas comunitarios."
+            },
+            {
+                "contenido": "Estructura y funcionamiento del cuerpo humano: sistemas circulatorio, nervioso y endocrino en la pubertad.",
+                "pda": "Explica los cambios físicos y emocionales durante la pubertad y su relación con el sistema endocrino; propone acciones de autocuidado integral.",
+                "proyecto_ltg": "Una barrera de defensa contra las enfermedades",
+                "libro_ltg": "Proyectos Escolares (págs. 112-127)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 60-67): Sistema inmunológico, vacunas, virus y bacterias",
+                "escenario": "Escolar",
+                "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
+                "problematicas_atendidas": "Comprensión de textos científicos y resolución de problemas."
             },
             {
                 "contenido": "Funciones vitales que caracterizan a plantas y animales como seres vivos, y su reproducción.",
-                "pda": "Comprende y compara la reproducción sexual y asexual en plantas y animales, reconociendo su importancia para la conservación biológica."
+                "pda": "Comprende y compara la reproducción sexual y asexual en plantas y animales, reconociendo su importancia para la conservación biológica.",
+                "proyecto_ltg": "Guardianes de la biodiversidad",
+                "libro_ltg": "Proyectos Escolares (págs. 128-143)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 80-89): Reproducción vegetal y animal, equilibrio ecológico",
+                "escenario": "Escolar",
+                "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
+                "problematicas_atendidas": "Pensamiento crítico y conservación ambiental."
             }
         ],
         "Ética, Naturaleza y Sociedades": [
             {
-                "contenido": "Servicios públicos, cultura contributiva (impuestos e IVA) y calidad de vida en la comunidad.",
-                "pda": "Comprende la función de los servicios públicos en la satisfacción de necesidades básicas, la importancia del pago de impuestos y el IVA en su financiamiento, y evalúa las dimensiones de la calidad de vida en su entorno local."
-            },
-            {
-                "contenido": "La cultura democrática: principios éticos que subyacen en los acuerdos, normas y leyes.",
-                "pda": "Evalúa la aplicación justa y equitativa de las normas y leyes en la vida escolar y comunitaria, promoviendo la rendición de cuentas."
-            },
-            {
-                "contenido": "Cultura de paz: derechos humanos, justicia social y resolución pacífica de controversias.",
-                "pda": "Aplica mecanismos de mediación dialógica, negociación y arbitraje para la resolución pacífica de controversias escolares, erradicando cualquier forma de discriminación y violencia."
+                "contenido": "Cultura democrática: servicios públicos, satisfacción de necesidades básicas e impacto social de los impuestos y el IVA.",
+                "pda": "Diagnostica los servicios públicos de su entorno escolar y comunitario; comprende la importancia de la contribución ciudadana y el destino de los impuestos para el bienestar colectivo en Durango.",
+                "proyecto_ltg": "Contribuyo con los servicios de mi escuela",
+                "libro_ltg": "Proyectos Escolares (págs. 194-207 / 210-225)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 140-149): Servicios públicos, satisfacción de necesidades, cultura contributiva e IVA (16%)",
+                "escenario": "Escolar / Comunitario",
+                "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
+                "problematicas_atendidas": "Comprensión crítica de textos, análisis social y memoria histórica."
             },
             {
                 "contenido": "Movimientos sociales en el México de los siglos XIX y XX y conmemoraciones históricas (12 de Octubre y Revolución de 1910).",
-                "pda": "Analiza críticamente el encuentro de dos mundos (12 de octubre) valorando la resistencia de los pueblos originarios, así como las causas de la Revolución Social de 1910 y los ideales de justicia social en Durango."
+                "pda": "Analiza críticamente el encuentro de dos mundos (12 de octubre) valorando la resistencia de los pueblos originarios, así como las causas de la Revolución Social de 1910 y los ideales de justicia social en Durango.",
+                "proyecto_ltg": "Movimientos sociales en México: La Revolución Social de 1910",
+                "libro_ltg": "Proyectos Escolares (págs. 230-245)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 150-165): Movimientos sociales del siglo XIX y XX, Revolución Mexicana de 1910 e ideales maderistas",
+                "escenario": "Escolar / Comunitario",
+                "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
+                "problematicas_atendidas": "Comprensión lectora crítica, memoria histórica y justicia social."
+            },
+            {
+                "contenido": "Cultura de paz: derechos humanos, justicia social y resolución pacífica de controversias.",
+                "pda": "Aplica mecanismos de mediación dialógica, negociación y arbitraje para la resolución pacífica de controversias escolares, erradicando cualquier forma de discriminación y violencia.",
+                "proyecto_ltg": "Comité de Paz y Convivencia Escolar",
+                "libro_ltg": "Proyectos de Aula (págs. 210-225)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 170-179): Cultura de paz, mediación escolar, derechos humanos y acuerdos colectivos",
+                "escenario": "Aula",
+                "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
+                "problematicas_atendidas": "Asuntos comunitarios y convivencia armónica."
+            },
+            {
+                "contenido": "La cultura democrática: principios éticos que subyacen en los acuerdos, normas y leyes.",
+                "pda": "Evalúa la aplicación justa y equitativa de las normas y leyes en la vida escolar y comunitaria, promoviendo la rendición de cuentas.",
+                "proyecto_ltg": "Leyes y normas para la convivencia democrática",
+                "libro_ltg": "Proyectos Comunitarios (págs. 210-225)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 180-189): Principios éticos, legalidad y derechos de las niñas y los niños",
+                "escenario": "Comunitario",
+                "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
+                "problematicas_atendidas": "Formación cívica, ética y pensamiento crítico."
             }
         ],
         "De lo Humano y lo Comunitario": [
             {
-                "contenido": "Estilos de vida activos y saludables, alimentación balanceada y Día Mundial de la Alimentación.",
-                "pda": "Diseña y evalúa un plan semanal de actividad física y alimentación balanceada basado en el Plato del Bien Comer, promoviendo campañas de cero desperdicio de comida en la escuela."
+                "contenido": "Estilos de vida activos y saludables, circuitos motrices, prevención del sedentarismo y resolución pacífica de desacuerdos.",
+                "pda": "Organiza y participa en circuitos motrices y dinámicas de actividad física para valorar el impacto del ejercicio continuo en el bienestar integral y resolver desacuerdos mediante la mediación dialógica.",
+                "proyecto_ltg": "El club de las nutrias",
+                "libro_ltg": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63 / 278-293)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 202-211): Mediación dialógica, cultura de paz, estilos de vida activos y circuitos motrices",
+                "escenario": "Aula / Comunitario",
+                "metodologia": "Aprendizaje Servicio (AS)",
+                "problematicas_atendidas": "Estilos de vida activos, convivencia armónica y salud comunitaria."
             },
             {
-                "contenido": "Resolución pacífica de conflictos y convivencia armónica en el aula y la escuela.",
-                "pda": "Establece acuerdos colectivos y decálogos de aula para la convivencia pacífica, utilizando el diálogo respetuoso y la empatía en la mediación de desacuerdos."
-            },
-            {
-                "contenido": "Proyectos de vida y valoración de metas personales y colectivas.",
-                "pda": "Valora sus logros y habilidades en distintas áreas para plantearse metas realistas a corto y mediano plazo hacia la educación secundaria."
+                "contenido": "Estilos de vida activos y saludables, alimentación balanceada y Día Mundial de la Alimentación (16 de Octubre).",
+                "pda": "Diseña y evalúa un plan semanal de actividad física y alimentación balanceada basado en el Plato del Bien Comer, promoviendo campañas de cero desperdicio de comida en la escuela.",
+                "proyecto_ltg": "Campaña Cero Desperdicio de Alimentos",
+                "libro_ltg": "Proyectos Comunitarios (págs. 294-309)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 212-219): Día Mundial de la Alimentación, seguridad alimentaria y nutrición comunitaria",
+                "escenario": "Comunitario",
+                "metodologia": "Aprendizaje Servicio (AS)",
+                "problematicas_atendidas": "Asuntos comunitarios, promoción de la salud y trabajo colaborativo."
             },
             {
                 "contenido": "La comunidad como el espacio para el aprendizaje y el bienestar común.",
-                "pda": "Diseña, organiza y participa en acciones colectivas y círculos comunitarios para promover el acceso equitativo a tecnologías y la lectura compartida en el entorno familiar."
+                "pda": "Diseña, organiza y participa en acciones colectivas y círculos comunitarios para promover el acceso equitativo a tecnologías y la lectura compartida en el entorno familiar.",
+                "proyecto_ltg": "Comunidad digital: Acceso equitativo y lectura compartida",
+                "libro_ltg": "Proyectos Comunitarios (págs. 310-325)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 220-229): Alfabetización digital crítica, fomento de la lectura comunitaria y tecnologías para el bien común",
+                "escenario": "Comunitario",
+                "metodologia": "Aprendizaje Servicio (AS)",
+                "problematicas_atendidas": "Promoción de la lectura, acceso/uso crítico de tecnologías y acompañamiento en el hogar."
+            },
+            {
+                "contenido": "Proyectos de vida y valoración de metas personales y colectivas.",
+                "pda": "Valora sus logros y habilidades en distintas áreas para plantearse metas realistas a corto y mediano plazo hacia la educación secundaria.",
+                "proyecto_ltg": "Hacia nuevas metas: Mi proyecto de vida",
+                "libro_ltg": "Proyectos de Aula (págs. 334-349)",
+                "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 230-239): Autoconocimiento, resiliencia y metas educativas",
+                "escenario": "Aula",
+                "metodologia": "Aprendizaje Servicio (AS)",
+                "problematicas_atendidas": "Autoestima, proyecto de vida y toma asertiva de decisiones."
             }
         ]
     }
 }
+
+# ==========================================
+# BASE DE DATOS OFICIAL DEL PROGRAMA ANALÍTICO
+# ESCUELA PRIMARIA "REVOLUCIÓN SOCIAL DE 1910" (CCT: 10EPR0361N)
+# ==========================================
+PROGRAMA_ANALITICO_OFICIAL_6TO: Dict[str, Any] = {
+    "ficha_tecnica": {
+        "nombre_escuela": "Escuela Primaria “Revolución Social de 1910”",
+        "cct": "10EPR0361N",
+        "zona_escolar": "Zona 49",
+        "sector": "Sector 02",
+        "entidad": "Durango",
+        "docente": "Maestra Aday Domínguez Domínguez",
+        "director": "Guillermo Gerardo Borjas Díaz",
+        "grado": "6° de Primaria",
+        "fase": "Fase 5",
+        "grupo": "A",
+        "matricula": 26,
+        "estilos_aprendizaje": "Kinestésico y Visual",
+        "ciclo_escolar": "2026-2027",
+        "turno": "Matutino"
+    },
+    "proyectos_principales_6to": {
+        "Lenguajes": {
+            "proyecto": "¡Mi comunidad se expresa!",
+            "campo": "Lenguajes",
+            "escenario": "Aula / Comunitario",
+            "libro_ltg": "Proyectos de Aula (págs. 20-35 / 34-49) y Múltiples Lenguajes (págs. 40-47)",
+            "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 28-35): Recursos literarios, la narración, el cuento y la lectura dramatizada",
+            "dia_sugerido": "Lunes",
+            "contenido": "Análisis y representación de textos literarios: el cuento y la lectura dramatizada.",
+            "pda": "Lee, analiza y recrea cuentos reconociendo planteamiento, nudo y desenlace; interpreta guiones teatrales en lectura dramatizada empleando acotaciones, modulación de voz y expresión corporal.",
+            "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
+            "problematicas": "Comprensión lectora inferencial, velocidad y fluidez lectora, ortografía y producción de textos escritos."
+        },
+        "Saberes y Pensamiento Científico": {
+            "proyecto": "El poder de la alimentación",
+            "campo": "Saberes y Pensamiento Científico",
+            "escenario": "Aula / Escolar",
+            "libro_ltg": "Proyectos de Aula (págs. 140-153)",
+            "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 68-76): El sistema digestivo, nutrición, alimentos ultraprocesados, sellos NOM-051 y unidades de masa: múltiplos del gramo",
+            "dia_sugerido": "Martes",
+            "contenido": "Alimentación saludable: alimentos procesados, sellos de advertencia NOM-051, Plato del Bien Comer y múltiplos y submúltiplos del gramo.",
+            "pda": "Analiza etiquetas y sellos de advertencia en alimentos ultraprocesados; diseña menús balanceados con el Plato del Bien Comer y resuelve situaciones problemáticas con conversiones de múltiplos y submúltiplos del gramo.",
+            "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
+            "problematicas": "Cálculo mental contextualizado, resolución de problemas y vida saludable."
+        },
+        "Ética, Naturaleza y Sociedades": {
+            "proyecto": "Contribuyo con los servicios de mi escuela",
+            "campo": "Ética, Naturaleza y Sociedades",
+            "escenario": "Escolar / Comunitario",
+            "libro_ltg": "Proyectos Escolares (págs. 194-207 / 210-225)",
+            "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 140-149): Servicios públicos, satisfacción de necesidades, cultura contributiva e IVA (16%)",
+            "dia_sugerido": "Miércoles",
+            "contenido": "Cultura democrática: servicios públicos, satisfacción de necesidades básicas e impacto social de los impuestos y el IVA.",
+            "pda": "Diagnostica los servicios públicos de su entorno escolar y comunitario; comprende la importancia de la contribución ciudadana y el destino de los impuestos para el bienestar colectivo en Durango.",
+            "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
+            "problematicas": "Comprensión crítica de textos, análisis social y memoria histórica."
+        },
+        "De lo Humano y lo Comunitario": {
+            "proyecto": "El club de las nutrias",
+            "campo": "De lo Humano y lo Comunitario",
+            "escenario": "Aula / Comunitario",
+            "libro_ltg": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63 / 278-293)",
+            "vinculacion_nuestros_saberes": "Nuestros Saberes (págs. 202-211): Mediación dialógica, cultura de paz, estilos de vida activos y circuitos motrices",
+            "dia_sugerido": "Jueves",
+            "contenido": "Estilos de vida activos y saludables, circuitos motrices, prevención del sedentarismo y resolución pacífica de desacuerdos.",
+            "pda": "Organiza y participa en circuitos motrices y dinámicas de actividad física para valorar el impacto del ejercicio continuo en el bienestar integral y resolver desacuerdos mediante la mediación dialógica.",
+            "metodologia": "Aprendizaje Servicio (AS)",
+            "problematicas": "Convivencia pacífica, fomento de la lectura comunitaria y uso reflexivo de tecnologías."
+        }
+    },
+    "banco_contenidos_pda": CONTENIDOS_PDA_POR_GRADO["6° de Primaria"]
+}
+
+def obtener_programa_analitico_6to(campo: Optional[str] = None) -> Any:
+    """Retorna la configuración oficial del Programa Analítico de 6° de Primaria para la Primaria Revolución Social de 1910."""
+    if campo:
+        return PROGRAMA_ANALITICO_OFICIAL_6TO["proyectos_principales_6to"].get(campo)
+    return PROGRAMA_ANALITICO_OFICIAL_6TO
 
 try:
     from cuadernillo_kempis import (

@@ -143,6 +143,32 @@ except ImportError:
         formatear_kempis_para_prompt = lambda *args, **kwargs: ""
         obtener_anexos_kempis_para_docx = lambda *args, **kwargs: []
 
+try:
+    from nem_data import (
+        CONTENIDOS_PDA_POR_GRADO as NEM_CONTENIDOS_PDA_POR_GRADO,
+        PROGRAMA_ANALITICO_OFICIAL_6TO,
+        obtener_programa_analitico_6to,
+        PROBLEMATIZACIONES_PREDETERMINADAS as PROBLEMATIZACIONES_OFICIALES_NEM,
+        CONTEXTO_ESCOLAR_PREDETERMINADO as CONTEXTO_ESCOLAR_NEM,
+        CONTEXTO_GRUPAL_PREDETERMINADO as CONTEXTO_GRUPAL_NEM
+    )
+except ImportError:
+    try:
+        import nem_data as _nd
+        NEM_CONTENIDOS_PDA_POR_GRADO = getattr(_nd, "CONTENIDOS_PDA_POR_GRADO", {})
+        PROGRAMA_ANALITICO_OFICIAL_6TO = getattr(_nd, "PROGRAMA_ANALITICO_OFICIAL_6TO", {})
+        obtener_programa_analitico_6to = getattr(_nd, "obtener_programa_analitico_6to", lambda *a, **k: {})
+        PROBLEMATIZACIONES_OFICIALES_NEM = getattr(_nd, "PROBLEMATIZACIONES_PREDETERMINADAS", "")
+        CONTEXTO_ESCOLAR_NEM = getattr(_nd, "CONTEXTO_ESCOLAR_PREDETERMINADO", "")
+        CONTEXTO_GRUPAL_NEM = getattr(_nd, "CONTEXTO_GRUPAL_PREDETERMINADO", "")
+    except Exception:
+        NEM_CONTENIDOS_PDA_POR_GRADO = {}
+        PROGRAMA_ANALITICO_OFICIAL_6TO = {}
+        obtener_programa_analitico_6to = lambda *a, **k: {}
+        PROBLEMATIZACIONES_OFICIALES_NEM = ""
+        CONTEXTO_ESCOLAR_NEM = ""
+        CONTEXTO_GRUPAL_NEM = ""
+
 
 # Cargar variables de entorno desde .env si existe
 load_dotenv()
@@ -709,7 +735,12 @@ CONTENIDOS_PDA_POR_GRADO = {
     }
 }
 
-CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO["6° de Primaria"]
+# Sincronización oficial con el Programa Analítico de 6° y Catálogo NEM
+if 'NEM_CONTENIDOS_PDA_POR_GRADO' in globals() and NEM_CONTENIDOS_PDA_POR_GRADO:
+    for g_k, g_v in NEM_CONTENIDOS_PDA_POR_GRADO.items():
+        CONTENIDOS_PDA_POR_GRADO[g_k] = g_v
+
+CONTENIDOS_PDA_EJEMPLO = CONTENIDOS_PDA_POR_GRADO.get("6° de Primaria", {})
 
 CONTEXTO_ESCOLAR_PREDETERMINADO = """Entorno Escolar y Comunitario (Durango):
 La Escuela Primaria “Revolución Social de 1910” (CCT: 10EPR0361N, Zona 49, Sector 02) está ubicada en una zona urbana consolidada de Durango. El entorno escolar y comunitario se caracteriza por familias trabajadoras con una presencia notable de profesionistas, empleados y jubilados con fuerte arraigo social. En general, las familias muestran interés y respaldo hacia la formación escolar de sus hijos; no obstante, se detecta la conveniencia de vincular aún más las actividades escolares con la vida práctica y fortalecer el acompañamiento lector continuo en el hogar."""
@@ -4879,11 +4910,15 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             if campo in k_campos_dict:
                 k_c_info = k_campos_dict[campo]
                 proy_t = k_c_info.get("proyecto_oficial") or PROYECTOS_OFICIALES_6TO_GRADO.get(campo, {}).get("proyecto", "")
+                ns_t = k_c_info.get("nuestros_saberes") or PROYECTOS_OFICIALES_6TO_GRADO.get(campo, {}).get("nuestros_saberes", "")
+                libro_t = k_c_info.get("libro_sep") or PROYECTOS_OFICIALES_6TO_GRADO.get(campo, {}).get("libro_ltg", "")
                 sugerencias_pda.append({
                     "campo": campo,
                     "proyecto": proy_t,
                     "contenido": f"{k_c_info['tema']} (Proyecto: '{proy_t}')",
                     "pda": k_c_info["pda_vinculado"],
+                    "libro_ltg": libro_t,
+                    "nuestros_saberes": ns_t,
                     "grado": grado_seleccionado,
                     "origen": "Programa Analítico Oficial (Bloque 5 al 16 de Octubre)"
                 })
@@ -4896,8 +4931,11 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
             if not campos_sel or c_item in campos_sel:
                 sugerencias_pda.append({
                     "campo": c_item,
+                    "proyecto": item.get("proyecto", ""),
                     "contenido": item.get("contenido", ""),
                     "pda": item.get("pda", ""),
+                    "libro_ltg": item.get("libro_ltg", ""),
+                    "nuestros_saberes": item.get("nuestros_saberes", ""),
                     "grado": item.get("grado", grado_seleccionado),
                     "origen": "Programa Sintético Fase 5 (Oficial Subido)"
                 })
@@ -4908,10 +4946,16 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
                 if not any(s["contenido"] == item["contenido"] and s["pda"] == item["pda"] for s in sugerencias_pda):
                     sugerencias_pda.append({
                         "campo": campo,
+                        "proyecto": item.get("proyecto_ltg", ""),
                         "contenido": item["contenido"],
                         "pda": item["pda"],
+                        "libro_ltg": item.get("libro_ltg", ""),
+                        "nuestros_saberes": item.get("vinculacion_nuestros_saberes", ""),
+                        "escenario": item.get("escenario", ""),
+                        "metodologia": item.get("metodologia", ""),
+                        "problematicas_atendidas": item.get("problematicas_atendidas", ""),
                         "grado": grado_seleccionado,
-                        "origen": "Banco Curricular SEP"
+                        "origen": "Programa Analítico / Banco Curricular SEP"
                     })
 
     if es_bloque_6_7:
@@ -4940,12 +4984,13 @@ El docente ha proporcionado la siguiente fuente de información web de referenci
     if sugerencias_pda:
         opciones_display = []
         for item in sugerencias_pda:
+            proy_lbl = f" | Proy: '{item['proyecto']}'" if item.get("proyecto") else ""
             if "Bloque 5 al 16 de Octubre" in item.get("origen", ""):
-                opciones_display.append(f"🎯 [Bloque Oficial 6° - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
+                opciones_display.append(f"🎯 [Bloque Oficial 6° - {item['campo']}]{proy_lbl} {item['contenido'][:50]}... — PDA: {item['pda'][:55]}...")
             elif "Programa Sintético Fase 5" in item.get("origen", ""):
-                opciones_display.append(f"⭐ [Oficial {grado_seleccionado[:2]} - {item['campo']}] {item['contenido'][:55]}... — PDA: {item['pda'][:65]}...")
+                opciones_display.append(f"⭐ [Oficial {grado_seleccionado[:2]} - {item['campo']}]{proy_lbl} {item['contenido'][:50]}... — PDA: {item['pda'][:55]}...")
             else:
-                opciones_display.append(f"[{item['campo']}] {item['contenido'][:60]}... — PDA: {item['pda'][:70]}...")
+                opciones_display.append(f"[{item['campo']}]{proy_lbl} {item['contenido'][:55]}... — PDA: {item['pda'][:60]}...")
 
         # Predeterminar OBLIGATORIAMENTE un PDA de cada uno de los 4 Campos Formativos del Programa Analítico
         default_indices_pda = []

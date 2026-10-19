@@ -19,6 +19,7 @@ PROYECTOS_OFICIALES_6TO_GRADO: Dict[str, Dict[str, Any]] = {
         "campo": "Lenguajes",
         "escenario": "Aula / Comunitario",
         "libro_sep": "Proyectos de Aula (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
+        "nuestros_saberes": "Nuestros Saberes (6° grado): Recursos literarios, la narración, el cuento y la lectura dramatizada (págs. 28-35)",
         "dia_sugerido": "Lunes",
         "metodologia": "Aprendizaje Basado en Proyectos Comunitarios",
         "descripcion": "Reconocimiento y producción de textos literarios (cuentos) y lecturas dramatizadas para fortalecer la expresión oral, modulación de voz y comunicación comunitaria."
@@ -28,6 +29,7 @@ PROYECTOS_OFICIALES_6TO_GRADO: Dict[str, Dict[str, Any]] = {
         "campo": "Saberes y Pensamiento Científico",
         "escenario": "Aula / Escolar",
         "libro_sep": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
+        "nuestros_saberes": "Nuestros Saberes (6° grado): El sistema digestivo, nutrición, alimentos ultraprocesados, sellos NOM-051 y unidades de masa: múltiplos del gramo (págs. 68-76)",
         "dia_sugerido": "Martes",
         "metodologia": "Aprendizaje Basado en Indagación (STEAM como enfoque)",
         "descripcion": "Análisis de alimentos ultraprocesados, sellos NOM-051, múltiplos y submúltiplos del gramo, y diseño de menús basados en el Plato del Bien Comer y balance calórico."
@@ -37,6 +39,7 @@ PROYECTOS_OFICIALES_6TO_GRADO: Dict[str, Dict[str, Any]] = {
         "campo": "Ética, Naturaleza y Sociedades",
         "escenario": "Escolar / Comunitario",
         "libro_sep": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
+        "nuestros_saberes": "Nuestros Saberes (6° grado): Servicios públicos, satisfacción de necesidades, cultura contributiva e IVA (págs. 140-149)",
         "dia_sugerido": "Miércoles",
         "metodologia": "Aprendizaje Basado en Problemas (ABPr)",
         "descripcion": "Diagnóstico de los servicios públicos, recaudación tributaria e impacto del IVA (16%), y valoración de las dimensiones de la calidad de vida en la comunidad de Durango."
@@ -46,6 +49,7 @@ PROYECTOS_OFICIALES_6TO_GRADO: Dict[str, Dict[str, Any]] = {
         "campo": "De lo Humano y lo Comunitario",
         "escenario": "Aula / Comunitario",
         "libro_sep": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)",
+        "nuestros_saberes": "Nuestros Saberes (6° grado): Mediación dialógica, cultura de paz, estilos de vida activos y circuitos motrices (págs. 202-211)",
         "dia_sugerido": "Jueves",
         "metodologia": "Aprendizaje Servicio (AS)",
         "descripcion": "Resolución pacífica de controversias escolares mediante la mediación y negociación dialógica, acompañada de circuitos motrices y estilos de vida activos."
@@ -79,6 +83,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Lunes",
                 "escenario": "Aula / Comunitario",
                 "libro_sep": "Proyectos de Aula (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 28-35): Recursos literarios, la narración y estructura del cuento",
                 "tema": "Textos literarios: El cuento y sus partes (planteamiento, nudo, desenlace y tipos de narrador)",
                 "pda_vinculado": "Lee y analiza textos literarios e identifica la estructura de la narración, las relaciones de causalidad y temporalidad, y describe personajes y escenarios.",
                 "inicio": "Presentar una caja sorpresa con títulos de cuentos clásicos y contemporáneos. Recuperar saberes previos: ¿Qué distingue a un cuento de una noticia o un texto informativo?",
@@ -93,6 +98,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Martes",
                 "escenario": "Aula / Escolar",
                 "libro_sep": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 68-76): Alimentos procesados, sellos de advertencia NOM-051 y conversiones con múltiplos del gramo",
                 "tema": "Alimentos procesados, grasas, sellos de advertencia (NOM-051) y múltiplos y submúltiplos del gramo",
                 "pda_vinculado": "Analiza etiquetas de alimentos empaquetados e interpreta sellos de advertencia; resuelve situaciones problemáticas que implican conversiones con múltiplos y submúltiplos del gramo.",
                 "inicio": "Exhibir 4 empaques reales de alimentos ultraprocesados. Preguntar: ¿Qué significan los octágonos negros en el empaque y por qué indican exceso de grasas o azúcares?",
@@ -107,6 +113,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Miércoles",
                 "escenario": "Escolar / Comunitario",
                 "libro_sep": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 140-149): Servicios públicos, satisfacción de necesidades, cultura contributiva e IVA (16%)",
                 "tema": "Servicios públicos, recaudación de impuestos y cálculo del IVA (16%)",
                 "pda_vinculado": "Comprende la función de los servicios públicos en la satisfacción de necesidades colectivas, la responsabilidad ciudadana en el pago de impuestos y el cálculo de porcentajes aplicados al IVA.",
                 "inicio": "Lluvia de ideas guiada: ¿De dónde proviene el agua potable, el alumbrado y quién limpia los parques en Durango? ¿Quién financia esos servicios?",
@@ -121,6 +128,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Jueves",
                 "escenario": "Aula / Comunitario",
                 "libro_sep": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 202-211): Mediación dialógica, cultura de paz, estilos de vida activos y circuitos motrices",
                 "tema": "Resolución pacífica de conflictos y convivencia escolar sana y pacífica",
                 "pda_vinculado": "Aplica estrategias de mediación, negociación y diálogo reflexivo para resolver desacuerdos en el aula y promover una cultura de paz.",
                 "inicio": "Dinámica kinestésica 'El nudo humano': los 26 alumnos forman un círculo tomados de las manos y deben desatarse usando exclusivamente el diálogo pacífico.",
@@ -184,6 +192,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Lunes",
                 "escenario": "Aula / Comunitario",
                 "libro_sep": "Proyectos de Aula (págs. 20-35) y Múltiples Lenguajes (págs. 40-47)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 32-37): La lectura dramatizada, acotaciones y características del guión teatral",
                 "tema": "La lectura dramatizada y el guión teatral (acotaciones, parlamentos y modulación)",
                 "pda_vinculado": "Interpreta y representa lecturas dramatizadas empleando adecuadamente acotaciones, volumen, tono y modulación de la voz.",
                 "inicio": "Juego de modulación de voz: leer la misma frase ('¡Ya llegaron los libros!') con distintas emociones (alegría, misterio, enojo). Analizar la importancia de las acotaciones.",
@@ -198,6 +207,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Martes",
                 "escenario": "Aula / Escolar",
                 "libro_sep": "Proyectos de Aula (págs. 140-153) y Nuestros Saberes (págs. 68-76)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 72-80): El Plato del Bien Comer, balance energético y la Jarra del Buen Beber",
                 "tema": "El Plato del Bien Comer actualizado, la Jarra del Buen Beber y balance calórico",
                 "pda_vinculado": "Diseña menús basados en el Plato del Bien Comer y la Jarra del Buen Beber, relacionando la masa en gramos de las porciones con los requerimientos energéticos saludables.",
                 "inicio": "Presentar silueta del nuevo Plato del Bien Comer. Preguntar: ¿Cuáles son los 3 grupos principales y por qué las verduras y frutas deben ocupar la mitad del plato?",
@@ -212,6 +222,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Miércoles",
                 "escenario": "Escolar / Comunitario",
                 "libro_sep": "Proyectos Escolares (págs. 194-207) y Nuestros Saberes (págs. 140-149)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 145-152): Dimensiones de la calidad de vida, desigualdades y justicia social en Durango",
                 "tema": "Calidad de vida: Factores determinantes, justicia social y desigualdades en la comunidad",
                 "pda_vinculado": "Analiza los factores que influyen en la calidad de vida de las familias en su comunidad y entidad (Durango), reconociendo brechas de equidad y propuestas de mejora.",
                 "inicio": "¿Qué necesita una familia para vivir bien? Lluvia de respuestas: salud, casa, trabajo, seguridad, áreas verdes, agua potable.",
@@ -226,6 +237,7 @@ CUADERNILLO_KEMPIS_DATA: Dict[int, Dict[str, Any]] = {
                 "dia_asignado": "Jueves",
                 "escenario": "Aula / Comunitario",
                 "libro_sep": "Proyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63)",
+                "nuestros_saberes": "Nuestros Saberes (págs. 205-214): Beneficios de los circuitos de actividad física y estilos de vida saludables",
                 "tema": "Estilos de vida activos, prevención de enfermedades crónicas y bienestar compartido",
                 "pda_vinculado": "Organiza y participa en circuitos motrices y dinámicas de actividad física para valorar el impacto del ejercicio continuo en el bienestar integral.",
                 "inicio": "Toma de pulso cardíaco en reposo. Breve calentamiento motriz en el aula para activar la oxigenación cerebral y el entusiasmo kinestésico.",
@@ -3475,8 +3487,14 @@ def formatear_kempis_para_prompt(
         if cf in data.get("campos", {}):
             c_info = data["campos"][cf]
             lineas.append(f"• Campo Formativo: {cf}")
-            lineas.append(f"  - Tema: {c_info['tema']}")
+            if c_info.get("proyecto_oficial"):
+                lineas.append(f"  - Proyecto Oficial LTG: {c_info['proyecto_oficial']}")
+            lineas.append(f"  - Tema / Contenido: {c_info['tema']}")
             lineas.append(f"  - PDA Vinculado: {c_info.get('pda_vinculado', '')}")
+            if c_info.get("libro_sep"):
+                lineas.append(f"  - Libros de Texto Gratuitos (LTG): {c_info['libro_sep']}")
+            if c_info.get("nuestros_saberes"):
+                lineas.append(f"  - Vinculación con Nuestros Saberes: {c_info['nuestros_saberes']}")
             lineas.append(f"  - Inicio sugerido: {c_info['inicio']}")
             lineas.append(f"  - Desarrollo sugerido: {c_info['desarrollo']}")
             lineas.append(f"  - Cierre sugerido: {c_info['cierre']}")

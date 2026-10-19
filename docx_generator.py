@@ -565,40 +565,40 @@ def add_articulacion_curricular_table(doc, parsed_info: Dict[str, Any], datos_es
         "PROYECTO Y ESCENARIO (LTG 6°)",
         "CONTENIDO SINTÉTICO (6°)",
         "PDA OFICIAL ESPECÍFICO",
-        "EJES Y VINCULACIÓN PEDAGÓGICA"
+        "VINCULACIÓN LTG Y NUESTROS SABERES"
     ]
-    col_widths = [Inches(1.2), Inches(1.3), Inches(1.7), Inches(1.8), Inches(1.5)]
+    col_widths = [Inches(1.2), Inches(1.4), Inches(1.6), Inches(1.8), Inches(1.5)]
 
     filas_art = parsed_info.get("articulacion_filas", [])
     if not filas_art or len(filas_art) < 4:
         filas_art = [
             [
                 "Lenguajes",
-                "Proyectos Comunitarios (págs. 20-35) y Múltiples Lenguajes (págs. 40-47).\nEscenario Comunitario.",
+                "Proyecto: ¡Mi comunidad se expresa!\nProyectos de Aula (págs. 20-35 / 34-49) y Múltiples Lenguajes (págs. 40-47).\nEscenario Aula / Comunitario.",
                 "Análisis y representación de textos literarios: el cuento y la lectura dramatizada.",
                 "Lee, analiza y recrea cuentos reconociendo planteamiento, nudo y desenlace; interpreta guiones teatrales empleando acotaciones, modulación de voz y expresión corporal.",
-                "Comprensión lectora inferencial, velocidad lectora, ortografía en redacción autónoma y Cuadernillo Profa. Kempis (Anexos 6.1 y 7.1)."
+                "Nuestros Saberes (págs. 28-35): Recursos literarios, la narración y estructura del cuento. Anexos 6.1 y 7.1."
             ],
             [
                 "Saberes y Pensamiento Científico",
-                "Nuestros Saberes (págs. 68-76) y Proyectos de Aula (págs. 82-95).\nEscenario de Aula.",
+                "Proyecto: El poder de la alimentación\nProyectos de Aula (págs. 140-153).\nEscenario Aula / Escolar.",
                 "Alimentación saludable: alimentos procesados, sellos de advertencia NOM-051, Plato del Bien Comer y múltiplos y submúltiplos del gramo.",
                 "Analiza etiquetas y sellos de advertencia en alimentos ultraprocesados; diseña menús balanceados con el Plato del Bien Comer y resuelve problemas con múltiplos del gramo y cálculo de porcentajes e IVA del 16%.",
-                "Pensamiento crítico, cálculo mental contextualizado, vida saludable y Cuadernillo Profa. Kempis (Anexos 6.2 y 7.2)."
+                "Nuestros Saberes (págs. 68-76): El sistema digestivo, nutrición, sellos NOM-051 y unidades de masa: múltiplos del gramo. Anexos 6.2 y 7.2."
             ],
             [
                 "Ética, Naturaleza y Sociedades",
-                "Proyectos Escolares (págs. 80-92) y Nuestros Saberes (págs. 140-149).\nEscenario Escolar.",
-                "Servicios públicos, cultura contributiva (impuestos e IVA) y calidad de vida en la comunidad; efemérides del 12 de Octubre y Revolución de 1910.",
-                "Comprende la función de los servicios públicos en la satisfacción de necesidades básicas, la importancia del pago de impuestos y el IVA en su financiamiento; analiza críticamente la memoria histórica de México y Durango.",
-                "Comprensión crítica de fuentes, redacción cívica reflexiva y Cuadernillo Profa. Kempis (Anexos 6.3 y 7.3)."
+                "Proyecto: Contribuyo con los servicios de mi escuela\nProyectos Escolares (págs. 194-207 / 210-225).\nEscenario Escolar / Comunitario.",
+                "Cultura democrática: servicios públicos, satisfacción de necesidades básicas e impacto social de los impuestos y el IVA; conmemoraciones cívicas.",
+                "Diagnostica los servicios públicos de su entorno escolar y comunitario; comprende la importancia de la contribución ciudadana y el destino de los impuestos para el bienestar colectivo en Durango.",
+                "Nuestros Saberes (págs. 140-149): Servicios públicos, cultura contributiva e IVA (16%). Anexos 6.3 y 7.3."
             ],
             [
                 "De lo Humano y lo Comunitario",
-                "Proyectos Comunitarios (págs. 50-63) y Proyectos de Aula (págs. 110-125).\nEscenario Comunitario.",
-                "Cultura de paz: derechos humanos, resolución pacífica de controversias y la comunidad como espacio de bienestar común.",
-                "Aplica mecanismos de mediación dialógica, negociación y arbitraje para la resolución pacífica de controversias escolares, promoviendo el fomento a la lectura en familia y el acceso ético y reflexivo a tecnologías.",
-                "Dinámicas activas kinestésicas, asambleas de aula y Cuadernillo Profa. Kempis (Anexos 6.4 y 7.4)."
+                "Proyecto: El club de las nutrias\nProyectos de Aula (págs. 320-333) y Proyectos Comunitarios (págs. 50-63 / 278-293).\nEscenario Aula / Comunitario.",
+                "Estilos de vida activos y saludables, circuitos motrices, prevención del sedentarismo y resolución pacífica de desacuerdos.",
+                "Organiza y participa en circuitos motrices y dinámicas de actividad física para valorar el impacto del ejercicio continuo en el bienestar integral y resolver desacuerdos mediante la mediación dialógica.",
+                "Nuestros Saberes (págs. 202-211): Mediación dialógica, cultura de paz, estilos de vida activos y circuitos motrices. Anexos 6.4 y 7.4."
             ]
         ]
 
@@ -1458,3 +1458,7 @@ def build_docx_planeacion(datos_escuela: Dict[str, Any], plan_text: str) -> io.B
     doc.save(buf)
     buf.seek(0)
     return buf
+
+# Alias para compatibilidad de interfaz
+generate_docx_planeacion = build_docx_planeacion
+
